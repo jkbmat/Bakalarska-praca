@@ -15,34 +15,11 @@
 <script type="text/javascript">
 	var _engine = new Engine(new Viewport(), new b2Vec2(0, 30));
 
-	var s = new b2CircleShape();
-	s.set_m_radius(31);
-	var h = new b2PolygonShape();
-	h.SetAsBox(8, 3);
+	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)))
+	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31))
 
-	var f = new b2FixtureDef();
-	f.set_density(30)
-	f.set_friction(5);
-	f.set_restitution(0.2);
-	f.set_shape(s);
-	var v = new b2FixtureDef();
-	v.set_density(3)
-	v.set_friction(0.6);
-	v.set_restitution(0.2);
-	v.set_shape(h);
+	_engine.entities[0].body.SetLinearVelocity(new b2Vec2(50,-50))
 
-	var b = new b2BodyDef();
-	b.set_type(Module.b2_dynamicBody);
-	b.set_position(new b2Vec2(500,50));
-	var c = new b2BodyDef();
-	c.set_type(Module.b2_dynamicBody);
-	c.set_position(new b2Vec2(450, 100));
-	c.set_linearVelocity(new b2Vec2(50,-50))
-
-
-	_engine.addEntity(new Entity(f, b));
-	// _engine.addEntity(new Entity(v, c));
-	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3), v, c))
 
 	window.requestAnimationFrame(function(){_engine.step()});
 </script>

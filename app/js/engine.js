@@ -26,7 +26,7 @@ var Engine = function(viewport, gravity)
 	this.lifetimeEntities = 0;
 
 	this.world = new b2World(gravity, true);
-	
+
 }
 
 Engine.prototype.addEntity = function(entity)
@@ -49,33 +49,14 @@ Engine.prototype.step = function(timestamp)
 	ctx = this.viewport.context;
 
 	ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
-	
+
 
 	for (var i = this.entities.length - 1; i >= 0; i--)
 	{
 		ctx.save();
 
-		var shape = this.entities[i].fixture.GetShape();
-		var center = this.entities[i].body.GetPosition();
+		this.entities[i].draw(ctx);
 
-		if(shape.get_m_type() === 0) // Circle
-		{
-			ctx.beginPath();
-
-			ctx.arc(center.get_x(), center.get_y(), shape.get_m_radius(), 0, 2 * Math.PI, false);
-			ctx.fillStyle = "red";
-
-			ctx.fill();
-		}
-
-		if(shape.get_m_type() === 2) // Polygon
-		{
-			this.entities[i].draw(ctx);
-
-		}
-
-
-		//console.log(this.entities[i])
 		ctx.restore();
 	}
 
@@ -106,7 +87,7 @@ var Viewport = function(canvasElement, width, height, x, y)
 	else
 	{
 		this.setAutoResize(true);
-		this.autoResize();	
+		this.autoResize();
 	}
 
 	if (x != undefined && y != undefined)
@@ -119,7 +100,7 @@ var Viewport = function(canvasElement, width, height, x, y)
 		this.x = Math.floor(this.width / 2)
 		this.y = Math.floor(this.height / 2)
 	}
-	
+
 	this.canvasElement = canvasElement;
 
 	if (canvasElement === undefined)
@@ -149,7 +130,7 @@ Viewport.prototype.autoResize = function()
 
 // Toggles viewport auto resizing
 Viewport.prototype.setAutoResize = function(value) {
-	
+
 	this.autoResizeActive = value;
 
 	if (this.autoResizeActive)
@@ -173,7 +154,7 @@ Viewport.prototype.setAutoResize = function(value) {
 
 // ENTITY
 
-var Entity = function(fixture, body, id, type)
+var Entity = function(shape, fixture, body, id, type)
 {
 	this.dead = false;
 	this.zIndex = 0;
@@ -181,6 +162,16 @@ var Entity = function(fixture, body, id, type)
 	this.type = type;
 
 	this.fixture = fixture;
+	if (this.fixture == undefined)
+	{
+		var fixture = new b2FixtureDef();
+		fixture.set_density(30)
+		fixture.set_friction(5);
+		fixture.set_restitution(0.2);
+
+		this.fixture = fixture;
+	}
+	this.fixture.set_shape(shape);
 	this.body = body;
 
 }
@@ -190,10 +181,23 @@ Entity.prototype.die = function()
 	this.dead = true;
 }
 
-
-var Rectangle = function(center, extents, fixture, body, id, type)
+Entity.prototype.draw = function()
 {
-	Entity.call(this, fixture, body, id, type);
+	alert("Cannot draw Entity: Use derived classes.");
+}
+
+
+var Rectangle = function(center, extents, fixture, id, type)
+{
+	var shape = new b2PolygonShape();
+	shape.SetAsBox(extents.get_x(), extents.get_y())
+
+	var body = new b2BodyDef();
+	body.set_type(Module.b2_dynamicBody);
+	body.set_position(center);
+
+	Entity.call(this, shape, fixture, body, id, type);
+
 	this.extents = extents;
 }
 Rectangle.prototype = new Entity();
@@ -205,12 +209,42 @@ Rectangle.prototype.draw = function(ctx)
 	var y = this.body.GetPosition().get_y();
 	var halfWidth = this.extents.get_x();
 	var halfHeight = this.extents.get_y();
+
 	ctx.translate(x, y);
 	ctx.rotate(this.body.GetAngle());
-	ctx.translate(-(x), -(y));
+	ctx.translate(-x, -y);
 	ctx.fillStyle = 'blue';
-	ctx.fillRect((x-halfWidth),
-				(y-halfHeight),
-				(halfWidth*2),
-				(halfHeight*2));
+	ctx.fillRect((x - halfWidth),
+							(y - halfHeight),
+							(halfWidth * 2),
+							(halfHeight * 2));
+}
+
+var Circle = function(center, radius, fixture, id, type)
+{
+	var shape = new b2CircleShape();
+	shape.set_m_radius(radius);
+
+	var body = new b2BodyDef();
+	body.set_type(Module.b2_dynamicBody);
+	body.set_position(center);
+
+	Entity.call(this, shape, fixture, body, id, type);
+
+	this.radius = radius;
+}
+Circle.prototype = new Entity();
+Circle.prototype.constructor = Circle;
+
+Circle.prototype.draw = function(ctx)
+{
+	var x = this.body.GetPosition().get_x();
+	var y = this.body.GetPosition().get_y();
+
+	ctx.beginPath();
+
+	ctx.arc(x, y, this.radius, 0, 2 * Math.PI, false);
+	ctx.fillStyle = "red";
+
+	ctx.fill();
 }
