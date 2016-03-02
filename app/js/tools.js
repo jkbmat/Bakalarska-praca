@@ -2,11 +2,11 @@ var Tools =
 {
 	getBrowserWidth: function()
 	{
-		return document.documentElement.clientWidth;
+		return window.innerWidth;
 	},
 
 	getBrowserHeight: function()
 	{
-		return document.documentElement.clientHeight;
+		return window.innerHeight;
 	}
 }
