@@ -1,10 +1,6 @@
-const AUTO_ID_PREFIX = "AUTO_ID_";
+const AUTO_ID_PREFIX = "ENTITY_NUMBER_";
 
 /*/ Myslienky
-
-Viewport
---------------
-Objekt, ktory udrziava kameru a obrazovku
 
 lockovanie kamery na objekt
  * prechody
@@ -52,10 +48,12 @@ Engine.prototype.step = function()
 
 	ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
 
+	ctx.save()
 
 	for (var i = this.entities.length - 1; i >= 0; i--)
 	{
 		ctx.save();
+		ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2)
 
 		this.entities[i].draw(ctx);
 
@@ -64,6 +62,16 @@ Engine.prototype.step = function()
 
 	this.world.Step(1/60, 3, 2)
 
+
+	if (_keyboard.isDown(40)) {
+		this.viewport.y --;
+	}if (_keyboard.isDown(39)) {
+		this.viewport.x ++;
+	}if (_keyboard.isDown(38)) {
+		this.viewport.y ++;
+	}if (_keyboard.isDown(37)) {
+		this.viewport.x --;
+	}
 	//this.world.ClearForces();
 
 	_mouse.cleanUp();
@@ -71,7 +79,7 @@ Engine.prototype.step = function()
 
 	end = Date.now();
 
-	setTimeout(window.requestAnimationFrame(function(){_engine.step()}), Math.min(60 - end - start, 0));
+	setTimeout(window.requestAnimationFrame(function(){ _engine.step() }), Math.min(60 - end - start, 0));
 }
 
 
@@ -100,8 +108,8 @@ var Viewport = function(canvasElement, width, height, x, y)
 	}
 	else
 	{
-		this.x = Math.floor(this.width / 2)
-		this.y = Math.floor(this.height / 2)
+		this.x = Math.floor(this.width / 2);
+		this.y = Math.floor(this.height / 2);
 	}
 
 	this.canvasElement = canvasElement;
@@ -129,6 +137,8 @@ Viewport.prototype.autoResize = function()
 {
 	this.width = Tools.getBrowserWidth();
 	this.height = Tools.getBrowserHeight();
+	this.x = Math.floor(this.width / 2);
+	this.y = Math.floor(this.height / 2);
 }
 
 // Toggles viewport auto resizing
