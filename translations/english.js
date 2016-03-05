@@ -1,0 +1,6 @@
+_strings.push(
+[
+  "English",
+
+]
+);

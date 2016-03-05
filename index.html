@@ -1,0 +1,29 @@
+<html>
+<head>
+<script language="javascript" src="./lib/Box2D_v2.3.1_debug.js"></script>
+
+<script language="javascript" src="./js/tools.js"></script>
+<script language="javascript" src="./js/input.js"></script>
+<script language="javascript" src="./js/engine.js"></script>
+<script language="javascript" src="./js/basicshapes.js"></script>
+
+<link rel="stylesheet" type="text/css" href="./css/styles.css">
+
+<title>Scenária</title>
+
+</head>
+<body>
+<script type="text/javascript">
+	var _engine = new Engine(new Viewport(), new b2Vec2(0, 50));
+
+	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), Module.b2_dynamicBody)
+	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31), Module.b2_dynamicBody)
+	_engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(200, 3)), Module.b2_kinematicBody)
+
+	_engine.entities[0].body.SetLinearVelocity(new b2Vec2(50,-50))
+
+
+	window.requestAnimationFrame(function(){_engine.step()});
+</script>
+</body>
+</html>
