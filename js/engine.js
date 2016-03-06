@@ -189,7 +189,7 @@ var Entity = function(shape, fixture, body, id, className)
 	if (this.fixture == undefined)
 	{
 		var fixture = new b2FixtureDef();
-		fixture.set_density(30)
+		fixture.set_density(10)
 		fixture.set_friction(5);
 		fixture.set_restitution(0.2);
 
