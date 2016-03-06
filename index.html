@@ -16,11 +16,10 @@
 <script type="text/javascript">
 	var _engine = new Engine(new Viewport(), new b2Vec2(0, 50));
 
-	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), Module.b2_dynamicBody)
-	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31), Module.b2_dynamicBody)
-	_engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(200, 3)), Module.b2_kinematicBody)
+	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), DYNAMIC_BODY).body.SetLinearVelocity(new b2Vec2(50,-50))
+	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31), DYNAMIC_BODY)
+	_engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(200, 3)), KINEMATIC_BODY)
 
-	_engine.entities[0].body.SetLinearVelocity(new b2Vec2(50,-50))
 
 
 	window.requestAnimationFrame(function(){_engine.step()});

@@ -9,6 +9,8 @@ var Rectangle = function(center, extents, fixture, id, className)
 	Entity.call(this, shape, fixture, body, id, className);
 
 	this.extents = extents;
+
+	return this;
 }
 Rectangle.prototype = new Entity();
 Rectangle.prototype.constructor = Rectangle;
@@ -41,6 +43,8 @@ var Circle = function(center, radius, fixture, id, className)
 	Entity.call(this, shape, fixture, body, id, className);
 
 	this.radius = radius;
+
+	return this;
 }
 Circle.prototype = new Entity();
 Circle.prototype.constructor = Circle;

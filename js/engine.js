@@ -1,3 +1,7 @@
+const DYNAMIC_BODY = Module.b2_dynamicBody;
+const STATIC_BODY = Module.b2_staticBody;
+const KINEMATIC_BODY = Module.b2_kinematicBody;
+
 const AUTO_ID_PREFIX = "ENTITY_NUMBER_";
 
 /*/ Myslienky
@@ -40,6 +44,7 @@ Engine.prototype.addEntity = function(entity, type)
 	entity.fixture = entity.body.CreateFixture(entity.fixture);
 	this.entities.push(entity);
 
+	return entity;
 }
 
 Engine.prototype.step = function()
