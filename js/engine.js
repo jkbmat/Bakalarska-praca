@@ -3,6 +3,8 @@ const STATIC_BODY = Module.b2_staticBody;
 const KINEMATIC_BODY = Module.b2_kinematicBody;
 
 const AUTO_ID_PREFIX = "ENTITY_NUMBER_";
+const AUTO_COLOR_RANGE = [50, 200];
+
 
 /*/ Myslienky
 
@@ -60,7 +62,8 @@ Engine.prototype.step = function()
 	for (var i = this.entities.length - 1; i >= 0; i--)
 	{
 		ctx.save();
-		ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2)
+		ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2);
+		ctx.fillStyle = this.entities[i].color;
 
 		this.entities[i].draw(ctx);
 
@@ -178,12 +181,12 @@ Viewport.prototype.setAutoResize = function(value) {
 
 // ENTITY
 
-var Entity = function(shape, fixture, body, id, className)
+var Entity = function(shape, fixture, body, id, tags)
 {
 	this.dead = false;
 	this.zIndex = 0;
 	this.id = id;
-	this.className = className;
+	this.tags = tags;
 
 	this.fixture = fixture;
 	if (this.fixture == undefined)
@@ -198,14 +201,27 @@ var Entity = function(shape, fixture, body, id, className)
 	this.fixture.set_shape(shape);
 	this.body = body;
 
+	var r = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
+	var g = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
+	var b = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
+	this.color = "rgb("+ r +", "+ g +", "+ b +")";
 }
 
 Entity.prototype.die = function()
 {
 	this.dead = true;
+
+	return this;
 }
 
 Entity.prototype.draw = function()
 {
 	alert("ERROR! Cannot draw Entity: Use derived classes.");
+}
+
+Entity.prototype.setColor = function(color)
+{
+	this.color = color;
+
+	return this;
 }

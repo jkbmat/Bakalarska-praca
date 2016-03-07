@@ -8,5 +8,10 @@ var Tools =
 	getBrowserHeight: function()
 	{
 		return window.innerHeight;
-	}
+	},
+
+	randomRange :function(min, max)
+	{
+    return Math.floor(Math.random() * (max - min) + min);
+	},
 }

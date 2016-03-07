@@ -1,4 +1,4 @@
-var Rectangle = function(center, extents, fixture, id, className)
+var Rectangle = function(center, extents, fixture, id, tags)
 {
 	var shape = new b2PolygonShape();
 	shape.SetAsBox(extents.get_x(), extents.get_y())
@@ -6,7 +6,7 @@ var Rectangle = function(center, extents, fixture, id, className)
 	var body = new b2BodyDef();
 	body.set_position(center);
 
-	Entity.call(this, shape, fixture, body, id, className);
+	Entity.call(this, shape, fixture, body, id, tags);
 
 	this.extents = extents;
 
@@ -25,14 +25,13 @@ Rectangle.prototype.draw = function(ctx)
 	ctx.translate(x, y);
 	ctx.rotate(this.body.GetAngle());
 	ctx.translate(-x, -y);
-	ctx.fillStyle = 'blue';
 	ctx.fillRect((x - halfWidth),
 							(y - halfHeight),
 							(halfWidth * 2),
 							(halfHeight * 2));
 }
 
-var Circle = function(center, radius, fixture, id, className)
+var Circle = function(center, radius, fixture, id, tags)
 {
 	var shape = new b2CircleShape();
 	shape.set_m_radius(radius);
@@ -40,7 +39,7 @@ var Circle = function(center, radius, fixture, id, className)
 	var body = new b2BodyDef();
 	body.set_position(center);
 
-	Entity.call(this, shape, fixture, body, id, className);
+	Entity.call(this, shape, fixture, body, id, tags);
 
 	this.radius = radius;
 
@@ -57,7 +56,6 @@ Circle.prototype.draw = function(ctx)
 	ctx.beginPath();
 
 	ctx.arc(x, y, this.radius, 0, 2 * Math.PI, false);
-	ctx.fillStyle = "red";
 
 	ctx.fill();
 }
