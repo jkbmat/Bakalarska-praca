@@ -268,6 +268,8 @@ var Entity = function(shape, fixture, body, id, collisionGroup)
 	this.fixture.set_shape(shape);
 	var fd = this.fixture.get_filter();
 	fd.set_categoryBits(1 << collisionGroup);
+	if(typeof _engine !== 'undefined')
+		fd.set_maskBits(_engine.collisionGroups[this.collisionGroup].mask);
 	this.fixture.set_filter(fd);
 	this.body = body;
 
