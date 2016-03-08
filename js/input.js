@@ -18,7 +18,7 @@ var _mouse =
 
 	updateButtonsDown: function(event)
 	{
-		if(event.srcElement != _engine.viewport.canvasElement)
+		if(event.target != _engine.viewport.canvasElement)
 			return true;
 
 		if(event.which === 1)
@@ -33,7 +33,7 @@ var _mouse =
 
 	updateButtonsUp: function(event)
 	{
-		if(event.srcElement != _engine.viewport.canvasElement)
+		if(event.target != _engine.viewport.canvasElement)
 			return true;
 
 		if(event.which === 1)
