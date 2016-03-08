@@ -1,15 +1,18 @@
-var _strings;
-var _currentLanguage = 0;
-
-function getTranslated(index)
+Translations =
 {
-  if(index < _strings[_currentLanguage].length && index >= 0)
-    return strings[_currentLanguage][index];
+  strings: [],
+  currentLanguage: 0,
 
-  alert("ERROR! No translation for string number " + index);
-}
+  getTranslated: function(index)
+  {
+    if(index < this.strings[this.currentLanguage].length && index >= 0)
+      return this.strings[this.currentLanguage][index];
 
-function setLanguage(index)
-{
-  _currentLanguage = index;
+    alert("ERROR! No translation for string number " + index);
+  },
+
+  setLanguage: function(index)
+  {
+    this.currentLanguage = index;
+  }
 }

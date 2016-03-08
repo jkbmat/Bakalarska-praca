@@ -1,6 +1,6 @@
-var _strings.push(
+Translations.strings.push(
 [
   "Slovensky",
-
+  "Skupiny pre kolízie",
 ]
 );

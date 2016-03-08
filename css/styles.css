@@ -2,4 +2,41 @@ body
 {
 	margin: 0;
 	padding: 0;
+	font: 15px Calibri, sans-serif;
+}
+
+#collisionsbutton
+{
+	position: absolute;
+}
+
+.button
+{
+	display: inline-block;
+	cursor: pointer;
+}
+
+.button:hover
+{
+	background: #eee;
+}
+
+.uiContainer
+{
+	z-index: 999;
+	position: absolute;
+	padding: 7px;
+	background: white;
+	border: 2px solid black;
+	border-radius: 4px;
+}
+
+.collisionTable
+{
+	border-collapse: collapse;
+}
+
+.collisionTable td
+{
+	border: 1px dashed #aaa;
 }

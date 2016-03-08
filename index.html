@@ -6,6 +6,11 @@
 <script language="javascript" src="./js/input.js"></script>
 <script language="javascript" src="./js/engine.js"></script>
 <script language="javascript" src="./js/basicshapes.js"></script>
+<script language="javascript" src="./js/i18n.js"></script>
+<script language="javascript" src="./js/ui.js"></script>
+
+<script language="javascript" src="./translations/english.js"></script>
+<script language="javascript" src="./translations/slovak.js"></script>
 
 <link rel="stylesheet" type="text/css" href="./css/styles.css">
 
@@ -16,11 +21,15 @@
 <script type="text/javascript">
 	var _engine = new Engine(new Viewport(), new b2Vec2(0, 50));
 
-	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), DYNAMIC_BODY).body.SetLinearVelocity(new b2Vec2(50,-50));
-	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31), DYNAMIC_BODY);
+	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), DYNAMIC_BODY)
+		.setCollisionGroup(1)
+		.body.SetLinearVelocity(new b2Vec2(50,-50));
+	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31), DYNAMIC_BODY)
+		.setCollisionGroup(2)
 	_engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(200, 3)), KINEMATIC_BODY);
 
 
+	UI.initialize();
 
 	window.requestAnimationFrame(function(){_engine.step()});
 </script>

@@ -25,6 +25,12 @@ var Engine = function(viewport, gravity)
 	this.viewport = viewport;
 	this.entities = [];
 
+	this.collisionGroups = [];
+	for (var i = 0; i < 16; i++) // 16 is the maximum number of collision groups supported by Box2D
+	{
+		this.collisionGroups.push(parseInt(Array(17).join("1"), 2))
+	}
+
 	this.lifetimeEntities = 0;
 
 	this.world = new b2World(gravity, true);
@@ -47,6 +53,51 @@ Engine.prototype.addEntity = function(entity, type)
 	this.entities.push(entity);
 
 	return entity;
+}
+
+Engine.prototype.getCollision = function(groupA, groupB)
+{
+	return (this.collisionGroups[groupA] >> groupB) & 1;
+}
+
+Engine.prototype.setCollision = function(groupA, groupB, value)
+{
+	var maskA = (1 << groupB);
+	var maskB = (1 << groupA);
+
+	if(value)
+	{
+		this.collisionGroups[groupA] = this.collisionGroups[groupA] | maskA;
+		this.collisionGroups[groupB] = this.collisionGroups[groupB] | maskB;
+	}
+	else
+	{
+		this.collisionGroups[groupA] = this.collisionGroups[groupA] & ~maskA;
+		this.collisionGroups[groupB] = this.collisionGroups[groupB] & ~maskB;
+	}
+	this.updateCollisions()
+
+	return this;
+}
+
+Engine.prototype.updateCollisions = function()
+{
+
+	for (var i = 0; i < this.entities.length; i++)
+	{
+		this.updateCollision(this.entities[i]);
+	}
+
+	return this;
+}
+
+Engine.prototype.updateCollision = function(entity)
+{
+	var filterData = entity.fixture.GetFilterData();
+	filterData.set_maskBits(this.collisionGroups[entity.collisionGroup]);
+	entity.fixture.SetFilterData(filterData);
+
+	return this;
 }
 
 Engine.prototype.step = function()
@@ -181,12 +232,16 @@ Viewport.prototype.setAutoResize = function(value) {
 
 // ENTITY
 
-var Entity = function(shape, fixture, body, id, tags)
+var Entity = function(shape, fixture, body, id, collisionGroup)
 {
 	this.dead = false;
 	this.zIndex = 0;
 	this.id = id;
-	this.tags = tags;
+	this.collisionGroup = collisionGroup;
+	if(this.collisionGroup == undefined)
+	{
+		this.collisionGroup = 0;
+	}
 
 	this.fixture = fixture;
 	if (this.fixture == undefined)
@@ -199,6 +254,9 @@ var Entity = function(shape, fixture, body, id, tags)
 		this.fixture = fixture;
 	}
 	this.fixture.set_shape(shape);
+	var fd = this.fixture.get_filter();
+	fd.set_categoryBits(1 << collisionGroup);
+	this.fixture.set_filter(fd);
 	this.body = body;
 
 	var r = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
@@ -222,6 +280,19 @@ Entity.prototype.draw = function()
 Entity.prototype.setColor = function(color)
 {
 	this.color = color;
+
+	return this;
+}
+
+Entity.prototype.setCollisionGroup = function(group)
+{
+	this.collisionGroup = group;
+
+	var fd = this.fixture.GetFilterData();
+	fd.set_categoryBits(1 << group);
+	this.fixture.SetFilterData(fd);
+
+	_engine.updateCollision(this);
 
 	return this;
 }
