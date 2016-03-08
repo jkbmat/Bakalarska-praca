@@ -3,7 +3,7 @@ const STATIC_BODY = Module.b2_staticBody;
 const KINEMATIC_BODY = Module.b2_kinematicBody;
 
 const AUTO_ID_PREFIX = "ENTITY_NUMBER_";
-const AUTO_COLOR_RANGE = [50, 200];
+const AUTO_COLOR_RANGE = [0, 230];
 
 const COLLISION_GROUPS_NUMBER = 16;
 
@@ -14,7 +14,6 @@ lockovanie kamery na objekt
  * prechody
 ako funguje cela kamera?
 
-PREMENIT RESIZE A PODOBNE DO VIEWPORTU
 /*/
 
 

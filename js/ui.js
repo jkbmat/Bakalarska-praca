@@ -12,8 +12,6 @@ UI =
       for(var j = 0; j < COLLISION_GROUPS_NUMBER + 1; j++)
       {
         var td = document.createElement("td");
-        td.row = i;
-        td.col = j;
 
         if(i === 0 && j > 0)
           td.innerHTML = j;
@@ -21,6 +19,9 @@ UI =
           td.innerHTML = i;
         else if(i <= j && j !== 0 && i !== 0)
         {
+          td.row = i;
+          td.col = j;
+
           td.onmouseover = function(i, j, table)
           {
             return function()
@@ -60,6 +61,11 @@ UI =
             }
           }(i, j, checkbox)
           td.appendChild(checkbox);
+        }
+        else
+        {
+          td.row = i;
+          td.col = j;
         }
 
         tr.appendChild(td);

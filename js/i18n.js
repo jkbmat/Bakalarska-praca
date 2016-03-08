@@ -3,10 +3,15 @@ Translations =
   strings: [],
   currentLanguage: 0,
 
-  getTranslated: function(index)
+  getTranslated: function(index, language)
   {
-    if(index < this.strings[this.currentLanguage].length && index >= 0)
-      return this.strings[this.currentLanguage][index];
+    if(language == undefined)
+    {
+      language = this.currentLanguage;
+    }
+
+    if(index < this.strings[language].length && index >= 0)
+      return this.strings[language][index];
 
     alert("ERROR! No translation for string number " + index);
   },
