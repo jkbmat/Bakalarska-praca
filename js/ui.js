@@ -17,7 +17,7 @@ UI =
   {
     var overlay = document.createElement("div");
     overlay.id = "popupOverlay";
-    overlay.onclick = this.closePopup;
+    overlay.onclick = function(){UI.closePopup()};
 
     var content = document.createElement("div");
     content.id = "popupContent";
@@ -33,7 +33,7 @@ UI =
     var overlay = document.getElementById("popupOverlay");
     var content = document.getElementById("popupContent");
 
-    if(e.srcElement !== overlay)
+    if(typeof e !== "undefined" && e.srcElement !== overlay)
       return true;
 
     content.parentNode.removeChild(content);

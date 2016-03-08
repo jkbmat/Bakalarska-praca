@@ -148,7 +148,9 @@ Engine.prototype.step = function()
 	{
 		var w = (_mouse.x - _mouse.dragOrigin[0]) / 2;
 		var h = (_mouse.y - _mouse.dragOrigin[1]) / 2;
-		_engine.addEntity(new Rectangle(new b2Vec2(_mouse.x - w, _mouse.y - h), new b2Vec2(w, h)), DYNAMIC_BODY)
+
+		if(w > 5 && h > 5)
+			_engine.addEntity(new Rectangle(new b2Vec2(_mouse.x - w, _mouse.y - h), new b2Vec2(w, h)), DYNAMIC_BODY)
 	}
 
 	_mouse.cleanUp();
