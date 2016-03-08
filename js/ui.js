@@ -2,9 +2,48 @@ UI =
 {
   initialize: function()
   {
-    var collisionsContainer = document.createElement("div");
+    var collisionsButton = document.createElement("div");
+    collisionsButton.className = "uiContainer button";
+    collisionsButton.innerHTML = Translations.getTranslated(1);
+    collisionsButton.onclick = function()
+    {
+      UI.popup(UI.createCollisions());
+    }
 
-    var collisionsContent = document.createElement("table");
+    document.body.insertBefore(collisionsButton, document.body.firstChild);
+  },
+
+  popup: function(data)
+  {
+    var overlay = document.createElement("div");
+    overlay.id = "popupOverlay";
+    overlay.onclick = this.closePopup;
+
+    var content = document.createElement("div");
+    content.id = "popupContent";
+
+    content.appendChild(data);
+    overlay.appendChild(content);
+
+    document.body.insertBefore(overlay, document.body.firstChild);
+  },
+
+  closePopup: function(e)
+  {
+    var overlay = document.getElementById("popupOverlay");
+    var content = document.getElementById("popupContent");
+
+    if(e.srcElement !== overlay)
+      return true;
+
+    content.parentNode.removeChild(content);
+    overlay.parentNode.removeChild(overlay);
+  },
+
+  createCollisions: function()
+  {
+    var table = document.createElement("table");
+
     for(var i = 0; i < COLLISION_GROUPS_NUMBER + 1; i++)
     {
       var tr = document.createElement("tr");
@@ -14,7 +53,9 @@ UI =
         var td = document.createElement("td");
 
         if(i === 0 && j > 0)
-          td.innerHTML = j;
+        {
+          td.innerHTML = "<div><span>"+ j +"</span></div>";
+        }
         else if(j === 0 && i !== 0)
           td.innerHTML = i;
         else if(i <= j && j !== 0 && i !== 0)
@@ -35,7 +76,7 @@ UI =
                   tds[n].className = "highlight";
               }
             }
-          }(i, j, collisionsContent);
+          }(i, j, table);
 
           td.onmouseout = function(table)
           {
@@ -47,7 +88,7 @@ UI =
                 tds[n].className = "";
               }
             }
-          }(collisionsContent);
+          }(table);
 
 
           var checkbox = document.createElement("input");
@@ -71,25 +112,11 @@ UI =
         tr.appendChild(td);
       }
 
-      collisionsContent.appendChild(tr);
-    }
-    collisionsContent.style.display = "none";
-    collisionsContent.style.top = "50px";
-    collisionsContent.className = "uiContainer collisionTable";
-
-    var collisionsButton = document.createElement("div");
-    collisionsButton.className = "uiContainer button";
-    collisionsButton.innerHTML = Translations.getTranslated(1);
-    collisionsButton.onclick = function()
-    {
-      if(collisionsContent.style.display === "block")
-        collisionsContent.style.display = "none";
-      else
-        collisionsContent.style.display = "block";
+      table.appendChild(tr);
     }
 
-    collisionsContainer.insertBefore(collisionsContent, collisionsContainer.firstChild);
-    collisionsContainer.insertBefore(collisionsButton, collisionsContainer.firstChild);
-    document.body.insertBefore(collisionsContainer, document.body.firstChild);
+    table.className = "collisionTable";
+
+    return table;
   }
 }

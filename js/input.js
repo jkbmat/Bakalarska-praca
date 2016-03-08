@@ -8,6 +8,7 @@ var _mouse =
 	rightDown: false,
 	leftUp: false,
 	rightUp: false,
+	dragOrigin: [0, 0],
 
 	updatePosition: function(event)
 	{
@@ -18,7 +19,10 @@ var _mouse =
 	updateButtonsDown: function(event)
 	{
 		if(event.which === 1)
+		{
 			this.leftDown = true;
+			this.dragOrigin = [this.x, this.y];
+		}
 
 		if(event.which === 3)
 			this.rightDown = true;

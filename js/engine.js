@@ -130,7 +130,6 @@ Engine.prototype.step = function()
 
 	this.world.Step(1/60, 3, 3)
 
-	var plat = this.entities[2].body;
 	var x = 0;
 	var y = 0;
 	if (_keyboard.isDown(40)) {
@@ -143,8 +142,14 @@ Engine.prototype.step = function()
 		x = -1;
 	}
 	var speed = 150;
-	plat.SetLinearVelocity(new b2Vec2(speed * x, speed * y));
-	//this.world.ClearForces();
+	this.entities[2].setLinearVelocity(new b2Vec2(speed * x, speed * y));
+
+	if(_mouse.leftUp)
+	{
+		var w = (_mouse.x - _mouse.dragOrigin[0]) / 2;
+		var h = (_mouse.y - _mouse.dragOrigin[1]) / 2;
+		_engine.addEntity(new Rectangle(new b2Vec2(_mouse.x - w, _mouse.y - h), new b2Vec2(w, h)), DYNAMIC_BODY)
+	}
 
 	_mouse.cleanUp();
 	_keyboard.cleanUp();
@@ -300,6 +305,13 @@ Entity.prototype.setCollisionGroup = function(group)
 	this.fixture.SetFilterData(fd);
 
 	_engine.updateCollision(this);
+
+	return this;
+}
+
+Entity.prototype.setLinearVelocity = function(vector)
+{
+	this.body.SetLinearVelocity(vector);
 
 	return this;
 }

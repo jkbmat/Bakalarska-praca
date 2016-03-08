@@ -23,10 +23,12 @@
 
 	_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), DYNAMIC_BODY)
 		.setCollisionGroup(1)
-		.body.SetLinearVelocity(new b2Vec2(50,-50));
+		.setLinearVelocity(new b2Vec2(50,-50));
 	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31), DYNAMIC_BODY)
 		.setCollisionGroup(2)
 	_engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(200, 3)), KINEMATIC_BODY);
+	_engine.addEntity(new Rectangle(new b2Vec2(400, 100), new b2Vec2(20, 30)), DYNAMIC_BODY)
+		.setCollisionGroup(3)
 
 
 	UI.initialize();
