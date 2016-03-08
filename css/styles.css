@@ -40,3 +40,20 @@ body
 {
 	border: 1px dashed #aaa;
 }
+
+.collisionTable tr:first-child td
+{
+	transform: rotate(-45deg);
+}
+
+.collisionTable tr td:first-child, .collisionTable tr:first-child td
+{
+	font-weight: bold;
+	padding: 3px;
+	border: none;
+}
+
+td.highlight
+{
+	background: #eee;
+}

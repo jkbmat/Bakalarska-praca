@@ -5,20 +5,50 @@ UI =
     var collisionsContainer = document.createElement("div");
 
     var collisionsContent = document.createElement("table");
-    for(var i = 0; i < 16; i++)
+    for(var i = 0; i < COLLISION_GROUPS_NUMBER + 1; i++)
     {
       var tr = document.createElement("tr");
 
-      for(var j = 1; j < 17; j++)
+      for(var j = 0; j < COLLISION_GROUPS_NUMBER + 1; j++)
       {
         var td = document.createElement("td");
+        td.row = i;
+        td.col = j;
 
-        if(i === 0 && j > 1)
+        if(i === 0 && j > 0)
           td.innerHTML = j;
-        else if(j === 1 && i !== 0)
+        else if(j === 0 && i !== 0)
           td.innerHTML = i;
-        else if(i < j && j !== 1 && i !== 0)
+        else if(i <= j && j !== 0 && i !== 0)
         {
+          td.onmouseover = function(i, j, table)
+          {
+            return function()
+            {
+              var tds = table.getElementsByTagName("td");
+              for(var n = 0; n < tds.length; n++)
+              {
+                tds[n].className = "";
+
+                if((tds[n].row === i && tds[n].col <= j) || (tds[n].col === j && tds[n].row <= i))
+                  tds[n].className = "highlight";
+              }
+            }
+          }(i, j, collisionsContent);
+
+          td.onmouseout = function(table)
+          {
+            return function()
+            {
+              var tds = table.getElementsByTagName("td");
+              for(var n = 0; n < tds.length; n++)
+              {
+                tds[n].className = "";
+              }
+            }
+          }(collisionsContent);
+
+
           var checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.checked = _engine.getCollision(i - 1, j - 1);

@@ -5,6 +5,8 @@ const KINEMATIC_BODY = Module.b2_kinematicBody;
 const AUTO_ID_PREFIX = "ENTITY_NUMBER_";
 const AUTO_COLOR_RANGE = [50, 200];
 
+const COLLISION_GROUPS_NUMBER = 16;
+
 
 /*/ Myslienky
 
@@ -26,9 +28,15 @@ var Engine = function(viewport, gravity)
 	this.entities = [];
 
 	this.collisionGroups = [];
-	for (var i = 0; i < 16; i++) // 16 is the maximum number of collision groups supported by Box2D
+	for (var i = 0; i < COLLISION_GROUPS_NUMBER; i++)
 	{
-		this.collisionGroups.push(parseInt(Array(17).join("1"), 2))
+		this.collisionGroups.push
+		(
+			{
+				"name": i,
+				"mask": parseInt(Array(COLLISION_GROUPS_NUMBER + 1).join("1"), 2)
+			}
+		)
 	}
 
 	this.lifetimeEntities = 0;
@@ -57,7 +65,7 @@ Engine.prototype.addEntity = function(entity, type)
 
 Engine.prototype.getCollision = function(groupA, groupB)
 {
-	return (this.collisionGroups[groupA] >> groupB) & 1;
+	return (this.collisionGroups[groupA].mask >> groupB) & 1;
 }
 
 Engine.prototype.setCollision = function(groupA, groupB, value)
@@ -67,13 +75,13 @@ Engine.prototype.setCollision = function(groupA, groupB, value)
 
 	if(value)
 	{
-		this.collisionGroups[groupA] = this.collisionGroups[groupA] | maskA;
-		this.collisionGroups[groupB] = this.collisionGroups[groupB] | maskB;
+		this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask | maskA;
+		this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask | maskB;
 	}
 	else
 	{
-		this.collisionGroups[groupA] = this.collisionGroups[groupA] & ~maskA;
-		this.collisionGroups[groupB] = this.collisionGroups[groupB] & ~maskB;
+		this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask & ~maskA;
+		this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask & ~maskB;
 	}
 	this.updateCollisions()
 
@@ -94,7 +102,7 @@ Engine.prototype.updateCollisions = function()
 Engine.prototype.updateCollision = function(entity)
 {
 	var filterData = entity.fixture.GetFilterData();
-	filterData.set_maskBits(this.collisionGroups[entity.collisionGroup]);
+	filterData.set_maskBits(this.collisionGroups[entity.collisionGroup].mask);
 	entity.fixture.SetFilterData(filterData);
 
 	return this;
