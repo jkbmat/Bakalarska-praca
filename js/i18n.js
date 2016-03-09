@@ -1,7 +1,8 @@
+// A class for facilitating internationalisation
 Translations =
 {
-  strings: [],
-  currentLanguage: 0,
+  strings: [], // Array of languages (each language is an array of strings)
+  currentLanguage: 0, // selected language
 
   getTranslated: function(index, language)
   {

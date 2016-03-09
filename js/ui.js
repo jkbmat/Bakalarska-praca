@@ -1,9 +1,12 @@
+// Object for building the UI
 UI =
 {
+  // UI initialisation
   initialize: function()
   {
     var collisionsButton = document.createElement("div");
-    collisionsButton.className = "uiContainer button";
+    collisionsButton.className = "uiContainer button translated";
+    collisionsButton.stringId = 1;
     collisionsButton.innerHTML = Translations.getTranslated(1);
     collisionsButton.onclick = function()
     {
@@ -13,6 +16,7 @@ UI =
     document.body.insertBefore(collisionsButton, document.body.firstChild);
   },
 
+  // Creating a popup message
   popup: function(data)
   {
     var overlay = document.createElement("div");
@@ -28,11 +32,13 @@ UI =
     document.body.insertBefore(overlay, document.body.firstChild);
   },
 
+  // Closing a popup message
   closePopup: function(e)
   {
     var overlay = document.getElementById("popupOverlay");
     var content = document.getElementById("popupContent");
 
+    // Make sure it was the overlay that was clicked, not an element above it
     if(typeof e !== "undefined" && e.target !== overlay)
       return true;
 
@@ -40,6 +46,7 @@ UI =
     overlay.parentNode.removeChild(overlay);
   },
 
+  // Building the collision group table
   createCollisions: function()
   {
     var table = document.createElement("table");
@@ -52,17 +59,23 @@ UI =
       {
         var td = document.createElement("td");
 
+        // first row
         if(i === 0 && j > 0)
         {
-          td.innerHTML = "<div><span>"+ j +"</span></div>";
+          td.innerHTML = "<div><span>"+ _engine.collisionGroups[j - 1].name +"</span></div>";
         }
+
+        // first column
         else if(j === 0 && i !== 0)
-          td.innerHTML = i;
+          td.innerHTML = _engine.collisionGroups[i - 1].name;
+
+        // relevant triangle
         else if(i <= j && j !== 0 && i !== 0)
         {
           td.row = i;
           td.col = j;
 
+          // highlighting
           td.onmouseover = function(i, j, table)
           {
             return function()
@@ -72,12 +85,14 @@ UI =
               {
                 tds[n].className = "";
 
+                // only highlight up to the relevant cell
                 if((tds[n].row === i && tds[n].col <= j) || (tds[n].col === j && tds[n].row <= i))
                   tds[n].className = "highlight";
               }
             }
           }(i, j, table);
 
+          // more highlighting
           td.onmouseout = function(table)
           {
             return function()
@@ -90,10 +105,10 @@ UI =
             }
           }(table);
 
-
+          // checkbox for collision toggling
           var checkbox = document.createElement("input");
           checkbox.type = "checkbox";
-          checkbox.checked = _engine.getCollision(i - 1, j - 1);
+          checkbox.checked = _engine.getCollision(i - 1, j - 1) ? true : false;
           checkbox.onchange = function(i, j, checkbox)
           {
             return function()
@@ -101,8 +116,24 @@ UI =
               _engine.setCollision(i - 1, j - 1, checkbox.checked ? 1 : 0);
             }
           }(i, j, checkbox)
+
+          // clicking the checkbox's cell should work as well
+          td.onclick = function(checkbox)
+          {
+            return function(e)
+            {
+              if(e.target === checkbox)
+                return true;
+
+              checkbox.checked = !checkbox.checked;
+              checkbox.onchange();
+            }
+          }(checkbox)
+
           td.appendChild(checkbox);
         }
+
+        // fix for also highlighting cells without checkboxes
         else
         {
           td.row = i;

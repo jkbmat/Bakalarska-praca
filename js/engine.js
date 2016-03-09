@@ -32,7 +32,7 @@ var Engine = function(viewport, gravity)
 		this.collisionGroups.push
 		(
 			{
-				"name": i,
+				"name": i + 1,
 				"mask": parseInt(Array(COLLISION_GROUPS_NUMBER + 1).join("1"), 2)
 			}
 		)
@@ -41,11 +41,12 @@ var Engine = function(viewport, gravity)
 	this.lifetimeEntities = 0;
 
 	this.world = new b2World(gravity, true);
-
 }
 
+// Adding an entity to the world
 Engine.prototype.addEntity = function(entity, type)
 {
+	// generate auto id
 	if (entity.id == undefined)
 	{
 		entity.id = AUTO_ID_PREFIX + this.lifetimeEntities;
@@ -62,11 +63,13 @@ Engine.prototype.addEntity = function(entity, type)
 	return entity;
 }
 
+// Checks whether two groups should collide
 Engine.prototype.getCollision = function(groupA, groupB)
 {
 	return (this.collisionGroups[groupA].mask >> groupB) & 1;
 }
 
+// Sets two groups up to collide
 Engine.prototype.setCollision = function(groupA, groupB, value)
 {
 	var maskA = (1 << groupB);
@@ -87,6 +90,7 @@ Engine.prototype.setCollision = function(groupA, groupB, value)
 	return this;
 }
 
+// Updates collision masks for all entities, based on engine's collisionGroups table
 Engine.prototype.updateCollisions = function()
 {
 
@@ -98,6 +102,7 @@ Engine.prototype.updateCollisions = function()
 	return this;
 }
 
+// Updates collision mask for an entity, based on engine's collisionGroups table
 Engine.prototype.updateCollision = function(entity)
 {
 	var filterData = entity.fixture.GetFilterData();
@@ -107,16 +112,20 @@ Engine.prototype.updateCollision = function(entity)
 	return this;
 }
 
+// One simulation step. Simulation logic happens here.
 Engine.prototype.step = function()
 {
+	// FPS timer
 	var start = Date.now();
 
 	ctx = this.viewport.context;
 
+	// clear screen
 	ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
 
 	ctx.save()
 
+	// draw all entities
 	for (var i = this.entities.length - 1; i >= 0; i--)
 	{
 		ctx.save();
@@ -128,8 +137,13 @@ Engine.prototype.step = function()
 		ctx.restore();
 	}
 
+	// box2d simulation step
 	this.world.Step(1/60, 3, 3)
 
+	// CUSTOM TESTING CODE STARTS HERE
+	// -------------------------------
+
+	// keyboard controlled platform
 	var x = 0;
 	var y = 0;
 	if (_keyboard.isDown(40)) {
@@ -144,20 +158,33 @@ Engine.prototype.step = function()
 	var speed = 150;
 	this.entities[2].setLinearVelocity(new b2Vec2(speed * x, speed * y));
 
-	if(_mouse.leftUp)
-	{
-		var w = (_mouse.x - _mouse.dragOrigin[0]) / 2;
-		var h = (_mouse.y - _mouse.dragOrigin[1]) / 2;
+	// drawing rectangles
+	var w = (_mouse.x - _mouse.dragOrigin[0]) / 2;
+	var h = (_mouse.y - _mouse.dragOrigin[1]) / 2;
 
-		if(w > 5 && h > 5)
+	if(_mouse.leftDown && w > 5 && h > 5)
+	{
+		ctx.save();
+		ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+		ctx.fillRect(_mouse.dragOrigin[0], _mouse.dragOrigin[1], w*2, h*2);
+		ctx.restore();
+	}
+	if(_mouse.leftUp && w > 5 && h > 5)
+	{
 			_engine.addEntity(new Rectangle(new b2Vec2(_mouse.x - w, _mouse.y - h), new b2Vec2(w, h)), DYNAMIC_BODY)
 	}
 
+	// -------------------------------
+	//  CUSTOM TESTING CODE ENDS HERE
+
+
+	// Released keys are only to be processed once
 	_mouse.cleanUp();
 	_keyboard.cleanUp();
 
 	end = Date.now();
 
+	// Call next step
 	setTimeout(window.requestAnimationFrame(function(){ _engine.step() }), Math.min(60 - end - start, 0));
 }
 
@@ -165,9 +192,10 @@ Engine.prototype.step = function()
 
 
 // VIEWPORT
-
+// This is basically camera + projector
 var Viewport = function(canvasElement, width, height, x, y)
 {
+	// Canvas dimensions
 	if (width != undefined && height != undefined)
 	{
 		this.setAutoResize(false);
@@ -180,6 +208,7 @@ var Viewport = function(canvasElement, width, height, x, y)
 		this.autoResize();
 	}
 
+	// Center point of the camera
 	if (x != undefined && y != undefined)
 	{
 		this.x = x;
@@ -191,6 +220,7 @@ var Viewport = function(canvasElement, width, height, x, y)
 		this.y = Math.floor(this.height / 2);
 	}
 
+	// Canvas element
 	this.canvasElement = canvasElement;
 
 	if (canvasElement === undefined)
@@ -199,7 +229,7 @@ var Viewport = function(canvasElement, width, height, x, y)
 		document.body.appendChild(this.canvasElement);
 	}
 
-	this.resetElement();
+	this.resetElement(); // Resize to new dimensions
 
 	this.context = this.canvasElement.getContext("2d");
 }
@@ -248,9 +278,10 @@ Viewport.prototype.setAutoResize = function(value) {
 
 var Entity = function(shape, fixture, body, id, collisionGroup)
 {
-	this.dead = false;
-	this.zIndex = 0;
 	this.id = id;
+	this.dead = false;
+	this.layer = 0;
+
 	this.collisionGroup = collisionGroup;
 	if(this.collisionGroup == undefined)
 	{
@@ -268,13 +299,19 @@ var Entity = function(shape, fixture, body, id, collisionGroup)
 		this.fixture = fixture;
 	}
 	this.fixture.set_shape(shape);
-	var fd = this.fixture.get_filter();
-	fd.set_categoryBits(1 << collisionGroup);
+
+	var filterData = this.fixture.get_filter();
+	filterData.set_categoryBits(1 << collisionGroup);
+
+	// Constructor is called when inheriting, so we need to check for _engine availability
 	if(typeof _engine !== 'undefined')
-		fd.set_maskBits(_engine.collisionGroups[this.collisionGroup].mask);
-	this.fixture.set_filter(fd);
+		filterData.set_maskBits(_engine.collisionGroups[this.collisionGroup].mask);
+
+	this.fixture.set_filter(filterData);
+
 	this.body = body;
 
+	// Auto generate color
 	var r = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
 	var g = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
 	var b = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
@@ -304,9 +341,9 @@ Entity.prototype.setCollisionGroup = function(group)
 {
 	this.collisionGroup = group;
 
-	var fd = this.fixture.GetFilterData();
-	fd.set_categoryBits(1 << group);
-	this.fixture.SetFilterData(fd);
+	var filterData = this.fixture.GetFilterData();
+	filterData.set_categoryBits(1 << group);
+	this.fixture.SetFilterData(filterData);
 
 	_engine.updateCollision(this);
 

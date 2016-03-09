@@ -1,3 +1,4 @@
+// Rectangle entity
 var Rectangle = function(center, extents, fixture, id, collisionGroup)
 {
 	var shape = new b2PolygonShape();
@@ -31,6 +32,8 @@ Rectangle.prototype.draw = function(ctx)
 							(halfHeight * 2));
 }
 
+
+// Circle entity
 var Circle = function(center, radius, fixture, id, collisionGroup)
 {
 	var shape = new b2CircleShape();

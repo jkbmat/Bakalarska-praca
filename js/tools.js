@@ -1,3 +1,4 @@
+// Object containing useful methods
 var Tools =
 {
 	getBrowserWidth: function()

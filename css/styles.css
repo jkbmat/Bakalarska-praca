@@ -46,16 +46,12 @@ body
 .collisionTable
 {
 	border-collapse: collapse;
-	margin: 1.5em auto;
+	margin: 5em auto;
 }
 
 .collisionTable td
 {
 	border: 1px dashed #aaa;
-}
-
-.collisionTable tr:first-child td
-{
 	white-space: nowrap;
 }
 
@@ -63,6 +59,7 @@ body
 {
 	transform:
 		rotate(-45deg);
+	width: 20px;
 }
 
 .collisionTable tr td:first-child, .collisionTable tr:first-child td
@@ -70,6 +67,8 @@ body
 	font-weight: bold;
 	padding: 3px;
 	border: none;
+	width: 20px;
+	height: 20px;
 }
 
 td.highlight
@@ -98,5 +97,5 @@ td.highlight
 	width: 50%;
 	margin: auto;
 	margin-top: 3em;
-	pointer-events: 
+	pointer-events:
 }
