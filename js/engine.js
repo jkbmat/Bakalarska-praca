@@ -43,6 +43,31 @@ var Engine = function(viewport, gravity)
 	this.world = new b2World(gravity, true);
 }
 
+
+// Returns the entity with id specified by argument
+Engine.prototype.getEntityById = function(id)
+{
+	for (var i = 0; i < this.entities.length; i++) {
+		if(this.entities[i].id === id)
+			return this.entities[i];
+	}
+
+	return null;
+}
+
+// Returns an array of entities with specified collisionGroup
+Engine.prototype.getEntitiesByCollisionGroup = function(group)
+{
+	var ret = [];
+
+	for (var i = 0; i < this.entities.length; i++) {
+		if(this.entities[i].collisionGroup === group)
+			ret.push(this.entities[i]);
+	}
+
+	return ret;
+}
+
 // Adding an entity to the world
 Engine.prototype.addEntity = function(entity, type)
 {
@@ -135,6 +160,14 @@ Engine.prototype.step = function()
 		this.entities[i].draw(ctx);
 
 		ctx.restore();
+
+		for(var j = 0; j < this.entities[i].behaviors.length; j++)
+		{
+			var behavior = this.entities[i].behaviors[j];
+
+			if(behavior.check(this.entities[i]))
+				behavior.result();
+		}
 	}
 
 	// box2d simulation step
@@ -273,7 +306,6 @@ Viewport.prototype.setAutoResize = function(value) {
 
 
 
-
 // ENTITY
 
 var Entity = function(shape, fixture, body, id, collisionGroup)
@@ -287,6 +319,8 @@ var Entity = function(shape, fixture, body, id, collisionGroup)
 	{
 		this.collisionGroup = 0;
 	}
+
+	this.behaviors = [];
 
 	this.fixture = fixture;
 	if (this.fixture == undefined)
@@ -337,6 +371,14 @@ Entity.prototype.setColor = function(color)
 	return this;
 }
 
+Entity.prototype.setId = function(id)
+{
+	this.id = id;
+
+	return this;
+}
+
+
 Entity.prototype.setCollisionGroup = function(group)
 {
 	this.collisionGroup = group;
@@ -355,4 +397,11 @@ Entity.prototype.setLinearVelocity = function(vector)
 	this.body.SetLinearVelocity(vector);
 
 	return this;
+}
+
+Entity.prototype.addBehavior = function(behavior)
+{
+  this.behaviors.push(behavior);
+
+  return this;
 }
