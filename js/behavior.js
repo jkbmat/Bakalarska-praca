@@ -2,6 +2,8 @@ const TYPE_BOOLEAN = "boolean";
 const TYPE_NUMBER = "number";
 const TYPE_STRING = "string";
 const TYPE_ARRAY = "array";
+const TYPE_ACTION = "action";
+const TYPE_ENTITYFILTER = "entityFilter";
 
 var Behavior = function(logic, results)
 {
@@ -22,10 +24,28 @@ Behavior.prototype.result = function() // Use a derived class
   }
 }
 
+var TypeError = function(expected, received, token)
+{
+  this.expected = expected;
+  this.received = received;
+  this.token = token;
+}
 
-var Logic = function(type)
+// TODO: Kontrola typov vo vrchnom konstruktore, linear action, porovnavanie, uhly, plus, minus , deleno, krat, x na n
+// TORQUE NEJDE?
+
+var Logic = function(type, args, argument_types)
 {
   this.type = type;
+
+  if(args == undefined)
+    return this;
+
+  for (var i = 0; i < args.length; i++)
+  {
+    if(args[i].type !== argument_types[i])
+      throw new TypeError(argument_types[i], args[i].type, this);
+  }
 }
 
 Logic.prototype.evaluate = function() // Use a derived class
@@ -34,25 +54,55 @@ Logic.prototype.evaluate = function() // Use a derived class
 }
 
 
-var Action = function()
+var Action = function(entityFilter, args, argument_types)
 {
+  this.entityFilter = entityFilter;
 
+  this.type = TYPE_ACTION;
+
+  if(args == undefined)
+    return this;
+
+  for (var i = 0; i < args.length; i++)
+  {
+    if(args[i].type !== argument_types[i])
+      throw new TypeError(argument_types[i], args[i].type, this);
+  }
 }
 
-Action.prototype.execute = function() // Use a derived class
+Action.prototype.each = function(entity) // Use a derived class
 {
   return false;
 }
 
-
-var EntityFilter = function(checkBehavior)
+Action.prototype.execute = function ()
 {
-  this.checkBehavior = checkBehavior;
+  var entities = this.entityFilter.filter();
+  for (var i = 0; i < entities.length; i++)
+  {
+    this.each(entities[i]);
+  }
+};
+
+
+var EntityFilter = function(args, argument_types)
+{
+  this.type = TYPE_ENTITYFILTER;
+
+  if(args == undefined)
+    return this;
+
+  for (var i = 0; i < args.length; i++)
+  {
+    if(args[i].type !== argument_types[i])
+      throw new TypeError(argument_types[i], args[i].type, this);
+  }
+
 }
 
-EntityFilter.prototype.decide = function (entity)
+EntityFilter.prototype.decide = function (entity) // Use derived class
 {
-  return new Behavior(this.checkBehavior).check(entity);
+  return false;
 };
 
 EntityFilter.prototype.filter = function ()
@@ -65,138 +115,3 @@ EntityFilter.prototype.filter = function ()
   }
   return ret;
 };
-
-
-var lAnd = function(a, b)
-{
-  this.a = a;
-  this.b = b;
-
-  this.type = TYPE_BOOLEAN;
-}
-lAnd.prototype = new Logic();
-lAnd.prototype.constructor = lAnd;
-
-lAnd.prototype.evaluate = function()
-{
-  if(this.a.evaluate() && this.b.evaluate())
-    return true;
-
-  return false;
-}
-
-var lOr = function(a, b)
-{
-  this.a = a;
-  this.b = b;
-
-  this.type = TYPE_BOOLEAN;
-}
-lOr.prototype = new Logic();
-lOr.prototype.constructor = lOr;
-
-lOr.prototype.evaluate = function()
-{
-  if(this.a.evaluate() || this.b.evaluate())
-    return true;
-
-  return false;
-}
-
-var lNot = function(a)
-{
-  this.a = a;
-
-  this.type = TYPE_BOOLEAN;
-}
-lNot.prototype = new Logic();
-lNot.prototype.constructor = lNot;
-
-lNot.prototype.evaluate = function()
-{
-  return !this.a.evaluate();
-}
-
-var lLiteral = function(value, type)
-{
-  this.value = value;
-  this.type = type;
-}
-lLiteral.prototype = new Logic();
-lLiteral.prototype.constructor = lLiteral;
-
-lLiteral.prototype.evaluate = function()
-{
-  return this.value;
-}
-
-var lButtonDown = function(button)
-{
-  this.button = button;
-
-  this.type = TYPE_BOOLEAN;
-}
-lButtonDown.prototype = new Logic();
-lButtonDown.prototype.constructor = lButtonDown;
-
-lButtonDown.prototype.evaluate = function()
-{
-  return _keyboard.isDown(this.button.evaluate());
-}
-
-var lButtonUp = function(button)
-{
-  this.button = button;
-
-  this.type = TYPE_BOOLEAN;
-}
-lButtonUp.prototype = new Logic();
-lButtonUp.prototype.constructor = lButtonUp;
-
-lButtonUp.prototype.evaluate = function()
-{
-  return _keyboard.isUp(this.button.evaluate());
-}
-
-
-var aSetColor = function(ef, color)
-{
-  this.entityFilter = ef;
-  this.color = color;
-}
-aSetColor.prototype = new Action();
-aSetColor.prototype.constructor = aSetColor;
-
-aSetColor.prototype.execute = function()
-{
-  var entities = this.entityFilter.filter();
-  for (var i = 0; i < entities.length; i++)
-  {
-    entities[i].setColor(this.color.evaluate());
-  }
-}
-
-
-var efById = function(id)
-{
-  this.id = id;
-}
-efById.prototype = new EntityFilter();
-efById.prototype.constructor = efById;
-
-efById.prototype.decide = function(entity)
-{
-  return entity.id === this.id;
-}
-
-var efByCollisionGroup = function(group)
-{
-  this.group = group;
-}
-efByCollisionGroup.prototype = new EntityFilter();
-efByCollisionGroup.prototype.constructor = efByCollisionGroup;
-
-efByCollisionGroup.prototype.decide = function(entity)
-{
-  return entity.collisionGroup === this.group;
-}

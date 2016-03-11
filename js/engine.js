@@ -189,7 +189,7 @@ Engine.prototype.step = function()
 		x = -1;
 	}
 	var speed = 150;
-	this.entities[2].setLinearVelocity(new b2Vec2(speed * x, speed * y));
+	//this.entities[2].setLinearVelocity(new b2Vec2(speed * x, speed * y));
 
 	// drawing rectangles
 	var w = (_mouse.x - _mouse.dragOrigin[0]) / 2;
@@ -327,7 +327,7 @@ var Entity = function(shape, fixture, body, id, collisionGroup)
 	{
 		var fixture = new b2FixtureDef();
 		fixture.set_density(10)
-		fixture.set_friction(5);
+		fixture.set_friction(0.1);
 		fixture.set_restitution(0.2);
 
 		this.fixture = fixture;
@@ -344,6 +344,8 @@ var Entity = function(shape, fixture, body, id, collisionGroup)
 	this.fixture.set_filter(filterData);
 
 	this.body = body;
+	if(this.body !== undefined)
+		this.body.set_fixedRotation(false);
 
 	// Auto generate color
 	var r = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
