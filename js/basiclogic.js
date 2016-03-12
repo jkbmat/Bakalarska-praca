@@ -76,6 +76,20 @@ lNumber.prototype.evaluate = function()
   return this.value;
 }
 
+var lBool = function(value, type)
+{
+  this.value = value;
+
+  Logic.call(this, TYPE_BOOLEAN);
+}
+lBool.prototype = new Logic();
+lBool.prototype.constructor = lBool;
+
+lBool.prototype.evaluate = function()
+{
+  return this.value;
+}
+
 var lButtonDown = function(button)
 {
   this.button = button;
@@ -102,4 +116,51 @@ lButtonUp.prototype.constructor = lButtonUp;
 lButtonUp.prototype.evaluate = function()
 {
   return _keyboard.isUp(this.button.evaluate());
+}
+
+var lRandom = function(min, max)
+{
+  this.min = min;
+  this.max = max;
+
+  Logic.call(this, TYPE_NUMBER, arguments, [TYPE_NUMBER, TYPE_NUMBER]);
+}
+lRandom.prototype = new Logic();
+lRandom.prototype.constructor = lRandom;
+
+lRandom.prototype.evaluate = function()
+{
+  return Tools.randomRange(this.min.evaluate() && this.max.evaluate());
+}
+
+var lVelocityX = function(ef)
+{
+  this.ef = ef;
+
+  Logic.call(this, TYPE_NUMBER, arguments, [TYPE_ENTITYFILTER]);
+}
+lVelocityX.prototype = new Logic();
+lVelocityX.prototype.constructor = lVelocityX;
+
+lVelocityX.prototype.evaluate = function()
+{
+  var entity = this.ef.filter()[0];
+
+  return entity.body.GetLinearVelocity().get_x();
+}
+
+var lVelocityY = function(ef)
+{
+  this.ef = ef;
+
+  Logic.call(this, TYPE_NUMBER, arguments, [TYPE_ENTITYFILTER]);
+}
+lVelocityY.prototype = new Logic();
+lVelocityY.prototype.constructor = lVelocityY;
+
+lVelocityY.prototype.evaluate = function()
+{
+  var entity = this.ef.filter()[0];
+
+  return entity.body.GetLinearVelocity().get_y();
 }

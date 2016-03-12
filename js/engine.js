@@ -157,6 +157,11 @@ Engine.prototype.step = function()
 		ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2);
 		ctx.fillStyle = this.entities[i].color;
 
+		var x = this.entities[i].body.GetPosition().get_x();
+		var y = this.entities[i].body.GetPosition().get_y();
+		ctx.translate(x, y);
+		ctx.rotate(this.entities[i].body.GetAngle());
+
 		this.entities[i].draw(ctx);
 
 		ctx.restore();
@@ -171,7 +176,7 @@ Engine.prototype.step = function()
 	}
 
 	// box2d simulation step
-	this.world.Step(1/60, 3, 3)
+	this.world.Step(1/60, 10, 5)
 
 	// CUSTOM TESTING CODE STARTS HERE
 	// -------------------------------
@@ -209,6 +214,7 @@ Engine.prototype.step = function()
 
 	// -------------------------------
 	//  CUSTOM TESTING CODE ENDS HERE
+
 
 
 	// Released keys are only to be processed once
@@ -327,7 +333,7 @@ var Entity = function(shape, fixture, body, id, collisionGroup)
 	{
 		var fixture = new b2FixtureDef();
 		fixture.set_density(10)
-		fixture.set_friction(0.1);
+		fixture.set_friction(2);
 		fixture.set_restitution(0.2);
 
 		this.fixture = fixture;
@@ -394,9 +400,33 @@ Entity.prototype.setCollisionGroup = function(group)
 	return this;
 }
 
+Entity.prototype.getLinearVelocity = function()
+{
+	return this.body.GetLinearVelocity();
+}
+
+Entity.prototype.getMass = function()
+{
+	return Math.max(1, this.body.GetMass());
+}
+
 Entity.prototype.setLinearVelocity = function(vector)
 {
 	this.body.SetLinearVelocity(vector);
+
+	return this;
+}
+
+Entity.prototype.applyTorque = function(force)
+{
+	this.body.ApplyTorque(force);
+
+	return this;
+}
+
+Entity.prototype.applyLinearImpulse = function(vector)
+{
+	this.body.ApplyLinearImpulse(vector, this.body.GetWorldCenter());
 
 	return this;
 }

@@ -18,18 +18,10 @@ Rectangle.prototype.constructor = Rectangle;
 
 Rectangle.prototype.draw = function(ctx)
 {
-	var x = this.body.GetPosition().get_x();
-	var y = this.body.GetPosition().get_y();
 	var halfWidth = this.extents.get_x();
 	var halfHeight = this.extents.get_y();
 
-	ctx.translate(x, y);
-	ctx.rotate(this.body.GetAngle());
-	ctx.translate(-x, -y);
-	ctx.fillRect((x - halfWidth),
-							(y - halfHeight),
-							(halfWidth * 2),
-							(halfHeight * 2));
+	ctx.fillRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2);
 }
 
 
@@ -53,12 +45,18 @@ Circle.prototype.constructor = Circle;
 
 Circle.prototype.draw = function(ctx)
 {
-	var x = this.body.GetPosition().get_x();
-	var y = this.body.GetPosition().get_y();
-
 	ctx.beginPath();
 
-	ctx.arc(x, y, this.radius, 0, 2 * Math.PI, false);
+	ctx.arc(0, 0, this.radius, 0, 2 * Math.PI, false);
 
 	ctx.fill();
+
+	ctx.strokeStyle = "red";
+	ctx.globalCompositeOperation = "destination-out";
+
+	ctx.beginPath();
+	ctx.moveTo(0, 0);
+	ctx.lineTo(0, this.radius);
+	ctx.stroke();
+	ctx.closePath();
 }
