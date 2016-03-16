@@ -1,6 +1,6 @@
 Translations.strings.push(
-[
-  "English",
-  "Collision groups",
-]
+  [
+    "English",
+    "Collision groups",
+  ]
 );

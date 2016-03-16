@@ -1,18 +1,14 @@
 // Object containing useful methods
-var Tools =
-{
-	getBrowserWidth: function()
-	{
-		return window.innerWidth;
-	},
+var Tools = {
+  getBrowserWidth: function() {
+    return window.innerWidth;
+  },
 
-	getBrowserHeight: function()
-	{
-		return window.innerHeight;
-	},
+  getBrowserHeight: function() {
+    return window.innerHeight;
+  },
 
-	randomRange :function(min, max)
-	{
+  randomRange: function(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
-	},
+  },
 }

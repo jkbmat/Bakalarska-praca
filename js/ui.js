@@ -1,15 +1,12 @@
 // Object for building the UI
-UI =
-{
+UI = {
   // UI initialisation
-  initialize: function()
-  {
+  initialize: function() {
     var collisionsButton = document.createElement("div");
     collisionsButton.className = "uiContainer button translated";
     collisionsButton.stringId = 1;
     collisionsButton.innerHTML = Translations.getTranslated(1);
-    collisionsButton.onclick = function()
-    {
+    collisionsButton.onclick = function() {
       UI.popup(UI.createCollisions());
     }
 
@@ -17,11 +14,12 @@ UI =
   },
 
   // Creating a popup message
-  popup: function(data)
-  {
+  popup: function(data) {
     var overlay = document.createElement("div");
     overlay.id = "popupOverlay";
-    overlay.onclick = function(e){UI.closePopup(e)};
+    overlay.onclick = function(e) {
+      UI.closePopup(e)
+    };
 
     var content = document.createElement("div");
     content.id = "popupContent";
@@ -33,13 +31,12 @@ UI =
   },
 
   // Closing a popup message
-  closePopup: function(e)
-  {
+  closePopup: function(e) {
     var overlay = document.getElementById("popupOverlay");
     var content = document.getElementById("popupContent");
 
     // Make sure it was the overlay that was clicked, not an element above it
-    if(typeof e !== "undefined" && e.target !== overlay)
+    if (typeof e !== "undefined" && e.target !== overlay)
       return true;
 
     content.parentNode.removeChild(content);
@@ -47,59 +44,48 @@ UI =
   },
 
   // Building the collision group table
-  createCollisions: function()
-  {
+  createCollisions: function() {
     var table = document.createElement("table");
 
-    for(var i = 0; i < COLLISION_GROUPS_NUMBER + 1; i++)
-    {
+    for (var i = 0; i < COLLISION_GROUPS_NUMBER + 1; i++) {
       var tr = document.createElement("tr");
 
-      for(var j = 0; j < COLLISION_GROUPS_NUMBER + 1; j++)
-      {
+      for (var j = 0; j < COLLISION_GROUPS_NUMBER + 1; j++) {
         var td = document.createElement("td");
 
         // first row
-        if(i === 0 && j > 0)
-        {
-          td.innerHTML = "<div><span>"+ _engine.collisionGroups[j - 1].name +"</span></div>";
+        if (i === 0 && j > 0) {
+          td.innerHTML = "<div><span>" + _engine.collisionGroups[j - 1].name + "</span></div>";
         }
 
         // first column
-        else if(j === 0 && i !== 0)
+        else if (j === 0 && i !== 0)
           td.innerHTML = _engine.collisionGroups[i - 1].name;
 
         // relevant triangle
-        else if(i <= j && j !== 0 && i !== 0)
-        {
+        else if (i <= j && j !== 0 && i !== 0) {
           td.row = i;
           td.col = j;
 
           // highlighting
-          td.onmouseover = function(i, j, table)
-          {
-            return function()
-            {
+          td.onmouseover = function(i, j, table) {
+            return function() {
               var tds = table.getElementsByTagName("td");
-              for(var n = 0; n < tds.length; n++)
-              {
+              for (var n = 0; n < tds.length; n++) {
                 tds[n].className = "";
 
                 // only highlight up to the relevant cell
-                if((tds[n].row === i && tds[n].col <= j) || (tds[n].col === j && tds[n].row <= i))
+                if ((tds[n].row === i && tds[n].col <= j) || (tds[n].col === j && tds[n].row <= i))
                   tds[n].className = "highlight";
               }
             }
           }(i, j, table);
 
           // more highlighting
-          td.onmouseout = function(table)
-          {
-            return function()
-            {
+          td.onmouseout = function(table) {
+            return function() {
               var tds = table.getElementsByTagName("td");
-              for(var n = 0; n < tds.length; n++)
-              {
+              for (var n = 0; n < tds.length; n++) {
                 tds[n].className = "";
               }
             }
@@ -109,20 +95,16 @@ UI =
           var checkbox = document.createElement("input");
           checkbox.type = "checkbox";
           checkbox.checked = _engine.getCollision(i - 1, j - 1) ? true : false;
-          checkbox.onchange = function(i, j, checkbox)
-          {
-            return function()
-            {
+          checkbox.onchange = function(i, j, checkbox) {
+            return function() {
               _engine.setCollision(i - 1, j - 1, checkbox.checked ? 1 : 0);
             }
           }(i, j, checkbox)
 
           // clicking the checkbox's cell should work as well
-          td.onclick = function(checkbox)
-          {
-            return function(e)
-            {
-              if(e.target === checkbox)
+          td.onclick = function(checkbox) {
+            return function(e) {
+              if (e.target === checkbox)
                 return true;
 
               checkbox.checked = !checkbox.checked;
@@ -134,8 +116,7 @@ UI =
         }
 
         // fix for also highlighting cells without checkboxes
-        else
-        {
+        else {
           td.row = i;
           td.col = j;
         }

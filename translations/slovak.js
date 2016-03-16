@@ -1,6 +1,6 @@
 Translations.strings.push(
-[
-  "Slovensky",
-  "Skupiny pre kolízie",
-]
+  [
+    "Slovensky",
+    "Skupiny pre kolízie",
+  ]
 );
