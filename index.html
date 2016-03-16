@@ -27,87 +27,43 @@
 </head>
 <body>
 <script type="text/javascript">
-	var _engine = new Engine(new Viewport(), new b2Vec2(0, 200));
+	var _engine = new Engine(new Viewport(), new b2Vec2(0, 500));
 
 	/*_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), DYNAMIC_BODY)
 		.setCollisionGroup(1)
 		.setLinearVelocity(new b2Vec2(50,-50));*/
-	_engine.addEntity(new Circle(new b2Vec2(500, 50), 31), DYNAMIC_BODY)
+	_engine.addEntity(new Circle(new b2Vec2(500, 50), 20), DYNAMIC_BODY)
 		.setCollisionGroup(2)
 		.setId("kruh")
+		.disableRotation(true)
 		.addBehavior
 		(
 			new Behavior
 			(
-				new lButtonUp(new lNumber(32)),
-				new aLinearImpulse(new efById(new lString("kruh")), new lNumber(0), new lNumber(-500))
+				Token.parse("isButtonUp(number(32))"),
+				Token.parse("setLinearVelocity(filterById(text(kruh)), getVelocityX(filterById(text(kruh))), number(-999999999999999999))")
 			)
 		)
 		.addBehavior
 		(
 			new Behavior
 			(
-				new lButtonDown(new lNumber(37)),
-				new aLinearVelocityX(new efById(new lString("kruh")), new lNumber(-100))
+				Token.parse("isButtonDown(number(37))"),
+				Token.parse("setLinearVelocity(filterById(text(kruh)), number(-100), getVelocityY(filterById(text(kruh))))")
 			)
 		)
 		.addBehavior
 		(
 			new Behavior
 			(
-				new lButtonDown(new lNumber(39)),
-				new aLinearVelocityX(new efById(new lString("kruh")), new lNumber(100))
+				Token.parse("isButtonDown(number(39))"),
+				Token.parse("setLinearVelocity(filterById(text(kruh)), number(100), getVelocityY(filterById(text(kruh))))")
 			)
 		)
 
 	_engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(400, 3)), KINEMATIC_BODY)
 		.setId("platform")
-		/*.addBehavior
-		(
-			new Behavior
-			(
-				new lBool(true),
-				new aLinearVelocity(new efById(new lString("platform")), new lNumber(0), new lNumber(0))
-			)
-		)
-		.addBehavior
-		(
-			new Behavior
-			(
-				new lButtonDown(new lNumber(37)),
-				[
-					new aLinearVelocityX(new efById(new lString("platform")), new lNumber(-60)),
-					new aSetColor(new efByCollisionGroup(new lNumber(0)), new lString("rgb(0, 102, 179)"))
-				]
-			)
-		)
-		.addBehavior
-		(
-			new Behavior
-			(
-				new lButtonDown(new lNumber(38)),
-				new aLinearVelocityY(new efById(new lString("platform")), new lNumber(-60))
-			)
-		)
-		.addBehavior
-		(
-			new Behavior
-			(
-				new lButtonDown(new lNumber(39)),
-				new aLinearVelocityX(new efById(new lString("platform")), new lNumber(60))
-			)
-		)
-		.addBehavior
-		(
-			new Behavior
-			(
-				new lButtonDown(new lNumber(40)),
-				new aLinearVelocityY(new efById(new lString("platform")), new lNumber(60))
-			)
-		)*/
-	/*_engine.addEntity(new Rectangle(new b2Vec2(400, 100), new b2Vec2(20, 30)), DYNAMIC_BODY)
 		.setCollisionGroup(3)
-		.setId("big")*/
 
 
 	UI.initialize();

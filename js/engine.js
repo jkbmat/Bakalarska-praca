@@ -7,6 +7,8 @@ const AUTO_COLOR_RANGE = [0, 230];
 
 const COLLISION_GROUPS_NUMBER = 16;
 
+const DISPLAY_RATIO = 20;
+
 
 /*/ Myslienky
 
@@ -41,6 +43,7 @@ var Engine = function(viewport, gravity)
 	this.lifetimeEntities = 0;
 
 	this.world = new b2World(gravity, true);
+	this.world.paused = false;
 }
 
 
@@ -176,25 +179,12 @@ Engine.prototype.step = function()
 	}
 
 	// box2d simulation step
-	this.world.Step(1/60, 10, 5)
+	if(!_engine.world.paused)
+		this.world.Step(1/60, 10, 5)
 
 	// CUSTOM TESTING CODE STARTS HERE
 	// -------------------------------
 
-	// keyboard controlled platform
-	var x = 0;
-	var y = 0;
-	if (_keyboard.isDown(40)) {
-		y = 1;
-	}if (_keyboard.isDown(39)) {
-		x = 1
-	}if (_keyboard.isDown(38)) {
-		y = -1
-	}if (_keyboard.isDown(37)) {
-		x = -1;
-	}
-	var speed = 150;
-	//this.entities[2].setLinearVelocity(new b2Vec2(speed * x, speed * y));
 
 	// drawing rectangles
 	var w = (_mouse.x - _mouse.dragOrigin[0]) / 2;
@@ -333,7 +323,7 @@ var Entity = function(shape, fixture, body, id, collisionGroup)
 	{
 		var fixture = new b2FixtureDef();
 		fixture.set_density(10)
-		fixture.set_friction(2);
+		fixture.set_friction(0.5);
 		fixture.set_restitution(0.2);
 
 		this.fixture = fixture;
@@ -427,6 +417,13 @@ Entity.prototype.applyTorque = function(force)
 Entity.prototype.applyLinearImpulse = function(vector)
 {
 	this.body.ApplyLinearImpulse(vector, this.body.GetWorldCenter());
+
+	return this;
+}
+
+Entity.prototype.disableRotation = function(value)
+{
+	this.body.SetFixedRotation(value)
 
 	return this;
 }

@@ -1,103 +1,81 @@
 var aSetColor = function(ef, color)
 {
-  this.color = color;
+  Action.call(this, "setColor", arguments, [TYPE_ENTITYFILTER, TYPE_STRING]);
 
-  Action.call(this, ef, arguments, [TYPE_ENTITYFILTER, TYPE_STRING]);
+  this.params.push(ef);
+  this.params.push(color);
 }
 aSetColor.prototype = new Action();
 aSetColor.prototype.constructor = aSetColor;
+Behavior.registerToken(aSetColor);
 
 aSetColor.prototype.each = function(entity)
 {
-  entity.setColor(this.color.evaluate());
+  entity.setColor(this.params[1].evaluate());
 }
 
 var aTorque = function(ef, strength)
 {
-  this.strength = strength;
+  Action.call(this, "applyTorque", arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER]);
 
-  Action.call(this, ef, arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER]);
+  this.params.push(ef);
+  this.params.push(strength);
 }
 aTorque.prototype = new Action();
 aTorque.prototype.constructor = aTorque;
+Behavior.registerToken(aTorque);
 
 aTorque.prototype.each = function(entity)
 {
-  entity.body.ApplyTorque(entity.getMass() * this.strength.evaluate());
+  entity.body.ApplyTorque(entity.getMass() * this.params[1].evaluate());
 }
 
 var aAngularImpulse = function(ef, strength)
 {
-  this.strength = strength;
+  Action.call(this, "applyAngularImpulse", arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER]);
 
-  Action.call(this, ef, arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER]);
+  this.params.push(ef);
+  this.params.push(strength);
 }
 aAngularImpulse.prototype = new Action();
 aAngularImpulse.prototype.constructor = aAngularImpulse;
+Behavior.registerToken(aAngularImpulse);
 
 aAngularImpulse.prototype.each = function(entity)
 {
-  entity.body.ApplyAngularImpulse(entity.getMass() * this.strength.evaluate());
+  entity.body.ApplyAngularImpulse(entity.getMass() * this.params[1].evaluate());
 }
 
 var aLinearVelocity = function(ef, x, y)
 {
-  this.x = x;
-  this.y = y;
+  Action.call(this, "setLinearVelocity", arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER, TYPE_NUMBER]);
 
-  Action.call(this, ef, arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER, TYPE_NUMBER]);
+  this.params.push(ef);
+  this.params.push(x);
+  this.params.push(y);
 }
 aLinearVelocity.prototype = new Action();
 aLinearVelocity.prototype.constructor = aLinearVelocity;
+Behavior.registerToken(aLinearVelocity);
 
 aLinearVelocity.prototype.each = function(entity)
 {
-  entity.setLinearVelocity(new b2Vec2(this.x.evaluate(), this.y.evaluate()));
-}
-
-var aLinearVelocityX = function(ef, x)
-{
-  this.x = x;
-
-  Action.call(this, ef, arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER]);
-}
-aLinearVelocityX.prototype = new Action();
-aLinearVelocityX.prototype.constructor = aLinearVelocityX;
-
-aLinearVelocityX.prototype.each = function(entity)
-{
-  var v = entity.getLinearVelocity();
-  v.set_x(this.x.evaluate());
-  entity.setLinearVelocity(v);
-}
-
-var aLinearVelocityY = function(ef, y)
-{
-  this.y = y;
-
-  Action.call(this, ef, arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER]);
-}
-aLinearVelocityY.prototype = new Action();
-aLinearVelocityY.prototype.constructor = aLinearVelocityY;
-
-aLinearVelocityY.prototype.each = function(entity)
-{
-  var v = entity.getLinearVelocity();
-  v.set_y(this.y.evaluate());
-  entity.setLinearVelocity(v);
+  entity.setLinearVelocity(new b2Vec2(this.params[1].evaluate(), this.params[2].evaluate()));
 }
 
 var aLinearImpulse = function(ef, x, y)
 {
-  this.x = x;
-  this.y = y;
+  Action.call(this, "applyLinearImpulse", ef, arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER, TYPE_NUMBER]);
 
-  Action.call(this, ef, arguments, [TYPE_ENTITYFILTER, TYPE_NUMBER, TYPE_NUMBER]);
+  this.params.push(ef);
+  this.params.push(x);
+  this.params.push(y);
 }
 aLinearImpulse.prototype = new Action();
 aLinearImpulse.prototype.constructor = aLinearImpulse;
+Behavior.registerToken(aLinearImpulse);
 
 aLinearImpulse.prototype.each = function(entity)
 {
-  entity.applyLinearImpulse(new b2Vec2(entity.getMass() * this.x.evaluate(), entity.getMass() * this.y.evaluate()));
+  entity.applyLinearImpulse(new b2Vec2(entity.getMass() * this.params[1].evaluate(), entity.getMass() * this.params[2].evaluate()));
 }

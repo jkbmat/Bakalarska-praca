@@ -4,6 +4,10 @@ const TYPE_STRING = "string";
 const TYPE_ARRAY = "array";
 const TYPE_ACTION = "action";
 const TYPE_ENTITYFILTER = "entityFilter";
+const TYPE_LITERAL = "literal";
+
+const INFIX = "infix";
+const PREFIX = "prefix";
 
 var Behavior = function(logic, results)
 {
@@ -15,6 +19,15 @@ var Behavior = function(logic, results)
   this.results = Array.isArray(results) ? results : [results];
 }
 
+Behavior.tokens = {};
+
+Behavior.registerToken = function(token)
+{
+  var t = new token();
+  Behavior.tokens[t.name] = t;
+}
+
+
 Behavior.prototype.check = function(entity)
 {
   return this.logic.evaluate(entity);
@@ -22,7 +35,7 @@ Behavior.prototype.check = function(entity)
 
 Behavior.prototype.toString = function()
 {
-  return "Behavior("+this.logic.string()+", "+this.result.string()+")";
+  return "Behavior("+ this.logic.toString() +", "+ this.results.toString() +")";
 }
 
 Behavior.prototype.result = function()
@@ -41,62 +54,202 @@ var TypeError = function(expected, received, token)
 }
 
 // TODO: linear action, porovnavanie, uhly, plus, minus , deleno, krat, x na n
-// TORQUE NEJDE?
 
-var Logic = function(type, args, argument_types)
+var Token = function(name, type, args, argument_types)
 {
   this.type = type;
+  this.fixType = PREFIX;
+  this.name = name;
+  this.args = args == undefined ? [] : args;
+  this.argument_types = argument_types;
+  this.params = [];
 
-  if(args == undefined)
-    return this;
-
-  for (var i = 0; i < args.length; i++)
+  for (var i = 0; i < this.args.length; i++)
   {
-    if(args[i].type !== argument_types[i])
+    if(args[i].type !== argument_types[i] && argument_types[i] !== TYPE_LITERAL)
       throw new TypeError(argument_types[i], args[i].type, this);
   }
 }
+
+Token.prototype.toString = function()
+{
+  var ret = "";
+  var argStrings = [];
+
+  for (var i = 0; i < this.args.length; i++)
+  {
+    argStrings.push(this.args[i].toString());
+  }
+
+  argStrings = argStrings.join(", ");
+
+  switch (this.fixType)
+  {
+    case PREFIX:
+      ret = this.name +"("+ argStrings +")";
+      break;
+    case INFIX:
+      ret = this.args[0].toString() + " " + this.name + " " + this.args[1].toString();
+      break;
+  }
+
+  return ret;
+}
+
+Token.stopChars = ["(", ")", ","];
+
+Token.parse = function(input)
+{
+  Token.parserInput = input;
+  Token.parserInputWhole = input;
+  Token.parserStack = [];
+
+  do
+  {
+    Token.parseStep()
+  } while (Token.parserInput.length);
+
+  var ret = Token.parserStack.pop();
+
+  if(Token.parserStack.length)
+    throw "Unexpected "+ ret.name;
+
+  return ret;
+}
+
+Token.readWhitespace = function()
+{
+  while(/\s/.test(Token.parserInput[0]) && Token.parserInput.length)
+  {
+    Token.parserInput = Token.parserInput.slice(1);
+  }
+}
+
+Token.parseName = function()
+{
+  Token.readWhitespace();
+
+  var ret = "";
+
+  while(!/\s/.test(Token.parserInput[0]) && Token.parserInput.length && Token.stopChars.indexOf(Token.parserInput[0]) === -1) // read until a whitespace occurs
+  {
+    ret += Token.parserInput[0]
+    Token.parserInput = Token.parserInput.slice(1);
+  }
+
+  Token.readWhitespace();
+
+  return ret;
+}
+
+Token.readChar = function(char)
+{
+  Token.readWhitespace();
+
+  if(Token.parserInput[0] !== char)
+  {
+    var position = Token.parserInputWhole.length - Token.parserInput.length;
+    throw "Expected '"+ char +"' at position "+ position +" at '"+ Token.parserInputWhole.substr(position) +"'";
+  }
+
+  Token.parserInput = Token.parserInput.slice(1);
+
+  Token.readWhitespace();
+}
+
+Token.parseStep = function(expectedType)
+{
+  var name = Token.parseName();
+  var token = Behavior.tokens[name];
+
+  if(token == undefined && expectedType === TYPE_LITERAL)
+  {
+    return name;
+  }
+
+  if(token == undefined)
+  {
+    throw "Expected argument with type "+ expectedType;
+  }
+
+  if(expectedType != undefined && token.type !== expectedType)
+  {
+    throw "Unexpected "+ token.type +" (was expecting "+ expectedType +")";
+  }
+
+  var numArgs = token.argument_types.length;
+
+  var args = [];
+
+  if(token.fixType === INFIX)
+  {
+    var a = Token.parserStack.pop();
+
+    if(a.type !== token.argument_types[0])
+      throw "Unexpected "+ a.type +" (was expecting "+ token.argument_types[0] +")";
+
+    args = [a, Token.parseStep(token.argument_types[1])];
+    Token.parserStack.pop();
+  }
+
+  if(token.fixType === PREFIX)
+  {
+    Token.readChar("(");
+
+    for(var i = 0; i < numArgs; i++)
+    {
+      args.push(Token.parseStep(token.argument_types[i]));
+
+      Token.readWhitespace();
+
+      if(Token.parserInput[0] === ",")
+        Token.parserInput = Token.parserInput.slice(1);
+    }
+
+    Token.readChar(")");
+  }
+
+  var newToken = new token.constructor();
+  for (var i = 0; i < args.length; i++)
+  {
+    newToken.params[i] = args[i];
+
+    Token.parserStack.pop();
+  }
+  Token.parserStack.push(newToken);
+
+  return newToken;
+}
+
+
+var Logic = function(name, type, args, argument_types)
+{
+  Token.call(this, name, type, args, argument_types);
+}
+Logic.prototype = new Token();
+Logic.prototype.constructor = Logic;
 
 Logic.prototype.evaluate = function() // Use a derived class
 {
   return false;
 }
 
-Logic.prototype.toString = function() // Use a derived class
+
+var Action = function(name, args, argument_types)
 {
-  return "ERROR: Use derived logic";
+  Token.call(this, name, TYPE_ACTION, args, argument_types);
 }
-
-
-var Action = function(entityFilter, args, argument_types)
-{
-  this.entityFilter = entityFilter;
-
-  this.type = TYPE_ACTION;
-
-  if(args == undefined)
-    return this;
-
-  for (var i = 0; i < args.length; i++)
-  {
-    if(args[i].type !== argument_types[i])
-      throw new TypeError(argument_types[i], args[i].type, this);
-  }
-}
+Action.prototype = new Token();
+Action.prototype.constructor = Action;
 
 Action.prototype.each = function(entity) // Use a derived class
 {
   return false;
 }
 
-Action.prototype.toString = function() // Use a derived class
-{
-  return "ERROR: Use derived action";
-}
-
 Action.prototype.execute = function ()
 {
-  var entities = this.entityFilter.filter();
+  var entities = this.params[0].filter();
   for (var i = 0; i < entities.length; i++)
   {
     this.each(entities[i]);
@@ -104,29 +257,16 @@ Action.prototype.execute = function ()
 };
 
 
-var EntityFilter = function(args, argument_types)
+var EntityFilter = function(name, args, argument_types)
 {
-  this.type = TYPE_ENTITYFILTER;
-
-  if(args == undefined)
-    return this;
-
-  for (var i = 0; i < args.length; i++)
-  {
-    if(args[i].type !== argument_types[i])
-      throw new TypeError(argument_types[i], args[i].type, this);
-  }
-
+  Token.call(this, name, TYPE_ENTITYFILTER, args, argument_types);
 }
+EntityFilter.prototype = new Token();
+EntityFilter.prototype.constructor = EntityFilter;
 
 EntityFilter.prototype.decide = function (entity) // Use derived class
 {
   return false;
-};
-
-EntityFilter.prototype.toString = function() // Use derived class
-{
-  return "ERROR: Use derived entity filter";
 };
 
 EntityFilter.prototype.filter = function()
