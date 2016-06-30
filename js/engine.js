@@ -26,6 +26,7 @@ ako funguje cela kamera?
 var Engine = function(viewport, gravity) {
   this.viewport = viewport;
   this.entities = [];
+  this.selectedEntity = null;
 
   this.collisionGroups = [];
   for (var i = 0; i < COLLISION_GROUPS_NUMBER; i++) {
@@ -38,8 +39,14 @@ var Engine = function(viewport, gravity) {
   this.lifetimeEntities = 0;
 
   this.world = new b2World(gravity, true);
-  this.world.paused = false;
+  this.world.paused = true;
 }
+
+// Changes running state of the simulation
+Engine.prototype.togglePause = function () {
+  this.world.paused = !this.world.paused;
+  this.selectedEntity = null;
+};
 
 
 // Returns the entity with id specified by argument
@@ -50,7 +57,7 @@ Engine.prototype.getEntityById = function(id) {
   }
 
   return null;
-}
+};
 
 // Returns an array of entities with specified collisionGroup
 Engine.prototype.getEntitiesByCollisionGroup = function(group) {
@@ -67,7 +74,7 @@ Engine.prototype.getEntitiesByCollisionGroup = function(group) {
 // Adding an entity to the world
 Engine.prototype.addEntity = function(entity, type) {
   // generate auto id
-  if (entity.id == undefined) {
+  if (entity.id === undefined) {
     entity.id = AUTO_ID_PREFIX + this.lifetimeEntities;
   }
 
@@ -104,6 +111,17 @@ Engine.prototype.setCollision = function(groupA, groupB, value) {
   return this;
 }
 
+// Changes the ID of an entity
+Engine.prototype.changeId = function (entity, id) {
+  entity.id = id;
+};
+
+// Selects an entity and shows its properties in the sidebar
+Engine.prototype.selectEntity = function (index) {
+  this.selectedEntity = index === null ? null : this.entities[index];
+  UI.buildSidebar(this.selectedEntity);
+}
+
 // Updates collision masks for all entities, based on engine's collisionGroups table
 Engine.prototype.updateCollisions = function() {
 
@@ -112,7 +130,7 @@ Engine.prototype.updateCollisions = function() {
   }
 
   return this;
-}
+};
 
 // Updates collision mask for an entity, based on engine's collisionGroups table
 Engine.prototype.updateCollision = function(entity) {
@@ -133,13 +151,18 @@ Engine.prototype.step = function() {
   // clear screen
   ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
 
-  ctx.save()
+  ctx.save();
 
   // draw all entities
   for (var i = this.entities.length - 1; i >= 0; i--) {
     ctx.save();
     ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2);
     ctx.fillStyle = this.entities[i].color;
+
+    if(this.selectedEntity == this.entities[i]) {
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 10;
+    }
 
     var x = this.entities[i].body.GetPosition().get_x();
     var y = this.entities[i].body.GetPosition().get_y();
@@ -158,9 +181,24 @@ Engine.prototype.step = function() {
     }
   }
 
-  // box2d simulation step
-  if (!_engine.world.paused)
-    this.world.Step(1 / 60, 10, 5)
+  if (!_engine.world.paused) {
+    // box2d simulation step
+    this.world.Step(1 / 60, 10, 5);
+  }
+  else {
+    // selecting objects
+    if (_mouse.leftUp) {
+      this.selectEntity(null);
+
+      for (i = this.entities.length - 1; i >= 0; i--) {
+        if (this.entities[i].fixture.TestPoint(
+            new b2Vec2(this.viewport.x - this.viewport.width / 2 + _mouse.x, this.viewport.y - this.viewport.height / 2  + _mouse.y))
+        ) {
+          this.selectEntity(i);
+        }
+      }
+    }
+  }
 
   // CUSTOM TESTING CODE STARTS HERE
   // -------------------------------
@@ -214,7 +252,7 @@ var Viewport = function(canvasElement, width, height, x, y) {
   }
 
   // Center point of the camera
-  if (x != undefined && y != undefined) {
+  if (x !== undefined && y !== undefined) {
     this.x = x;
     this.y = y;
   } else {
@@ -233,7 +271,7 @@ var Viewport = function(canvasElement, width, height, x, y) {
   this.resetElement(); // Resize to new dimensions
 
   this.context = this.canvasElement.getContext("2d");
-}
+};
 
 // Reloads values for the canvas element
 Viewport.prototype.resetElement = function() {
@@ -247,7 +285,7 @@ Viewport.prototype.autoResize = function() {
   this.height = Tools.getBrowserHeight();
   this.x = Math.floor(this.width / 2);
   this.y = Math.floor(this.height / 2);
-}
+};
 
 // Toggles viewport auto resizing
 Viewport.prototype.setAutoResize = function(value) {
@@ -263,7 +301,7 @@ Viewport.prototype.setAutoResize = function(value) {
   } else {
     window.onresize = null;
   }
-}
+};
 
 
 
@@ -273,6 +311,8 @@ var Entity = function(shape, fixture, body, id, collisionGroup) {
   this.id = id;
   this.dead = false;
   this.layer = 0;
+
+  this.fixedRotation = false;
 
   this.collisionGroup = collisionGroup;
   if (this.collisionGroup == undefined) {
@@ -306,10 +346,10 @@ var Entity = function(shape, fixture, body, id, collisionGroup) {
     this.body.set_fixedRotation(false);
 
   // Auto generate color
-  var r = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
-  var g = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
-  var b = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]);
-  this.color = "rgb(" + r + ", " + g + ", " + b + ")";
+  var r = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); r = r.length == 1 ? "0" + r : r;
+  var g = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); g = g.length == 1 ? "0" + g : g;
+  var b = Tools.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); b = b.length == 1 ? "0" + b : b;
+  this.color = "#" + r  + g + b ;
 }
 
 Entity.prototype.die = function() {
@@ -374,6 +414,7 @@ Entity.prototype.applyLinearImpulse = function(vector) {
 }
 
 Entity.prototype.disableRotation = function(value) {
+  this.fixedRotation = value;
   this.body.SetFixedRotation(value)
 
   return this;

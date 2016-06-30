@@ -14,7 +14,24 @@ Translations = {
     alert("ERROR! No translation for string number " + index);
   },
 
+  getTranslatedWrapped: function(index, language) {
+    var ret = el("span", {stringId: index});
+    ret.innerHTML = this.getTranslated(index, language);
+
+    return ret;
+  },
+
   setLanguage: function(index) {
     this.currentLanguage = index;
+
+    var translated = document.querySelectorAll("[stringId]");
+    for (var i = 0; i < translated.length; i++)
+    {
+      translated[i].innerHTML = this.getTranslated(translated[i].getAttribute("stringId"));
+    }
+  },
+
+  refresh: function () {
+    this.setLanguage(this.currentLanguage);
   }
 }

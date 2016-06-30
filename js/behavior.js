@@ -1,66 +1,70 @@
-const TYPE_BOOLEAN = "boolean";
-const TYPE_NUMBER = "number";
-const TYPE_STRING = "string";
-const TYPE_ARRAY = "array";
-const TYPE_ACTION = "action";
-const TYPE_ENTITYFILTER = "entityFilter";
-const TYPE_LITERAL = "literal";
+var Type = {
+  BOOLEAN: "boolean",
+  NUMBER: "number",
+  STRING: "string",
+  ARRAY: "array",
+  ACTION: "action",
+  ENTITYFILTER: "entityFilter",
+  LITERAL: "literal"
+};
 
-const INFIX = "infix";
-const PREFIX = "prefix";
+var FixType = {
+  INFIX: "infix",
+  PREFIX: "prefix"
+};
 
 var Behavior = function(logic, results) {
   this.logic = logic;
 
-  if (this.logic.type !== TYPE_BOOLEAN)
-    throw new TypeError(TYPE_BOOLEAN, this.logic.type, this)
+  if (this.logic.type !== Type.BOOLEAN)
+    throw new TypeException(Type.BOOLEAN, this.logic.type, this);
 
   this.results = Array.isArray(results) ? results : [results];
-}
+};
 
 Behavior.tokens = {};
 
 Behavior.registerToken = function(token) {
   var t = new token();
   Behavior.tokens[t.name] = t;
-}
+};
 
 
 Behavior.prototype.check = function(entity) {
   return this.logic.evaluate(entity);
-}
+};
 
 Behavior.prototype.toString = function() {
   return "Behavior(" + this.logic.toString() + ", " + this.results.toString() + ")";
-}
+};
 
 Behavior.prototype.result = function() {
   for (var i = 0; i < this.results.length; i++) {
     this.results[i].execute()
   }
-}
+};
 
-var TypeError = function(expected, received, token) {
+var TypeException = function(expected, received, token) {
   this.expected = expected;
   this.received = received;
   this.token = token;
-}
+};
 
 // TODO: linear action, porovnavanie, uhly, plus, minus , deleno, krat, x na n
 
 var Token = function(name, type, args, argument_types) {
   this.type = type;
-  this.fixType = PREFIX;
+  this.fixType = FixType.PREFIX;
   this.name = name;
   this.args = args == undefined ? [] : args;
   this.argument_types = argument_types;
-  this.params = [];
+  this.args = [];
 
   for (var i = 0; i < this.args.length; i++) {
-    if (args[i].type !== argument_types[i] && argument_types[i] !== TYPE_LITERAL)
-      throw new TypeError(argument_types[i], args[i].type, this);
+    if (args[i].type !== argument_types[i] && argument_types[i] !== Type.LITERAL)
+      throw new TypeException(argument_types[i], args[i].type, this);
   }
-}
+};
 
 Token.prototype.toString = function() {
   var ret = "";
@@ -73,16 +77,16 @@ Token.prototype.toString = function() {
   argStrings = argStrings.join(", ");
 
   switch (this.fixType) {
-    case PREFIX:
+    case FixType.PREFIX:
       ret = this.name + "(" + argStrings + ")";
       break;
-    case INFIX:
+    case FixType.INFIX:
       ret = this.args[0].toString() + " " + this.name + " " + this.args[1].toString();
       break;
   }
 
   return ret;
-}
+};
 
 Token.stopChars = ["(", ")", ","];
 
@@ -101,13 +105,13 @@ Token.parse = function(input) {
     throw "Unexpected " + ret.name;
 
   return ret;
-}
+};
 
 Token.readWhitespace = function() {
   while (/\s/.test(Token.parserInput[0]) && Token.parserInput.length) {
     Token.parserInput = Token.parserInput.slice(1);
   }
-}
+};
 
 Token.parseName = function() {
   Token.readWhitespace();
@@ -123,7 +127,7 @@ Token.parseName = function() {
   Token.readWhitespace();
 
   return ret;
-}
+};
 
 Token.readChar = function(char) {
   Token.readWhitespace();
@@ -136,13 +140,13 @@ Token.readChar = function(char) {
   Token.parserInput = Token.parserInput.slice(1);
 
   Token.readWhitespace();
-}
+};
 
 Token.parseStep = function(expectedType) {
   var name = Token.parseName();
   var token = Behavior.tokens[name];
 
-  if (token == undefined && expectedType === TYPE_LITERAL) {
+  if (token === undefined && expectedType === Type.LITERAL) {
     return name;
   }
 
@@ -150,7 +154,7 @@ Token.parseStep = function(expectedType) {
     throw "Expected argument with type " + expectedType;
   }
 
-  if (expectedType != undefined && token.type !== expectedType) {
+  if (expectedType !== undefined && token.type !== expectedType) {
     throw "Unexpected " + token.type + " (was expecting " + expectedType + ")";
   }
 
@@ -158,7 +162,7 @@ Token.parseStep = function(expectedType) {
 
   var args = [];
 
-  if (token.fixType === INFIX) {
+  if (token.fixType === FixType.INFIX) {
     var a = Token.parserStack.pop();
 
     if (a.type !== token.argument_types[0])
@@ -168,10 +172,10 @@ Token.parseStep = function(expectedType) {
     Token.parserStack.pop();
   }
 
-  if (token.fixType === PREFIX) {
+  if (token.fixType === FixType.PREFIX) {
     Token.readChar("(");
 
-    for (var i = 0; i < numArgs; i++) {
+    for (i = 0; i < numArgs; i++) {
       args.push(Token.parseStep(token.argument_types[i]));
 
       Token.readWhitespace();
@@ -185,41 +189,41 @@ Token.parseStep = function(expectedType) {
 
   var newToken = new token.constructor();
   for (var i = 0; i < args.length; i++) {
-    newToken.params[i] = args[i];
+    newToken.args[i] = args[i];
 
     Token.parserStack.pop();
   }
   Token.parserStack.push(newToken);
 
   return newToken;
-}
+};
 
 
 var Logic = function(name, type, args, argument_types) {
   Token.call(this, name, type, args, argument_types);
-}
+};
 Logic.prototype = new Token();
 Logic.prototype.constructor = Logic;
 
 Logic.prototype.evaluate = function() // Use a derived class
   {
     return false;
-  }
+  };
 
 
 var Action = function(name, args, argument_types) {
-  Token.call(this, name, TYPE_ACTION, args, argument_types);
-}
+  Token.call(this, name, Type.ACTION, args, argument_types);
+};
 Action.prototype = new Token();
 Action.prototype.constructor = Action;
 
 Action.prototype.each = function(entity) // Use a derived class
-  {
-    return false;
-  }
+{
+  return false;
+};
 
 Action.prototype.execute = function() {
-  var entities = this.params[0].filter();
+  var entities = this.args[0].filter();
   for (var i = 0; i < entities.length; i++) {
     this.each(entities[i]);
   }
@@ -227,15 +231,15 @@ Action.prototype.execute = function() {
 
 
 var EntityFilter = function(name, args, argument_types) {
-  Token.call(this, name, TYPE_ENTITYFILTER, args, argument_types);
-}
+  Token.call(this, name, Type.ENTITYFILTER, args, argument_types);
+};
 EntityFilter.prototype = new Token();
 EntityFilter.prototype.constructor = EntityFilter;
 
 EntityFilter.prototype.decide = function(entity) // Use derived class
-  {
-    return false;
-  };
+{
+  return false;
+};
 
 EntityFilter.prototype.filter = function() {
   var ret = [];

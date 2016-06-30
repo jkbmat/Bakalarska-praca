@@ -10,8 +10,8 @@ var _mouse = {
   dragOrigin: [0, 0],
 
   updatePosition: function(event) {
-    this.x = event.pageX;
-    this.y = event.pageY;
+    this.x = event.pageX - _engine.viewport.canvasElement.getBoundingClientRect().left;
+    this.y = event.pageY - _engine.viewport.canvasElement.getBoundingClientRect().top;
   },
 
   updateButtonsDown: function(event) {

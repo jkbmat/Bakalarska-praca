@@ -1,33 +1,131 @@
 // Object for building the UI
-UI = {
+var UI = {
   // UI initialisation
   initialize: function() {
-    var collisionsButton = document.createElement("div");
-    collisionsButton.className = "uiContainer button translated";
-    collisionsButton.stringId = 1;
-    collisionsButton.innerHTML = Translations.getTranslated(1);
+
+    var toolbar = el("div.toolbar");
+
+    var collisionsButton = el("div.uiContainer.button", {stringId: 1});
     collisionsButton.onclick = function() {
       UI.popup(UI.createCollisions());
+    };
+
+    var pauseButton = el("div.uiContainer.button", {stringId: 2});
+    pauseButton.onclick = function() {
+      _engine.togglePause();
+      this.stringId = _engine.world.paused ? 2 : 3;
+      this.innerHTML = Translations.getTranslated(this.stringId);
+    };
+
+    var languageSelector = el("select");
+    languageSelector.onchange = function () {
+      Translations.setLanguage(this.value);
+    };
+    for (var i = 0; i < Translations.strings.length; i++)
+    {
+      var option = el("option", {value: i});
+      option.innerHTML = Translations.getTranslated(0, i);
+
+      languageSelector.appendChild(option);
     }
 
-    document.body.insertBefore(collisionsButton, document.body.firstChild);
+    toolbar.appendChild(pauseButton);
+    toolbar.appendChild(collisionsButton);
+    toolbar.appendChild(languageSelector);
+
+    var languages = [];
+    for (var i = 0; i < Translations.strings.length; i++)
+    {
+      languages.push({ text: Translations.getTranslated(0, i), id: i });
+    }
+
+    $("body").w2layout(
+      {
+        name: "editorLayout",
+        panels: [
+          {
+            type: "main",
+
+            content: "<canvas id='mainCanvas'></canvas>",
+
+            toolbar: {
+              items: [
+                { type: "button", id: "pause", caption: Translations.getTranslatedWrapped(2).outerHTML, stringId: 2 },
+                { type: "button", id: "collisions", caption: Translations.getTranslatedWrapped(1).outerHTML},
+                { type: "spacer" },
+                { type: "menu", id: "language", caption: Translations.getTranslatedWrapped(0).outerHTML, items: languages}
+              ],
+              onClick: function(e) {
+                switch (e.target)
+                {
+                  case "pause":
+                    _engine.togglePause();
+                    UI.buildSidebar(null);
+                    w2ui.editorLayout.toggle("right");
+                    this.get("pause").stringId = _engine.world.paused ? 2 : 3;
+                    this.get("pause").caption = "<span stringId='"+ this.get("pause").stringId +"'>"+
+                      Translations.getTranslated(this.get("pause").stringId)
+                    +"</span>";
+                    this.refresh();
+                    Translations.refresh();
+
+                    break;
+
+                  case "collisions":
+                    UI.popup(UI.createCollisions());
+                    break;
+                }
+
+                if (e.target.startsWith("language:"))
+                {
+                  Translations.setLanguage(e.subItem.id);
+                }
+              }
+            }
+          },
+          {
+            type: "right",
+            size: 250,
+            resizable: true,
+            style: "padding: 1em;"
+          },
+        ],
+        onResize: function (e) {
+          if(_engine === undefined)
+            return;
+
+          e.onComplete = function () {
+            _engine.viewport.autoResize();
+            _engine.viewport.resetElement();
+          }
+        },
+        onClick: function (e) {
+          alert();
+        }
+      }
+    );
+
+    Translations.refresh();
   },
 
   // Creating a popup message
   popup: function(data) {
-    var overlay = document.createElement("div");
-    overlay.id = "popupOverlay";
+    /*w2popup.open(
+      {
+        body: "<div class='w2ui-centered'>"+ data.outerHTML +"</div>",
+        width: "700",
+        height: "700",
+        speed: 0.15
+      }
+    );*/
+    var overlay = el("div#popupOverlay", [el("div#popupContent", [el("div.w2ui-centered", [data])])]);
     overlay.onclick = function(e) {
       UI.closePopup(e)
     };
 
-    var content = document.createElement("div");
-    content.id = "popupContent";
-
-    content.appendChild(data);
-    overlay.appendChild(content);
-
     document.body.insertBefore(overlay, document.body.firstChild);
+
+    Translations.refresh();
   },
 
   // Closing a popup message
@@ -45,13 +143,13 @@ UI = {
 
   // Building the collision group table
   createCollisions: function() {
-    var table = document.createElement("table");
+    var table = el("table.collisionTable");
 
     for (var i = 0; i < COLLISION_GROUPS_NUMBER + 1; i++) {
-      var tr = document.createElement("tr");
+      var tr = el("tr");
 
       for (var j = 0; j < COLLISION_GROUPS_NUMBER + 1; j++) {
-        var td = document.createElement("td");
+        var td = el("td");
 
         // first row
         if (i === 0 && j > 0) {
@@ -92,14 +190,16 @@ UI = {
           }(table);
 
           // checkbox for collision toggling
-          var checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.checked = _engine.getCollision(i - 1, j - 1) ? true : false;
+          var checkbox = el("input", {type: "checkbox"});
+
+          if (_engine.getCollision(i - 1, j - 1))
+            checkbox.setAttribute("checked", "checked");
+
           checkbox.onchange = function(i, j, checkbox) {
             return function() {
               _engine.setCollision(i - 1, j - 1, checkbox.checked ? 1 : 0);
             }
-          }(i, j, checkbox)
+          }(i, j, checkbox);
 
           // clicking the checkbox's cell should work as well
           td.onclick = function(checkbox) {
@@ -109,8 +209,8 @@ UI = {
 
               checkbox.checked = !checkbox.checked;
               checkbox.onchange();
-            }
-          }(checkbox)
+            };
+          }(checkbox);
 
           td.appendChild(checkbox);
         }
@@ -127,8 +227,102 @@ UI = {
       table.appendChild(tr);
     }
 
-    table.className = "collisionTable";
-
     return table;
+  },
+
+  createBehavior: function (entity) {
+    return "TODO";
+
+    var logic = el("textarea");
+    logic.innerHTML = entity.behaviors[0].toString();
+
+    return el("div", [
+      Translations.getTranslatedWrapped(5), el("br"),
+      logic,
+      el.p(),
+      Translations.getTranslatedWrapped(6), el("br"),
+
+    ]);
+  },
+
+  buildSidebar: function (entity) {
+    var sidebar = w2ui.editorLayout.get("right");
+
+    sidebar.content = "";
+
+    if (entity === null) {
+      w2ui.editorLayout.refresh("right");
+      return;
+    }
+
+
+    var id = el.input({type: "text", value: entity.id});
+    id.oninput = function ()
+    {
+      _engine.changeId(entity, this.value);
+    };
+
+    var collisionGroup = el.input({type: "number", min: 1, max: 16, value: entity.collisionGroup + 1});
+    collisionGroup.onchange = function (e)
+    {
+      entity.setCollisionGroup(this.value * 1 - 1);
+    };
+
+    var x = el.input({type: "number", value: entity.body.GetPosition().get_x()});
+    x.onchange = function ()
+    {
+      entity.body.SetTransform(new b2Vec2(this.value * 1, entity.body.GetPosition().get_y()), entity.body.GetAngle());
+    };
+
+    var y = el.input({type: "number", value: entity.body.GetPosition().get_y()});
+    y.onchange = function ()
+    {
+      entity.body.SetTransform(new b2Vec2(entity.body.GetPosition().get_x(), this.value * 1), entity.body.GetAngle());
+    };
+
+    var rotation = el.input({type: "number", value: entity.body.GetAngle() * 180 / Math.PI});
+    rotation.onchange = function ()
+    {
+      entity.body.SetTransform(entity.body.GetPosition(), (this.value * 1) * Math.PI / 180);
+    };
+
+    var fixedRotation = el.input({type: "checkbox"});
+    fixedRotation.checked = entity.fixedRotation;
+    fixedRotation.onchange = function ()
+    {
+      entity.disableRotation(this.checked);
+    };
+
+    var color = el.input({type: "color", value: entity.color});
+    color.onchange = function () {
+      entity.color = this.value;
+    };
+
+
+    var changeBehavior = el("button", [Translations.getTranslatedWrapped(4)]);
+    changeBehavior.onclick = function () {
+      UI.popup(UI.createBehavior(entity));
+    };
+
+    var content = el.div({}, [
+      Translations.getTranslatedWrapped(7),
+      el("br"), id, el("p"),
+      Translations.getTranslatedWrapped(8),
+      el("br"), collisionGroup, el("p"),
+      Translations.getTranslatedWrapped(9),
+      el("br"), x, el("p"),
+      Translations.getTranslatedWrapped(10),
+      el("br"), y, el("p"),
+      Translations.getTranslatedWrapped(11),
+      el("br"), rotation, el("p"),
+      Translations.getTranslatedWrapped(12),
+      el("br"), fixedRotation, el("p"),
+      Translations.getTranslatedWrapped(13),
+      el("br"), color, el("p"),
+      /*el("br"), changeBehavior, el("p")*/
+    ]);
+
+    w2ui.editorLayout.content("right", content);
+
   }
-}
+};

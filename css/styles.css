@@ -26,6 +26,7 @@ body
 {
 	display: inline-block;
 	cursor: pointer;
+	margin-right: 5px;
 }
 
 .button:hover
@@ -36,17 +37,26 @@ body
 .uiContainer, #popupContent
 {
 	z-index: 999;
-	position: absolute;
+	position: relative;
 	padding: 7px;
 	background: white;
 	border: 2px solid black;
 	border-radius: 4px;
 }
 
+.toolbar
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	display: block;
+}
+
 .collisionTable
 {
 	border-collapse: collapse;
-	margin: 5em auto;
+	margin: auto;
 }
 
 .collisionTable td
@@ -97,5 +107,6 @@ td.highlight
 	width: 50%;
 	margin: auto;
 	margin-top: 3em;
-	pointer-events:
+	min-height: 600px;
+	min-width: 600px;
 }
