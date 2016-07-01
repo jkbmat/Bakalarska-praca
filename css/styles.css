@@ -17,6 +17,16 @@ body
 	font: 15px Calibri, sans-serif;
 }
 
+input, select
+{
+	width: 100%;
+}
+
+input[type=color]
+{
+	padding: 0;
+}
+
 #collisionsbutton
 {
 	position: absolute;
