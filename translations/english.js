@@ -13,6 +13,9 @@ Translations.strings.push(
     "Y-axis position:",
     "Rotation:",
     "Fixed rotation:",
-    "Color:"
+    "Color:",
+    "Body type:",
+    "Dynamic",
+    "Static",
   ]
 );

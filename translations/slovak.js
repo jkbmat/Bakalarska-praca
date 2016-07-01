@@ -13,6 +13,9 @@ Translations.strings.push(
     "Pozícia na osi Y:",
     "Rotácia:",
     "Fixná rotácia:",
-    "Farba:"
+    "Farba:",
+    "Druh telesa:",
+    "Dynamické",
+    "Statické"
   ]
 );

@@ -298,11 +298,27 @@ var UI = {
       entity.color = this.value;
     };
 
-
     var changeBehavior = el("button", [Translations.getTranslatedWrapped(4)]);
     changeBehavior.onclick = function () {
       UI.popup(UI.createBehavior(entity));
     };
+    
+    var bodyType = el("select", {}, [
+      el("option", {value: DYNAMIC_BODY}, [Translations.getTranslatedWrapped(15)]),
+      el("option", {value: KINEMATIC_BODY}, [Translations.getTranslatedWrapped(16)]),
+    ]);
+    for(var i = 0; i < bodyType.options.length; i ++)
+    {
+      if((bodyType.options[i].value * 1) === entity.body.GetType()) {
+        bodyType.options[i].selected = true;
+
+        break;
+      }
+    }
+    bodyType.onchange = function () {
+      entity.body.SetType(this.value * 1);
+    };
+
 
     var content = el.div({}, [
       Translations.getTranslatedWrapped(7),
@@ -319,6 +335,8 @@ var UI = {
       el("br"), fixedRotation, el("p"),
       Translations.getTranslatedWrapped(13),
       el("br"), color, el("p"),
+      Translations.getTranslatedWrapped(14),
+      el("br"), bodyType, el("p"),
       /*el("br"), changeBehavior, el("p")*/
     ]);
 
