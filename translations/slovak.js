@@ -16,6 +16,9 @@ Translations.strings.push(
     "Farba:",
     "Druh telesa:",
     "Dynamické",
-    "Statické"
+    "Statické",
+    "Výber",
+    "Obdĺžnik",
+    "Kruh",
   ]
 );

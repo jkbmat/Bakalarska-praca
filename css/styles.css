@@ -17,7 +17,7 @@ body
 	font: 15px Calibri, sans-serif;
 }
 
-input, select
+#layout_editorLayout_panel_right input, select
 {
 	width: 100%;
 }
@@ -73,6 +73,7 @@ input[type=color]
 {
 	border: 1px dashed #aaa;
 	white-space: nowrap;
+	text-align: center;
 }
 
 .collisionTable tr:first-child td > div

@@ -10,16 +10,16 @@
   <script language="javascript" src="./translations/english.js"></script>
   <script language="javascript" src="./translations/slovak.js"></script>
 
-  <script language="javascript" src="./js/tools.js"></script>
-  <script language="javascript" src="./js/input.js"></script>
-  <script language="javascript" src="./js/engine.js"></script>
-  <script language="javascript" src="./js/behavior.js"></script>
-  <script language="javascript" src="./js/ui.js"></script>
+  <!--<script language="javascript" src="./js/tools.js"></script>-->
+  <!--<script language="javascript" src="./js/input.js"></script>-->
+  <!--<script language="javascript" src="./js/engine.js"></script>-->
+  <!--<script language="javascript" src="./js/behavior.js"></script>-->
+  <!--<script language="javascript" src="./js/ui.js"></script>-->
 
-  <script language="javascript" src="./js/basicshapes.js"></script>
-  <script language="javascript" src="./js/basicactions.js"></script>
-  <script language="javascript" src="./js/basicentityfilters.js"></script>
-  <script language="javascript" src="./js/basiclogic.js"></script>
+  <!--<script language="javascript" src="./js/basicshapes.js"></script>-->
+  <!--<script language="javascript" src="./js/actions.js"></script>-->
+  <!--<script language="javascript" src="./js/entityfilters.js"></script>-->
+  <!--<script language="javascript" src="./js/logic.js"></script>-->
 
 
   <link rel="stylesheet" type="text/css" href="./lib/w2ui-1.4.3.min.css">
@@ -32,46 +32,10 @@
 </head>
 
 <body>
-<script type="text/javascript">
-  UI.initialize();
-
-  var _engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 500));
-
-  /*_engine.addEntity(new Rectangle(new b2Vec2(450, 100), new b2Vec2(8, 3)), DYNAMIC_BODY)
-   .setCollisionGroup(1)
-   .setLinearVelocity(new b2Vec2(50,-50));*/
-  _engine.addEntity(new Circle(new b2Vec2(500, 50), 20), DYNAMIC_BODY)
-          .setCollisionGroup(2)
-          .setId("kruh")
-          .disableRotation(false)
-          .addBehavior(
-                  new Behavior(
-                          Token.parse("isButtonUp(number(32))"),
-                          Token.parse("setLinearVelocity(filterById(text(kruh)), getVelocityX(filterById(text(kruh))), number(-999999999999999999))")
-                  )
-          )
-          .addBehavior(
-                  new Behavior(
-                          Token.parse("isButtonDown(number(37))"),
-                          Token.parse("setLinearVelocity(filterById(text(kruh)), number(-100), getVelocityY(filterById(text(kruh))))")
-                  )
-          )
-          .addBehavior(
-                  new Behavior(
-                          Token.parse("isButtonDown(number(39))"),
-                          Token.parse("setLinearVelocity(filterById(text(kruh)), number(100), getVelocityY(filterById(text(kruh))))")
-                  )
-          )
-
-  _engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(400, 3)), KINEMATIC_BODY)
-          .setId("platform")
-          .setCollisionGroup(1)
-
-
-  window.requestAnimationFrame(function() {
-    _engine.step()
-  });
+<script language="JavaScript">
+  var _engine;
 </script>
+<script language="javascript" src="app.js"></script>
 </body>
 
 </html>

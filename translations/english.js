@@ -17,5 +17,8 @@ Translations.strings.push(
     "Body type:",
     "Dynamic",
     "Static",
+    "Selection",
+    "Rectangle",
+    "Circle",
   ]
 );

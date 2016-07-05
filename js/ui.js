@@ -1,3 +1,6 @@
+var Tools = require("./tools.js");
+var BodyType = require("./bodytype.js");
+
 // Object for building the UI
 var UI = {
   // UI initialisation
@@ -51,11 +54,18 @@ var UI = {
             toolbar: {
               items: [
                 { type: "button", id: "pause", caption: Translations.getTranslatedWrapped(2).outerHTML, stringId: 2 },
+                { type: 'break', id: 'break1' },
                 { type: "button", id: "collisions", caption: Translations.getTranslatedWrapped(1).outerHTML},
+                { type: 'break', id: 'break2' },
+                { type: "radio", group: 1, id: "selection", checked: true, caption: Translations.getTranslatedWrapped(17).outerHTML},
+                { type: "radio", group: 1, id: "rectangle", caption: Translations.getTranslatedWrapped(18).outerHTML},
+                { type: "radio", group: 1, id: "circle", caption: Translations.getTranslatedWrapped(19).outerHTML},
                 { type: "spacer" },
                 { type: "menu", id: "language", caption: Translations.getTranslatedWrapped(0).outerHTML, items: languages}
               ],
               onClick: function(e) {
+                _engine.selectEntity(null);
+
                 switch (e.target)
                 {
                   case "pause":
@@ -66,6 +76,12 @@ var UI = {
                     this.get("pause").caption = "<span stringId='"+ this.get("pause").stringId +"'>"+
                       Translations.getTranslated(this.get("pause").stringId)
                     +"</span>";
+
+                    if(_engine.world.paused)
+                      this.enable("collisions", "selection", "rectangle", "circle");
+                    else
+                      this.disable("collisions", "selection", "rectangle", "circle");
+
                     this.refresh();
                     Translations.refresh();
 
@@ -73,6 +89,18 @@ var UI = {
 
                   case "collisions":
                     UI.popup(UI.createCollisions());
+                    break;
+
+                  case "selection":
+                    window.Input.tool = Tools.Selection;
+                    break;
+
+                  case "rectangle":
+                    window.Input.tool = Tools.Rectangle;
+                    break;
+
+                  case "circle":
+                    window.Input.tool = Tools.Circle;
                     break;
                 }
 
@@ -91,7 +119,7 @@ var UI = {
           },
         ],
         onResize: function (e) {
-          if(_engine === undefined)
+          if(typeof (_engine) === 'undefined')
             return;
 
           e.onComplete = function () {
@@ -145,10 +173,10 @@ var UI = {
   createCollisions: function() {
     var table = el("table.collisionTable");
 
-    for (var i = 0; i < COLLISION_GROUPS_NUMBER + 1; i++) {
+    for (var i = 0; i < _engine.COLLISION_GROUPS_NUMBER + 1; i++) {
       var tr = el("tr");
 
-      for (var j = 0; j < COLLISION_GROUPS_NUMBER + 1; j++) {
+      for (var j = 0; j < _engine.COLLISION_GROUPS_NUMBER + 1; j++) {
         var td = el("td");
 
         // first row
@@ -304,8 +332,8 @@ var UI = {
     };
     
     var bodyType = el("select", {}, [
-      el("option", {value: DYNAMIC_BODY}, [Translations.getTranslatedWrapped(15)]),
-      el("option", {value: KINEMATIC_BODY}, [Translations.getTranslatedWrapped(16)]),
+      el("option", {value: BodyType.DYNAMIC_BODY}, [Translations.getTranslatedWrapped(15)]),
+      el("option", {value: BodyType.KINEMATIC_BODY}, [Translations.getTranslatedWrapped(16)]),
     ]);
     for(var i = 0; i < bodyType.options.length; i ++)
     {
@@ -344,3 +372,5 @@ var UI = {
 
   }
 };
+
+module.exports = UI;
