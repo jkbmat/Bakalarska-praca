@@ -1,0 +1,57 @@
+body
+{
+  font: 12px sans-serif;
+}
+
+ul.ui
+{
+  list-style-type: none;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+ul.ui.radioGroup li
+{
+  display: inline-block;
+  position: relative;
+}
+
+ul.ui.radioGroup li input[type=radio]
+{
+  visibility: hidden;
+  position: absolute;
+}
+
+ul.ui.radioGroup li input[type=radio]+label
+{
+  width: 100%;
+  height: 100%;
+}
+
+ul.ui.radioGroup li input[type=radio]:checked+label, .ui.button:not(.disabled):active
+{
+  background: #eee;
+}
+
+.ui.button, select.ui
+{
+  border: 1px solid #eee;
+  padding: 0.5em;
+  font-size: 90%;
+  cursor: pointer;
+  border-radius: 3px;
+  margin-right: 0.25em;
+  margin-left: 0.25em;
+}
+
+.ui.button:not(.disabled):hover, select.ui:not(.disabled):hover
+{
+  border-color: #999;
+}
+
+.ui.button.disabled, select.ui.disabled
+{
+  color: #999;
+  cursor: default;
+}

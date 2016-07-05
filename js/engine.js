@@ -194,45 +194,8 @@ Engine.prototype.step = function() {
   }
   else {
     window.Input.tool.onmove(ctx);
-
-    // selecting objects
-    // if (window.Input.mouse.leftUp) {
-    //   this.selectEntity(null);
-    //
-    //   for (i = this.entities.length - 1; i >= 0; i--) {
-    //     if (this.entities[i].fixture.TestPoint(
-    //         new b2Vec2(this.viewport.x - this.viewport.width / 2 + window.Input.mouse.x, this.viewport.y - this.viewport.height / 2  + window.Input.mouse.y))
-    //     ) {
-    //       this.selectEntity(i);
-    //     }
-    //   }
-    // }
   }
-
-
-
-  // CUSTOM TESTING CODE STARTS HERE
-  // -------------------------------
-
-
-  // drawing rectangles
-  // var w = (window.Input.mouse.x - window.Input.mouse.dragOrigin[0]) / 2;
-  // var h = (window.Input.mouse.y - window.Input.mouse.dragOrigin[1]) / 2;
-  //
-  // if (window.Input.mouse.leftDown && w > 5 && h > 5) {
-  //   ctx.save();
-  //   ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-  //   ctx.fillRect(window.Input.mouse.dragOrigin[0], window.Input.mouse.dragOrigin[1], w * 2, h * 2);
-  //   ctx.restore();
-  // }
-  // if (window.Input.mouse.leftUp && w > 5 && h > 5) {
-  //   _engine.addEntity(new Rectangle(new b2Vec2(window.Input.mouse.x - w, window.Input.mouse.y - h), new b2Vec2(w, h)), Module.b2_dynamicBody);
-  // }
-
-  // -------------------------------
-  //  CUSTOM TESTING CODE ENDS HERE
-
-
+  
 
   // Released keys are only to be processed once
   window.Input.mouse.cleanUp();

@@ -1,5 +1,5 @@
 // A class for facilitating internationalisation
-Translations = {
+var Translations = {
   strings: [], // Array of languages (each language is an array of strings)
   currentLanguage: 0, // selected language
 
@@ -34,4 +34,4 @@ Translations = {
   refresh: function () {
     this.setLanguage(this.currentLanguage);
   }
-}
+};
