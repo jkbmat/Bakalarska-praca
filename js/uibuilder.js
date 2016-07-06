@@ -352,7 +352,7 @@ var UIBuilder = {
 
   // Creating a popup message
   popup: function(data) {
-    var overlay = el("div#popupOverlay", [el("div#popupContent", [el("div.w2ui-centered", [data])])]);
+    var overlay = el("div#popupOverlay", [el("div#popupContent", [data])]);
     overlay.onclick = function(e) {
       UIBuilder.closePopup(e);
     };

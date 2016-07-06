@@ -71,6 +71,9 @@ window.window.Input = {
 
     updateButtonsDown: function (event) {
       this.down.add(event.which);
+
+      if(event.which === 32)
+        event.preventDefault();
     },
 
     updateButtonsUp: function (event) {

@@ -46,6 +46,7 @@ input[type=color]
 {
 	border-collapse: collapse;
 	margin: auto;
+	margin-top: 2em;
 }
 
 .collisionTable td
