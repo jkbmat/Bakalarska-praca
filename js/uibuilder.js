@@ -1,5 +1,9 @@
 var UIBuilder = {
   radio: function (properties) {
+    properties = $.extend({}, {
+      id: "radioGroup-" + $(".radioGroup").length,
+    }, properties);
+
     var ret = el("div.ui.radioGroup", {id: properties.id});
 
     ret.disable = function () {
@@ -17,8 +21,11 @@ var UIBuilder = {
     var idCount = $("input[type=radio]").length;
 
     properties.elements.forEach(function(element) {
-
-      element.id = element.id == undefined ? "radio-" + idCount++ : element.id;
+      element = $.extend({}, {
+        id: "radio-" + idCount++,
+        checked: false,
+        onclick: function(){}
+      }, element);
 
       var input = el("input.ui", {type: "radio", id: element.id, name: properties.id});
       var label = el("label.ui.button", {for: element.id}, [element.text]);
@@ -33,18 +40,14 @@ var UIBuilder = {
         $("+label", this).addClass("disabled");
       };
 
-      if (element.onclick !== undefined) {
-        label.onclick = function () {
-          if($(this).hasClass("disabled"))
-            return;
+      label.onclick = function () {
+        if($(this).hasClass("disabled"))
+          return;
 
-          element.onclick();
-        };
-      }
+        element.onclick();
+      };
 
-      if (element.checked === true) {
-        input.checked = true;
-      }
+      input.checked = element.checked;
 
       ret.appendChild(input);
       ret.appendChild(label);
@@ -54,7 +57,12 @@ var UIBuilder = {
   },
   
   button: function (properties) {
-    var ret = el("span.ui.button", {}, [properties.text]);
+    properties = $.extend({}, {
+      id: "button-" + $(".button").length,
+      onclick: function(){}
+    }, properties);
+
+    var ret = el("span.ui.button", { id: properties.id }, [properties.text]);
 
     ret.disable = function ()
     {
@@ -65,31 +73,27 @@ var UIBuilder = {
       $(this).removeClass("disabled");
     };
 
-    if (properties.onclick != undefined)
-      ret.onclick = function () {
-        if($(this).hasClass("disabled"))
-          return;
+    ret.onclick = function () {
+      if($(this).hasClass("disabled"))
+        return;
 
-        properties.onclick();
-      };
-
-    if (properties.id != undefined)
-      ret.id = properties.id;
+      properties.onclick();
+    };
 
     return ret;
   },
 
   select: function (properties) {
-    var ret = el("select.ui");
+    properties = $.extend({}, {
+      id: "select-" + $("select").length,
+      onchange: function(){}
+    }, properties);
 
-    if (properties.id != undefined)
-      ret.id = properties.id;
+    var ret = el("select.ui", { id: properties.id });
 
-    if (properties.onchange != undefined) {
-      ret.onchange = function () {
-        properties.onchange(this.value);
-      };
-    }
+    ret.onchange = function () {
+      properties.onchange(this.value);
+    };
 
     ret.disable = function () {
       $(this).addClass("disabled");
@@ -100,7 +104,6 @@ var UIBuilder = {
       $(this).removeClass("disabled");
       this.disabled = enable;
     };
-
 
     properties.options.forEach(function (option) {
       ret.appendChild(el("option", {value: option.value}, [option.text]));
@@ -114,7 +117,13 @@ var UIBuilder = {
   },
 
   inputText: function (properties) {
-    var ret = el("input.ui", { type: "text" });
+    properties = $.extend({}, {
+      id: "inputText-" + $("input[type=text]").length,
+      value: "",
+      oninput: function(){}
+    }, properties);
+
+    var ret = el("input.ui", { type: "text", id: properties.id, value: properties.value });
 
     ret.disable = function () {
       $(this).addClass("disabled");
@@ -126,22 +135,23 @@ var UIBuilder = {
       this.disabled = false;
     };
 
-    if (properties.id != undefined)
-      ret.id = properties.id;
-
-    if (properties.oninput != undefined)
-      ret.oninput = function () {
-        properties.oninput(this.value);
-      };
-
-    if (properties.value != undefined)
-      ret.value = properties.value;
+    ret.oninput = function () {
+      properties.oninput(this.value);
+    };
 
     return ret;
   },
 
   inputNumber: function (properties) {
-    var ret = el("input.ui", { type: "number" });
+    properties = $.extend({}, {
+      id: "inputNumber-" + $("input[type=number]").length,
+      value: 0,
+      min: -Infinity,
+      max: Infinity,
+      oninput: function(){}
+    }, properties);
+
+    var ret = el("input.ui", { type: "number", id: properties.id, value: properties.value, min: properties.min, max: properties.max });
 
     ret.disable = function () {
       $(this).addClass("disabled");
@@ -153,32 +163,29 @@ var UIBuilder = {
       this.disabled = false;
     };
 
-    if (properties.id != undefined)
-      ret.id = properties.id;
-
-    if (properties.oninput != undefined)
-      ret.oninput = function (e) {
-        properties.oninput(this.value);
-      };
-
-    if (properties.value != undefined)
-      ret.value = properties.value;
-
-    if (properties.min != undefined)
-      ret.min = properties.min;
-
-    if (properties.max != undefined)
-      ret.max = properties.max;
+    ret.oninput = function (e) {
+      properties.oninput(this.value);
+    };
 
     return ret;
   },
 
   html: function (properties) {
+    properties = $.extend({}, {
+      content: ""
+    }, properties);
+
     return properties.content;
   },
 
   inputColor: function (properties) {
-    var ret = el("input.ui", { type: "color" });
+    properties = $.extend({}, {
+      id: "inputColor-" + $("input[type=color]").length,
+      value: "#000000",
+      oninput: function(){}
+    }, properties);
+
+    var ret = el("input.ui", { type: "color", id: properties.id, value: properties.value });
 
     ret.disable = function () {
       $(this).addClass("disabled");
@@ -190,27 +197,23 @@ var UIBuilder = {
       this.disabled = false;
     };
 
-    if (properties.id != undefined)
-      ret.id = properties.id;
-
-    if (properties.value != undefined)
-      ret.value = properties.value;
-
-    if (properties.oninput != undefined)
-      ret.oninput = function () {
-        properties.oninput(this.value);
-      };
+    ret.oninput = function () {
+      properties.oninput(this.value);
+    };
 
     return ret;
   },
 
   checkbox: function (properties) {
-    var ret = el("span");
+    properties = $.extend({}, {
+      id: "checkbox-" + $("input[type=checkbox]").length,
+      checked: false,
+      onchange: function(){}
+    }, properties);
 
-    var id = properties.id != undefined ? properties.id : "checkbox-" + $("input[type=checkbox]").length;
-    
-    var checkbox = el("input.ui", { type: "checkbox", id: id });
-    var label = el("label.ui.button", { for: id });
+    var ret = el("span");
+    var checkbox = el("input.ui", { type: "checkbox", id: properties.id });
+    var label = el("label.ui.button", { for: properties.id });
 
     ret.appendChild(checkbox);
     ret.appendChild(label);
@@ -225,13 +228,11 @@ var UIBuilder = {
       this.disabled = false;
     };
 
-    if (properties.checked != undefined && properties.checked === true)
-      checkbox.checked = true;
+    checkbox.checked = properties.checked;
 
-    if (properties.onchange != undefined)
-      checkbox.onchange = function () {
-        properties.onchange(this.checked);
-      };
+    checkbox.onchange = function () {
+      properties.onchange(this.checked);
+    };
 
     return ret;
   },
