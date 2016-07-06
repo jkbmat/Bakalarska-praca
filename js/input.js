@@ -30,6 +30,8 @@ window.window.Input = {
 
       if (event.which === 3)
         this.rightDown = true;
+
+      event.preventDefault();
     },
 
     updateButtonsUp: function (event) {
