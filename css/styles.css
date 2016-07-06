@@ -17,7 +17,7 @@ body
 	font: 15px Calibri, sans-serif;
 }
 
-#layout_editorLayout_panel_right input, select
+.ui.sidebar input, .ui.sidebar select
 {
 	width: 100%;
 }
@@ -32,18 +32,6 @@ input[type=color]
 	position: absolute;
 }
 
-.button
-{
-	display: inline-block;
-	cursor: pointer;
-	margin-right: 5px;
-}
-
-.button:hover
-{
-	background: #eee;
-}
-
 .uiContainer, #popupContent
 {
 	z-index: 999;
@@ -52,15 +40,6 @@ input[type=color]
 	background: white;
 	border: 2px solid black;
 	border-radius: 4px;
-}
-
-.toolbar
-{
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	display: block;
 }
 
 .collisionTable

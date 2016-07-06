@@ -1,9 +1,14 @@
+.ui {
+  box-sizing: border-box;
+}
+
 body
 {
   font: 12px sans-serif;
+  overflow: hidden;
 }
 
-ul.ui
+div.ui.radioGroup
 {
   list-style-type: none;
   display: inline-block;
@@ -11,47 +16,124 @@ ul.ui
   padding: 0;
 }
 
-ul.ui.radioGroup li
+
+div.ui.radioGroup input.ui[type=radio], input.ui[type=checkbox]
 {
-  display: inline-block;
-  position: relative;
+  display: none;
 }
 
-ul.ui.radioGroup li input[type=radio]
+div.ui.radioGroup input.ui[type=radio]:checked+label, .ui.button:not(.disabled):active
 {
-  visibility: hidden;
-  position: absolute;
+  background: #ddd;
 }
 
-ul.ui.radioGroup li input[type=radio]+label
+.ui.button, select.ui, input.ui
 {
-  width: 100%;
-  height: 100%;
-}
-
-ul.ui.radioGroup li input[type=radio]:checked+label, .ui.button:not(.disabled):active
-{
-  background: #eee;
-}
-
-.ui.button, select.ui
-{
-  border: 1px solid #eee;
+  border: 1px solid #ddd;
   padding: 0.5em;
   font-size: 90%;
   cursor: pointer;
   border-radius: 3px;
   margin-right: 0.25em;
   margin-left: 0.25em;
+  display: inline-block;
 }
 
-.ui.button:not(.disabled):hover, select.ui:not(.disabled):hover
+input.ui[type=color] {
+  padding: 0;
+}
+
+.ui.button:not(.disabled):hover, select.ui:not(.disabled):hover, input.ui:not(.disabled):hover
 {
   border-color: #999;
 }
 
-.ui.button.disabled, select.ui.disabled
+.ui.disabled
 {
   color: #999;
   cursor: default;
+}
+
+input[type=checkbox].ui+label {
+  position: relative;
+  top: 3px;
+  margin-left: 1em;
+  width: 15px;
+  height: 15px;
+}
+
+input[type=checkbox].ui:checked+label:after {
+  content: "✖";
+  position: absolute;
+  bottom: 0px;
+  left: 2px;
+}
+
+html, body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.ui.break {
+  width: 1px;
+  height: 1em;
+  display: inline-block;
+  background: #ddd;
+  margin-right: 0.5em;
+  margin-left: 0.5em;
+}
+
+.ui.panel {
+  position: relative;
+}
+
+.ui.content
+{
+  float: left;
+  background: white;
+  height: 100%;
+  background: #eee;
+}
+
+.ui.sidebar {
+  float: left;
+  background: #fff;
+  height: 100%;
+  position: absolute;
+  right: 0;
+}
+
+.ui.sidebar .content {
+  box-sizing: content-box;
+  height: 100%;
+  position: relative;
+  padding: 1em;
+}
+
+.ui.toolbar {
+  width: 100%;
+  min-height: 35px;
+  background: white;
+  padding: 0.3em;
+}
+
+.ui.resizer {
+  height: 100%;
+  width: 7px;
+  border-left: 3px solid rgba(0, 0, 0, 0.1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: ew-resize;
+}
+
+.ui.resizer:hover {
+  border-left-color: rgba(0, 0, 0, 0.2);
+}
+
+.ui.resizer.resizing {
+  border-left-color: rgba(0, 0, 0, 0.3);
 }
