@@ -211,6 +211,12 @@ var UI = {
         oninput: function (val) {entity.setCollisionGroup(val * 1 - 1);}},
       { type: "html", content: el("p")},
 
+      // Layer
+      { type: "html", content: Translations.getTranslatedWrapped(21)},
+      { type: "inputNumber", value: entity.layer + 1, min: 1, max: _engine.LAYERS_NUMBER,
+        oninput: function (val) { _engine.setEntityLayer(entity, val*1 - 1); }},
+      { type: "html", content: el("p")},
+
       // X
       { type: "html", content: Translations.getTranslatedWrapped(9)},
       { type: "inputNumber", value: entity.body.GetPosition().get_x(),
@@ -241,6 +247,24 @@ var UI = {
       // Color
       { type: "html", content: Translations.getTranslatedWrapped(13)},
       { type: "inputColor", value: entity.color, oninput: function (val) {entity.color = val}},
+      { type: "html", content: el("p")},
+
+      // Body type
+      { type: "html", content: Translations.getTranslatedWrapped(14)},
+      {
+        type: "select", selected: entity.body.GetType(), onchange: function (val) {entity.body.SetType(val * 1)},
+        options: [
+          { text: Translations.getTranslatedWrapped(15), value: BodyType.DYNAMIC_BODY },
+          { text: Translations.getTranslatedWrapped(20), value: BodyType.KINEMATIC_BODY },
+          { text: Translations.getTranslatedWrapped(16), value: BodyType.STATIC_BODY },
+        ]
+      },
+      { type: "html", content: el("p")},
+
+      { type: "button", text: Translations.getTranslatedWrapped(22), onclick: function () {
+        if(confirm(Translations.getTranslated(23)))
+          _engine.removeEntity(entity);
+      }},
       { type: "html", content: el("p")},
 
     ];

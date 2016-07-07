@@ -51,8 +51,10 @@ var Entity = function(shape, fixture, body, id, collisionGroup) {
 Entity.prototype.die = function() {
   this.dead = true;
 
+  
+
   return this;
-}
+};
 
 Entity.prototype.draw = function() {
   alert("ERROR! Cannot draw Entity: Use derived classes.");

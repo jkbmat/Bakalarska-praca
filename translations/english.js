@@ -20,5 +20,9 @@ Translations.strings.push(
     "Selection",
     "Rectangle",
     "Circle",
+    "Kinematic",
+    "Layer:",
+    "Delete object",
+    "Are you sure you want to delete this object?"
   ]
 );

@@ -21,10 +21,16 @@ ako funguje cela kamera?
 
 var Engine = function(viewport, gravity) {
   this.viewport = viewport;
-  this.entities = [];
   this.selectedEntity = null;
   
   this.COLLISION_GROUPS_NUMBER = 16;
+  this.LAYERS_NUMBER = 10;
+
+  this.layers = new Array(this.LAYERS_NUMBER);
+  for (var i = 0; i < this.LAYERS_NUMBER; i++)
+  {
+    this.layers[i] = [];
+  }
 
   this.collisionGroups = [];
   for (var i = 0; i < this.COLLISION_GROUPS_NUMBER; i++) {
@@ -53,12 +59,33 @@ Engine.prototype.togglePause = function () {
     window.Input.tool = Tools.Selection;
 };
 
+Engine.prototype.removeEntity = function (entity) {
+  this.world.DestroyBody(entity.body);
+  this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
+};
+
+Engine.prototype.setEntityLayer = function (entity, newLayer) {
+  // Remove from old layer
+  this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
+
+  // Set new layer
+  entity.layer = newLayer;
+  this.layers[newLayer].push(entity);
+};
+
+// Returns all entities in one array
+Engine.prototype.entities = function () {
+  return [].concat.apply([], this.layers);
+};
+
 
 // Returns the entity with id specified by argument
 Engine.prototype.getEntityById = function(id) {
-  for (var i = 0; i < this.entities.length; i++) {
-    if (this.entities[i].id === id)
-      return this.entities[i];
+  var entities = this.entities();
+
+  for (var i = 0; i < entities.length; i++) {
+    if (entities[i].id === id)
+      return entities[i];
   }
 
   return null;
@@ -67,14 +94,15 @@ Engine.prototype.getEntityById = function(id) {
 // Returns an array of entities with specified collisionGroup
 Engine.prototype.getEntitiesByCollisionGroup = function(group) {
   var ret = [];
+  var entities = this.entities();
 
-  for (var i = 0; i < this.entities.length; i++) {
-    if (this.entities[i].collisionGroup === group)
-      ret.push(this.entities[i]);
+  for (var i = 0; i < entities.length; i++) {
+    if (entities[i].collisionGroup === group)
+      ret.push(entities[i]);
   }
 
   return ret;
-}
+};
 
 // Adding an entity to the world
 Engine.prototype.addEntity = function(entity, type) {
@@ -83,23 +111,22 @@ Engine.prototype.addEntity = function(entity, type) {
     entity.id = AUTO_ID_PREFIX + this.lifetimeEntities;
   }
 
-  entity.engine = this;
-
   this.lifetimeEntities++;
 
   entity.body.set_type(type);
 
   entity.body = this.world.CreateBody(entity.body);
   entity.fixture = entity.body.CreateFixture(entity.fixture);
-  this.entities.push(entity);
+
+  this.layers[entity.layer].push(entity);
 
   return entity;
-}
+};
 
 // Checks whether two groups should collide
 Engine.prototype.getCollision = function(groupA, groupB) {
   return (this.collisionGroups[groupA].mask >> groupB) & 1;
-}
+};
 
 // Sets two groups up to collide
 Engine.prototype.setCollision = function(groupA, groupB, value) {
@@ -124,16 +151,17 @@ Engine.prototype.changeId = function (entity, id) {
 };
 
 // Selects an entity and shows its properties in the sidebar
-Engine.prototype.selectEntity = function (index) {
-  this.selectedEntity = index === null ? null : this.entities[index];
+Engine.prototype.selectEntity = function (entity) {
+  this.selectedEntity = entity === null ? null : entity;
   UI.buildSidebar(this.selectedEntity);
 }
 
 // Updates collision masks for all entities, based on engine's collisionGroups table
 Engine.prototype.updateCollisions = function() {
+  var entities = this.entities();
 
-  for (var i = 0; i < this.entities.length; i++) {
-    this.updateCollision(this.entities[i]);
+  for (var i = 0; i < entities.length; i++) {
+    this.updateCollision(entities[i]);
   }
 
   return this;
@@ -161,31 +189,9 @@ Engine.prototype.step = function() {
   ctx.save();
 
   // draw all entities
-  for (var i = this.entities.length - 1; i >= 0; i--) {
-    ctx.save();
-    ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2);
-    ctx.fillStyle = this.entities[i].color;
-
-    if(this.selectedEntity == this.entities[i]) {
-      ctx.shadowColor = "black";
-      ctx.shadowBlur = 10;
-    }
-
-    var x = this.entities[i].body.GetPosition().get_x();
-    var y = this.entities[i].body.GetPosition().get_y();
-    ctx.translate(x, y);
-    ctx.rotate(this.entities[i].body.GetAngle());
-
-    this.entities[i].draw(ctx);
-
-    ctx.restore();
-
-    for (var j = 0; j < this.entities[i].behaviors.length; j++) {
-      var behavior = this.entities[i].behaviors[j];
-
-      if (behavior.check(this.entities[i]))
-        behavior.result();
-    }
+  for (var i = 0; i < this.LAYERS_NUMBER; i++)
+  {
+    this.drawArray(this.layers[i], ctx);
   }
 
   if (!_engine.world.paused) {
@@ -207,7 +213,36 @@ Engine.prototype.step = function() {
   setTimeout(window.requestAnimationFrame(function() {
     _engine.step()
   }), Math.min(60 - end - start, 0));
-}
+};
+
+Engine.prototype.drawArray = function(array, ctx) {
+  for (var i = array.length - 1; i >= 0; i--) {
+    ctx.save();
+    ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2);
+    ctx.fillStyle = array[i].color;
+
+    if(this.selectedEntity === array[i]) {
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 10;
+    }
+
+    var x = array[i].body.GetPosition().get_x();
+    var y = array[i].body.GetPosition().get_y();
+    ctx.translate(x, y);
+    ctx.rotate(array[i].body.GetAngle());
+
+    array[i].draw(ctx);
+
+    ctx.restore();
+
+    for (var j = 0; j < array[i].behaviors.length; j++) {
+      var behavior = array[i].behaviors[j];
+
+      if (behavior.check(array[i]))
+        behavior.result();
+    }
+  }
+};
 
 
 module.exports = Engine;

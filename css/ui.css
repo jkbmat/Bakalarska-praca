@@ -37,10 +37,15 @@ div.ui.radioGroup input.ui[type=radio]:checked+label, .ui.button:not(.disabled):
   margin-right: 0.25em;
   margin-left: 0.25em;
   display: inline-block;
+  background: white;
 }
 
 input.ui[type=color] {
   padding: 0;
+}
+
+input.ui[type=text], input.ui[type=number] {
+  cursor: text;
 }
 
 .ui.button:not(.disabled):hover, select.ui:not(.disabled):hover, input.ui:not(.disabled):hover
@@ -111,6 +116,7 @@ html, body {
   height: 100%;
   position: relative;
   padding: 1em;
+  overflow-y: auto;
 }
 
 .ui.toolbar {

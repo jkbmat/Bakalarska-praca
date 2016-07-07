@@ -86,6 +86,7 @@ var UIBuilder = {
   select: function (properties) {
     properties = $.extend({}, {
       id: "select-" + $("select").length,
+      selected: "",
       onchange: function(){}
     }, properties);
 
@@ -105,8 +106,11 @@ var UIBuilder = {
       this.disabled = enable;
     };
 
-    properties.options.forEach(function (option) {
+    properties.options.forEach(function (option, index) {
       ret.appendChild(el("option", {value: option.value}, [option.text]));
+
+      if (option.value == properties.selected)
+        ret.selectedIndex = index;
     });
 
     return ret;

@@ -20,5 +20,9 @@ Translations.strings.push(
     "Výber",
     "Obdĺžnik",
     "Kruh",
+    "Kinematické",
+    "Vrstva:",
+    "Odstrániť objekt",
+    "Naozaj chcete odstrániť tento objekt?",
   ]
 );
