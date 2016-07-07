@@ -70,7 +70,7 @@ input[type=checkbox].ui+label {
 input[type=checkbox].ui:checked+label:after {
   content: "✖";
   position: absolute;
-  bottom: 0px;
+  bottom: -1px;
   left: 2px;
 }
 

@@ -54,17 +54,17 @@ var UI = {
         elements: [
           {
             text: Translations.getTranslatedWrapped(17), checked: true, onclick: function () {
-            window.Input.tool = Tools.Selection;
+            Input.tool = Tools.Selection;
           }
           },
           {
             text: Translations.getTranslatedWrapped(18), onclick: function () {
-            window.Input.tool = Tools.Rectangle;
+            Input.tool = Tools.Rectangle;
           }
           },
           {
             text: Translations.getTranslatedWrapped(19), onclick: function () {
-            window.Input.tool = Tools.Circle;
+            Input.tool = Tools.Circle;
           }
           },
         ]

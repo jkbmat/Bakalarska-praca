@@ -1,5 +1,6 @@
 var UI = require("./ui.js");
 var Tools = require("./tools.js");
+var TokenManager = require("./tokenmanager.js");
 
 
 const AUTO_ID_PREFIX = "ENTITY_NUMBER_";
@@ -45,7 +46,9 @@ var Engine = function(viewport, gravity) {
   this.world = new b2World(gravity, true);
   this.world.paused = true;
 
-  window.Input.initialize(viewport.canvasElement);
+  this.tokenManager = new TokenManager();
+
+  Input.initialize(viewport.canvasElement);
 };
 
 // Changes running state of the simulation
@@ -53,10 +56,10 @@ Engine.prototype.togglePause = function () {
   this.world.paused = !this.world.paused;
   this.selectedEntity = null;
 
-  window.Input.tool = Tools.Blank;
+  Input.tool = Tools.Blank;
 
   if(this.world.paused)
-    window.Input.tool = Tools.Selection;
+    Input.tool = Tools.Selection;
 };
 
 Engine.prototype.removeEntity = function (entity) {
@@ -199,13 +202,13 @@ Engine.prototype.step = function() {
     this.world.Step(1 / 60, 10, 5);
   }
   else {
-    window.Input.tool.onmove(ctx);
+    Input.tool.onmove(ctx);
   }
   
 
   // Released keys are only to be processed once
-  window.Input.mouse.cleanUp();
-  window.Input.keyboard.cleanUp();
+  Input.mouse.cleanUp();
+  Input.keyboard.cleanUp();
 
   var end = Date.now();
 

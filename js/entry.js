@@ -5,7 +5,6 @@ var Viewport = require("./viewport.js");
 var UI = require("./ui.js");
 var BodyType = require("./bodytype.js");
 var Behavior = require("./behavior.js");
-var Token = require("./token.js").Token;
 
 var Circle = require("./shapes.js").Circle;
 var Rectangle = require("./shapes.js").Rectangle;
@@ -20,20 +19,20 @@ _engine.addEntity(new Circle(new b2Vec2(500, 50), 20), BodyType.DYNAMIC_BODY)
   .disableRotation(false)
   .addBehavior(
     new Behavior(
-      Token.parse("isButtonUp(number(32))"),
-      Token.parse("setLinearVelocity(filterById(text(kruh)), getVelocityX(filterById(text(kruh))), number(-999999999999999999))")
+      _engine.tokenManager.parser.parse("isButtonUp(number(32))"),
+      _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), getVelocityX(filterById(text(kruh))), number(-999999999999999999))")
     )
   )
   .addBehavior(
     new Behavior(
-      Token.parse("isButtonDown(number(37))"),
-      Token.parse("setLinearVelocity(filterById(text(kruh)), number(-100), getVelocityY(filterById(text(kruh))))")
+      _engine.tokenManager.parser.parse("isButtonDown(number(37))"),
+      _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), number(-100), getVelocityY(filterById(text(kruh))))")
     )
   )
   .addBehavior(
     new Behavior(
-      Token.parse("isButtonDown(number(39))"),
-      Token.parse("setLinearVelocity(filterById(text(kruh)), number(100), getVelocityY(filterById(text(kruh))))")
+      _engine.tokenManager.parser.parse("isButtonDown(number(39))"),
+      _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), number(100), getVelocityY(filterById(text(kruh))))")
     )
   );
 

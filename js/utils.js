@@ -1,11 +1,11 @@
 // Object containing useful methods
 var Utils = {
   getBrowserWidth: function() {
-    return $(".ui.content").outerWidth();//window.innerWidth;
+    return $(".ui.content").outerWidth();
   },
 
   getBrowserHeight: function() {
-    return $(".ui.content").outerHeight() - $(".ui.toolbar").outerHeight();//window.innerHeight;
+    return $(".ui.content").outerHeight() - $(".ui.toolbar").outerHeight();
   },
 
   randomRange: function(min, max) {

@@ -15,7 +15,7 @@ var Selection = {
     for (var i = _engine.LAYERS_NUMBER - 1; i >= 0; i--) {
       for (var j = 0; j < _engine.layers[i].length; j++) {
         if (_engine.layers[i][j].fixture.TestPoint(
-            new b2Vec2(_engine.viewport.x - _engine.viewport.width / 2 + window.Input.mouse.x, _engine.viewport.y - _engine.viewport.height / 2 + window.Input.mouse.y))
+            new b2Vec2(_engine.viewport.x - _engine.viewport.width / 2 + Input.mouse.x, _engine.viewport.y - _engine.viewport.height / 2 + Input.mouse.y))
         ) {
           _engine.selectEntity(_engine.layers[i][j]);
           return;
@@ -36,7 +36,7 @@ var Rectangle = {
 
   onclick: function () {
     this.onmove = this.dragging;
-    this.origin = [window.Input.mouse.x, window.Input.mouse.y];
+    this.origin = [Input.mouse.x, Input.mouse.y];
   },
 
   onrelease: function () {
@@ -55,8 +55,8 @@ var Rectangle = {
   },
 
   dragging: function (ctx) {
-    this.w = window.Input.mouse.x - this.origin[0];
-    this.h = window.Input.mouse.y - this.origin[1];
+    this.w = Input.mouse.x - this.origin[0];
+    this.h = Input.mouse.y - this.origin[1];
 
     if (this.w < this.minSize || this.h < this.minSize)
       return;
@@ -76,7 +76,7 @@ var Circle = {
 
   onclick: function () {
     this.onmove = this.dragging;
-    this.origin = [window.Input.mouse.x, window.Input.mouse.y];
+    this.origin = [Input.mouse.x, Input.mouse.y];
   },
 
   onrelease: function () {
@@ -95,7 +95,7 @@ var Circle = {
   },
 
   dragging: function (ctx) {
-    this.radius = Math.min(window.Input.mouse.x - this.origin[0], window.Input.mouse.y - this.origin[1]) / 2;
+    this.radius = Math.min(Input.mouse.x - this.origin[0], Input.mouse.y - this.origin[1]) / 2;
 
     if (this.radius < this.minRadius)
       return;

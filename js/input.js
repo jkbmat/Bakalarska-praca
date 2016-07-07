@@ -2,7 +2,7 @@
 
 var Tools = require("./tools.js");
 
-window.window.Input = {
+window.Input = {
   tool: Tools.Selection,
 
   mouse: {
@@ -25,7 +25,7 @@ window.window.Input = {
       if (event.which === 1) {
         this.leftDown = true;
 
-        window.Input.tool.onclick();
+        Input.tool.onclick();
       }
 
       if (event.which === 3)
@@ -42,7 +42,7 @@ window.window.Input = {
         this.leftDown = false;
         this.leftUp = true;
 
-        window.Input.tool.onrelease();
+        Input.tool.onrelease();
       }
 
       if (event.which === 3) {
@@ -88,20 +88,20 @@ window.window.Input = {
 
   initialize: function(element) {
     element.onmousemove = function(e) {
-      window.window.Input.mouse.updatePosition(e);
+      Input.mouse.updatePosition(e);
     };
     element.onmousedown = function(e) {
-      window.window.Input.mouse.updateButtonsDown(e);
+      Input.mouse.updateButtonsDown(e);
     };
     element.onmouseup = function(e) {
-      window.window.Input.mouse.updateButtonsUp(e);
+      Input.mouse.updateButtonsUp(e);
     };
 
     document.onkeydown = function(e) {
-      window.window.Input.keyboard.updateButtonsDown(e);
+      Input.keyboard.updateButtonsDown(e);
     };
     document.onkeyup = function(e) {
-      window.window.Input.keyboard.updateButtonsUp(e);
+      Input.keyboard.updateButtonsUp(e);
     };
   }
 };
