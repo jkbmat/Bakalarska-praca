@@ -101,3 +101,36 @@ td.highlight
 	min-height: 600px;
 	min-width: 600px;
 }
+
+#tokenChoice
+{
+	z-index: 1500;
+	position: absolute;
+	background: white;
+	border: 1px solid black;
+	border-radius: 3px;
+	padding: 0.5em;
+}
+
+#tokenChoice .token
+{
+	position: relative;
+	padding: 0.5em;
+	cursor: pointer;
+}
+
+#tokenChoice .token:hover
+{
+	background: #eee;
+}
+
+.token .argument
+{
+	font-size: 90%;
+	color: grey;
+}
+
+.token .argument+.name, .token .name+.argument
+{
+	padding-left: 0.5em;
+}

@@ -17,7 +17,7 @@ Translations.strings.push(
     "Druh telesa:",
     "Dynamické",
     "Statické",
-    "Výber",
+    "Nástroj: ",
     "Obdĺžnik",
     "Kruh",
     "Kinematické",

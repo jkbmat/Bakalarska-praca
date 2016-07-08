@@ -47,23 +47,24 @@ var UI = {
         }
       },
       {type: "break"},
+      { type: "html", content: Translations.getTranslatedWrapped(17) },
       {
         type: "radio",
 
         id: "tool",
         elements: [
           {
-            text: Translations.getTranslatedWrapped(17), checked: true, onclick: function () {
+            text: el.img({src: "./img/selection.png"}), checked: true, onclick: function () {
             Input.tool = Tools.Selection;
           }
           },
           {
-            text: Translations.getTranslatedWrapped(18), onclick: function () {
+            text: el.img({src: "./img/rectangle.png"}), onclick: function () {
             Input.tool = Tools.Rectangle;
           }
           },
           {
-            text: Translations.getTranslatedWrapped(19), onclick: function () {
+            text: el.img({src: "./img/circle.png"}), onclick: function () {
             Input.tool = Tools.Circle;
           }
           },
@@ -176,6 +177,17 @@ var UI = {
   },
 
   createBehavior: function (entity) {
+    var BehaviorBuilder = require("./behaviorbuilder.js");
+    var Type = require("./typing.js").Type;
+
+    var bbuilder = new BehaviorBuilder(_engine.tokenManager);
+
+    var c = el("div");
+
+    bbuilder.initialize(Type.BOOLEAN, c);
+
+    return c;
+
     return "TODO";
 
     var logic = el("textarea");
@@ -264,6 +276,11 @@ var UI = {
       { type: "button", text: Translations.getTranslatedWrapped(22), onclick: function () {
         if(confirm(Translations.getTranslated(23)))
           _engine.removeEntity(entity);
+      }},
+      { type: "html", content: el("p")},
+
+      { type: "button", text: Translations.getTranslatedWrapped(4), onclick: function () {
+        UIBuilder.popup(UI.createBehavior(entity));
       }},
       { type: "html", content: el("p")},
 

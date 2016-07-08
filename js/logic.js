@@ -88,19 +88,30 @@ lNumber.prototype.constructor = lNumber;
 module.exports.push(lNumber);
 
 
-var lBool = function (value) {
-  Logic.call(this, "boolean", Type.BOOLEAN, arguments, [Type.LITERAL]);
-
-  this.args.push(value);
+var lTrue = function () {
+  Logic.call(this, "true", Type.BOOLEAN, arguments, []);
 };
-lBool.prototype = new Logic();
+lTrue.prototype = new Logic();
 
-lBool.prototype.evaluate = function () {
-  return this.args[0] === "true";
+lTrue.prototype.evaluate = function () {
+  return true;
 };
 
-lBool.prototype.constructor = lBool;
-module.exports.push(lBool);
+lTrue.prototype.constructor = lTrue;
+module.exports.push(lTrue);
+
+
+var lFalse = function (value) {
+  Logic.call(this, "false", Type.BOOLEAN, arguments, []);
+};
+lFalse.prototype = new Logic();
+
+lFalse.prototype.evaluate = function () {
+  return false;
+};
+
+lFalse.prototype.constructor = lFalse;
+module.exports.push(lFalse);
 
 
 var lButtonDown = function (button) {

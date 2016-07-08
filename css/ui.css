@@ -31,7 +31,7 @@ div.ui.radioGroup input.ui[type=radio]:checked+label, .ui.button:not(.disabled):
 {
   border: 1px solid #ddd;
   padding: 0.5em;
-  font-size: 90%;
+  font-size: 11px;
   cursor: pointer;
   border-radius: 3px;
   margin-right: 0.25em;
@@ -51,6 +51,11 @@ input.ui[type=text], input.ui[type=number] {
 .ui.button:not(.disabled):hover, select.ui:not(.disabled):hover, input.ui:not(.disabled):hover
 {
   border-color: #999;
+}
+
+.ui.button img
+{
+  height: 10px;
 }
 
 .ui.disabled
@@ -124,6 +129,7 @@ html, body {
   min-height: 35px;
   background: white;
   padding: 0.3em;
+  font-size: 11px;
 }
 
 .ui.resizer {

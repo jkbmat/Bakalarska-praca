@@ -4,45 +4,45 @@ var Tools = require("./tools.js");
 
 window.Input = {
   tool: Tools.Selection,
+  element: null,
 
   mouse: {
     x: 0,
     y: 0,
+    realX: 0,
+    realY: 0,
     leftDown: false,
     rightDown: false,
     leftUp: false,
     rightUp: false,
 
     updatePosition: function (event) {
-      this.x = event.pageX - _engine.viewport.canvasElement.getBoundingClientRect().left;
-      this.y = event.pageY - _engine.viewport.canvasElement.getBoundingClientRect().top;
+      this.x = event.pageX - Input.element.getBoundingClientRect().left;
+      this.y = event.pageY - Input.element.getBoundingClientRect().top;
+      this.realX = event.pageX;
+      this.realY = event.pageY;
     },
 
     updateButtonsDown: function (event) {
-      if (event.target != _engine.viewport.canvasElement)
-        return true;
-
-      if (event.which === 1) {
+      if (event.which === 1)
         this.leftDown = true;
-
-        Input.tool.onclick();
-      }
 
       if (event.which === 3)
         this.rightDown = true;
 
-      event.preventDefault();
+      if (event.target === Input.element) {
+        Input.tool.onclick();
+        event.preventDefault();
+      }
     },
 
     updateButtonsUp: function (event) {
-      if (event.target != _engine.viewport.canvasElement)
-        return true;
+      if (event.target === Input.element)
+        Input.tool.onrelease();
 
       if (event.which === 1) {
         this.leftDown = false;
         this.leftUp = true;
-
-        Input.tool.onrelease();
       }
 
       if (event.which === 3) {
@@ -87,13 +87,15 @@ window.Input = {
   },
 
   initialize: function(element) {
-    element.onmousemove = function(e) {
+    this.element = element;
+
+    document.onmousemove = function(e) {
       Input.mouse.updatePosition(e);
     };
-    element.onmousedown = function(e) {
+    document.onmousedown = function(e) {
       Input.mouse.updateButtonsDown(e);
     };
-    element.onmouseup = function(e) {
+    document.onmouseup = function(e) {
       Input.mouse.updateButtonsUp(e);
     };
 

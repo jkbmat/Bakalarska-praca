@@ -189,7 +189,7 @@ var UIBuilder = {
       oninput: function(){}
     }, properties);
 
-    var ret = el("input.ui", { type: "color", id: properties.id, value: properties.value });
+    var ret = el("input.ui.button", { type: "color", id: properties.id, value: properties.value });
 
     ret.disable = function () {
       $(this).addClass("disabled");

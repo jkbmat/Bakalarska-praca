@@ -69,7 +69,7 @@ module.exports.push(aLinearVelocity);
 
 
 var aLinearImpulse = function(ef, x, y) {
-  Action.call(this, "applyLinearImpulse", ef, arguments, [Type.ENTITYFILTER, Type.NUMBER, Type.NUMBER]);
+  Action.call(this, "applyLinearImpulse", arguments, [Type.ENTITYFILTER, Type.NUMBER, Type.NUMBER]);
 
   this.args.push(ef);
   this.args.push(x);

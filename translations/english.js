@@ -17,7 +17,7 @@ Translations.strings.push(
     "Body type:",
     "Dynamic",
     "Static",
-    "Selection",
+    "Tool: ",
     "Rectangle",
     "Circle",
     "Kinematic",
