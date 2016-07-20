@@ -73,11 +73,12 @@ Parser.prototype.parseStep = function(expectedType) {
   var name = this.parseName();
   var token = this.tokenManager.getTokenByName(name);
 
-  if (token === undefined && expectedType === Type.LITERAL) {
+  if (token === undefined && (expectedType === Type.LITERAL || expectedType == undefined)) {
+    this.parserStack.push(name);
     return name;
   }
 
-  if (token == undefined) {
+  if (token == undefined && expectedType !== undefined) {
     throw "Expected argument with type " + expectedType;
   }
 
@@ -102,14 +103,30 @@ Parser.prototype.parseStep = function(expectedType) {
   if (token.fixType === FixType.PREFIX) {
     this.readChar("(");
 
-    for (i = 0; i < numArgs; i++) {
-      args.push(this.parseStep(token.argument_types[i]));
-
+    while(this.parserInput[0] !== ")") {
       this.readWhitespace();
+
+      this.parseStep();
 
       if (this.parserInput[0] === ",")
         this.parserInput = this.parserInput.slice(1);
+
+      this.readWhitespace();
     }
+
+    for (i = 0; i < numArgs; i++) {
+      var expectedArg = token.argument_types[token.argument_types.length - i - 1];
+      var actualArg = this.parserStack[this.parserStack.length - 1].type;
+
+      if (expectedArg !== Type.LITERAL && actualArg !== expectedArg)
+      {
+        throw "Unexpected " + actualArg +
+          " (was expecting " + expectedArg + ")";
+      }
+      args.push(this.parserStack.pop());
+    }
+
+    args.reverse();
 
     this.readChar(")");
   }
@@ -117,8 +134,6 @@ Parser.prototype.parseStep = function(expectedType) {
   var newToken = new token.constructor();
   for (var i = 0; i < args.length; i++) {
     newToken.args[i] = args[i];
-
-    this.parserStack.pop();
   }
   this.parserStack.push(newToken);
 

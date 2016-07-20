@@ -1,32 +1,127 @@
 var FixType = require("./typing.js").FixType;
+var Type = require("./typing.js").Type;
 
 var BehaviorBuilder = function (tokenManager) {
   this.tokenManager = tokenManager;
 };
 
 BehaviorBuilder.prototype.initialize = function (type, container) {
-  var holder = el("span");
   var btn = el("span.ui.button", {}, ["+"]);
+  btn.type = type;
 
+  btn.onclick = this.buildChoiceClick();
+
+  $(container).html(btn);
+};
+
+BehaviorBuilder.prototype.buildChoiceClick = function () {
   var that = this;
-  btn.onclick = function (e) {
+
+  return function (e) {
     e.stopPropagation();
 
-    that.buildChoice(that.tokenManager.getTokensByType(type), holder);
+    that.buildChoice(that.tokenManager.getTokensByType(this.type), this);
+  };
+};
+
+BehaviorBuilder.prototype.buildArgument = function (token, argIndex, argHolder) {
+  // Builds an argument or argument placeholder. Returns false on bad literal input.
+
+  if (token.args[argIndex] != undefined) {
+    // Token in argument exists, build it
+    
+    if (token.argument_types[argIndex] === Type.LITERAL) {
+      // Literals are dealt with and done
+
+      $(argHolder).replaceWith(document.createTextNode(token.evaluate()));
+      return true;
+    }
+
+    this.buildToken(token.args[argIndex], argHolder);
+    return true;
+  }
+  else {
+    // Argument is empty so far, add a button to create new
+
+    if (token.argument_types[argIndex] === Type.LITERAL) {
+      // Literals are dealt with and done
+
+      token.populate();
+      if (! token.validate())
+        return false;
+
+      $(argHolder).replaceWith(document.createTextNode(token.evaluate()));
+      return true;
+    }
+
+    this.initialize(token.argument_types[argIndex], argHolder);
+    return true;
+  }
+};
+
+BehaviorBuilder.prototype.buildToken = function (token, holder) {
+  var ret = el("span.token", {}, [el("span.name", {}, [token.name])]);
+
+  ret.type = token.type;
+  ret.onclick = this.buildChoiceClick();
+
+  // Fix, so :hover triggers only on actual hovered token, not its ancestors
+  ret.onmouseover = function (e) {
+    e.stopPropagation();
+
+    $(this).addClass("hover");
+  };
+  ret.onmouseout = function (e) {
+    $(this).removeClass("hover");
   };
 
-  holder.appendChild(btn);
-  $(container).html(holder);
+  if (token.fixType === FixType.PREFIX) {
+    ret.appendChild(document.createTextNode("( "));
+
+    var that = this;
+
+    for (var index = 0; index < token.argument_types.length; index ++) {
+      var argHolder = el("span.argument");
+      ret.appendChild(argHolder);
+
+      if (! that.buildArgument(token, index, argHolder)) {
+        return;
+      }
+
+      if (index !== token.argument_types.length - 1)
+        ret.appendChild(document.createTextNode(", "));
+    }
+
+    ret.appendChild(document.createTextNode(" )"));
+  }
+
+  if (token.fixType === FixType.INFIX) {
+    ret.insertBefore(document.createTextNode(" "), ret.firstChild);
+    ret.appendChild(document.createTextNode(" "));
+
+    var argHolder = el("span");
+    ret.insertBefore(argHolder, ret.firstChild);
+
+    this.buildArgument(token, 0, argHolder);
+
+    argHolder = el("span");
+    ret.appendChild(argHolder);
+
+    this.buildArgument(token, 1, argHolder);
+  }
+
+  $(holder).replaceWith(ret);
 };
 
 BehaviorBuilder.prototype.buildChoice = function (tokens, holder) {
+  $("div#tokenChoice").remove();
   var container = el("div#tokenChoice");
   var that = this;
 
   tokens.forEach(function (token) {
     var text = el("div.token", {}, [el("span.name", {}, [token.name])]);
 
-    if (token.fixType === FixType.PREFIX && token.argument_types.length)
+    if (token.fixType === FixType.PREFIX)
       text.appendChild(el("span.argument", {}, ["( ", token.argument_types.join(", "), " )"]));
 
     if (token.fixType === FixType.INFIX) {
@@ -35,25 +130,7 @@ BehaviorBuilder.prototype.buildChoice = function (tokens, holder) {
     }
 
     $(text).on("click", function (e) {
-      var ret = el("span", {}, [el("span.name", {}, [token.name])]);
-
-      if (token.fixType === FixType.PREFIX && token.argument_types.length) {
-        ret.appendChild(document.createTextNode("( "));
-
-        token.argument_types.forEach(function (argument, index) {
-          var argHolder = el("span");
-          ret.appendChild(argHolder);
-
-          that.initialize(argument, argHolder);
-
-          if (index != token.argument_types.length - 1)
-            ret.appendChild(document.createTextNode(", "));
-        });
-
-        ret.appendChild(document.createTextNode(" )"));
-      }
-      
-      $(holder).html(ret);
+      that.buildToken(new token.constructor(), holder);
     });
 
     container.appendChild(text);
@@ -62,7 +139,7 @@ BehaviorBuilder.prototype.buildChoice = function (tokens, holder) {
   document.body.appendChild(container);
 
   $(document).one("click", function(e) {
-    container.parentNode.removeChild(container);
+    $("div#tokenChoice").remove();
   });
 
   var offset = 15;

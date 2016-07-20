@@ -11,7 +11,7 @@ var Rectangle = require("./shapes.js").Rectangle;
 
 UI.initialize();
 
-_engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 500));
+window._engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 500));
 
 _engine.addEntity(new Circle(new b2Vec2(500, 50), 20), BodyType.DYNAMIC_BODY)
   .setCollisionGroup(2)
@@ -20,7 +20,7 @@ _engine.addEntity(new Circle(new b2Vec2(500, 50), 20), BodyType.DYNAMIC_BODY)
   .addBehavior(
     new Behavior(
       _engine.tokenManager.parser.parse("isButtonUp(number(32))"),
-      _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), getVelocityX(filterById(text(kruh))), number(-999999999999999999))")
+     [ _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), getVelocityX(filterById(text(kruh))), number(-999999999999999999))"),_engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), number(-100), getVelocityY(filterById(text(kruh))))")]
     )
   )
   .addBehavior(

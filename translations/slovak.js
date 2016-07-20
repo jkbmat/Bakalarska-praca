@@ -24,5 +24,13 @@ Translations.strings.push(
     "Vrstva:",
     "Odstrániť objekt",
     "Naozaj chcete odstrániť tento objekt?",
+    "Zadajte korektnú hodnotu pre ",
+    "A toto:",
+    "Pridať novú akciu",
+    "Pridať novú podmienku",
+    "Odstrániť akciu",
+    "Odstrániť podmienku",
+    "Hotovo",
+    "Zrušiť",
   ]
 );

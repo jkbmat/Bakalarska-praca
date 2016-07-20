@@ -5,7 +5,7 @@ Translations.strings.push(
     "Start",
     "Pause",
     "Set behavior",
-    "When the following conditons are met:",
+    "When the following conditon is met:",
     "Do this:",
     "ID:",
     "Collision group:",
@@ -23,6 +23,14 @@ Translations.strings.push(
     "Kinematic",
     "Layer:",
     "Delete object",
-    "Are you sure you want to delete this object?"
+    "Are you sure you want to delete this object?",
+    "Insert a correct value for ",
+    "And this:",
+    "Add new action",
+    "Add new behavior",
+    "Remove action",
+    "Remove behavior",
+    "Done",
+    "Cancel",
   ]
 );

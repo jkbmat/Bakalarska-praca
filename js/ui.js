@@ -177,29 +177,148 @@ var UI = {
   },
 
   createBehavior: function (entity) {
-    var BehaviorBuilder = require("./behaviorbuilder.js");
+    var BehaviorBuilder = new (require("./behaviorbuilder.js"))(_engine.tokenManager);
+    var UIBuilder = require("./uibuilder.js");
     var Type = require("./typing.js").Type;
 
-    var bbuilder = new BehaviorBuilder(_engine.tokenManager);
+    var oneBehavior = function(behavior) {
+      var wrapper = el("div.behavior");
+      var logic = el("div.tokenBuilder", {}, [""]);
+      var results = el("div");
 
-    var c = el("div");
+      var remover = UIBuilder.button({
+        text: Translations.getTranslatedWrapped(29), onclick: (function (wrapper) {
+          return function () {
+            // If the function isn't wrapped, only the last instance of behavior gets passed
 
-    bbuilder.initialize(Type.BOOLEAN, c);
+            $(wrapper).remove();
+          };
+        })(wrapper)
+      });
+      remover.style.float = "right";
 
-    return c;
+      if (behavior === null) {
+        BehaviorBuilder.initialize(Type.BOOLEAN, logic);
 
-    return "TODO";
+        results.appendChild(oneResult(null, Translations.getTranslatedWrapped(6), false));
+      }
+      else {
+        BehaviorBuilder.buildToken(behavior.logic, logic.firstChild);
 
-    var logic = el("textarea");
-    logic.innerHTML = entity.behaviors[0].toString();
+        results.appendChild(oneResult(behavior.results[0], Translations.getTranslatedWrapped(6), false));
 
-    return el("div", [
-      Translations.getTranslatedWrapped(5), el("br"),
-      logic,
-      el.p(),
-      Translations.getTranslatedWrapped(6), el("br"),
+        for (var j = 1; j < behavior.results.length; j++) {
+          results.appendChild(oneResult(behavior.results[j], Translations.getTranslatedWrapped(25), true));
+        }
+      }
 
+
+      results.appendChild(UIBuilder.button({text: Translations.getTranslatedWrapped(26), onclick: function (e) {
+        this.parentNode.insertBefore(oneResult(null, Translations.getTranslatedWrapped(25), true), this);
+      }}));
+
+      wrapper.appendChild(el("h2", {}, [Translations.getTranslatedWrapped(5), remover]));
+      wrapper.appendChild(logic);
+      wrapper.appendChild(results);
+
+      return wrapper;
+    };
+
+    var oneResult = function(result, text, enableRemove) {
+      var wrapper = el("div");
+      var resultElement = el("div.tokenBuilder", {}, [""]);
+
+      var resultRemover = UIBuilder.button({text: Translations.getTranslatedWrapped(28), onclick:
+        (function(resultElement){return function(){
+          // If the function isn't wrapped, only the last instance of result gets passed
+
+          $(resultElement).prev().remove(); // Remove the header
+          $(resultElement).remove(); // And the token builder
+        };})(resultElement)});
+      resultRemover.style.float = "right";
+
+      if(! enableRemove)
+        resultRemover = "";
+
+      wrapper.appendChild(el("h2", {}, [
+        text,
+        resultRemover
+      ]));
+      wrapper.appendChild(resultElement);
+
+      if(result === null)
+        BehaviorBuilder.initialize(Type.ACTION, resultElement);
+      else
+        BehaviorBuilder.buildToken(result, resultElement.firstChild);
+
+      return wrapper;
+    };
+    
+    var ret = el("div.behaviorWrapper");
+
+    for (var i = 0; i < entity.behaviors.length; i++) {
+      ret.appendChild(oneBehavior(entity.behaviors[i]));
+    }
+
+    var that = this;
+
+    var buttons = el("div.bottom", {}, [
+      UIBuilder.button({
+        text: Translations.getTranslatedWrapped(27),
+        onclick: function () {
+          ret.appendChild(oneBehavior(null));
+          ret.scrollTop = ret.scrollHeight;
+        }
+      }),
+      UIBuilder.break(),
+      UIBuilder.button({
+        text: Translations.getTranslatedWrapped(31),
+        onclick: function () {
+          UIBuilder.closePopup();
+        }
+      }),
+      UIBuilder.button({
+        text: Translations.getTranslatedWrapped(30),
+        onclick: function () {
+          that.saveBehavior(entity);
+          UIBuilder.closePopup();
+        }
+      }),
     ]);
+    var wrapper = el("div", {}, [ret, buttons]);
+
+    return wrapper;
+  },
+
+  saveBehavior: function (entity) {
+    var Behavior = require("./behavior.js");
+
+    entity.behaviors = [];
+    var behaviors = $(".behaviorWrapper .behavior");
+
+    for(var i = 0; i < behaviors.length; i++) {
+      var tokenBuilders = $(".tokenBuilder", behaviors[i]);
+
+      try {
+        var logic = _engine.tokenManager.parser.parse(tokenBuilders[0].textContent);
+        var results = [];
+
+        for(var j = 1; j < tokenBuilders.length; j++) {
+          try {
+            results.push(_engine.tokenManager.parser.parse(tokenBuilders[j].textContent));
+          }
+          catch (err) {}
+        }
+
+        if (results.length === 0)
+          throw "All results blank";
+
+        entity.behaviors.push(new Behavior(logic, results));
+      }
+      catch (err) {
+        // Ignore parsing errors (something left blank)
+      }
+    }
   },
 
   buildSidebar: function (entity) {

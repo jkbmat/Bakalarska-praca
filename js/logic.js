@@ -69,6 +69,15 @@ lString.prototype.evaluate = function () {
   return this.args[0];
 };
 
+lString.prototype.validate = function () {
+  return true;
+};
+
+lString.prototype.populate = function () {
+  this.args[0] = prompt(Translations.getTranslated(24) + this.name);
+  this.args[0] = this.args[0] === null ? "" : this.args[0];
+};
+
 lString.prototype.constructor = lString;
 module.exports.push(lString);
 
@@ -82,6 +91,14 @@ lNumber.prototype = new Logic();
 
 lNumber.prototype.evaluate = function () {
   return parseFloat(this.args[0]);
+};
+
+lNumber.prototype.validate = function () {
+  return $.isNumeric(this.args[0]);
+};
+
+lNumber.prototype.populate = function () {
+  this.args[0] = prompt(Translations.getTranslated(24) + this.name);
 };
 
 lNumber.prototype.constructor = lNumber;

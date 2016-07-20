@@ -26,7 +26,7 @@ var efByCollisionGroup = function(group) {
 efByCollisionGroup.prototype = new EntityFilter();
 
 efByCollisionGroup.prototype.decide = function(entity) {
-  return entity.collisionGroup === this.args[0].evaluate();
+  return entity.collisionGroup + 1 === this.args[0].evaluate();
 };
 
 efByCollisionGroup.prototype.constructor = efByCollisionGroup;
@@ -41,7 +41,7 @@ var efByLayer = function(layer) {
 efByLayer.prototype = new EntityFilter();
 
 efByLayer.prototype.decide = function(entity) {
-  return entity.layer === this.args[0].evaluate();
+  return entity.layer + 1 === this.args[0].evaluate();
 };
 
 efByLayer.prototype.constructor = efByLayer;

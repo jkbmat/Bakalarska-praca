@@ -73,11 +73,11 @@ var UIBuilder = {
       $(this).removeClass("disabled");
     };
 
-    ret.onclick = function () {
+    ret.onclick = function (e) {
       if($(this).hasClass("disabled"))
         return;
 
-      properties.onclick();
+      properties.onclick.call(this, e);
     };
 
     return ret;

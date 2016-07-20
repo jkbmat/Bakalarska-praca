@@ -98,8 +98,9 @@ td.highlight
 	width: 50%;
 	margin: auto;
 	margin-top: 3em;
-	min-height: 600px;
 	min-width: 600px;
+  height: 90%;
+  overflow-y: auto;
 }
 
 #tokenChoice
@@ -110,6 +111,8 @@ td.highlight
 	border: 1px solid black;
 	border-radius: 3px;
 	padding: 0.5em;
+	max-height: 400px;
+	overflow-y: auto;
 }
 
 #tokenChoice .token
@@ -124,13 +127,60 @@ td.highlight
 	background: #eee;
 }
 
-.token .argument
+#tokenChoice .token .argument
 {
 	font-size: 90%;
 	color: grey;
 }
 
-.token .argument+.name, .token .name+.argument
+#tokenChoice .token .argument+.name, #tokenChoice .token .name+.argument
 {
 	padding-left: 0.5em;
+}
+
+.tokenBuilder .token
+{
+	border-radius: 3px;
+	display: inline-block;
+	padding: 0 3px;
+}
+
+.tokenBuilder .token.hover
+{
+	background: #5e5e5e;
+	box-shadow: 0 0 0 3px #5e5e5e;
+	color: #fff;
+	cursor: pointer;
+}
+
+.tokenBuilder
+{
+	margin: 1em 0;
+	border-radius: 3px;
+	padding: 1em;
+	background: #eee;
+}
+
+.behavior
+{
+	padding: 1em;
+  margin-bottom: 1em;
+	border-bottom: 1px solid #999;
+}
+
+.behavior h2
+{
+	font-size: 120%;
+	text-align: left;
+}
+
+.behaviorWrapper
+{
+  height: calc(100% - 50px);
+  overflow-y: auto;
+}
+
+#popupContent .bottom
+{
+  padding: 1em 0;
 }
