@@ -21,13 +21,14 @@ window.Input = {
     updatePosition: function (event) {
       this.canvasY = event.pageY - Input.element.getBoundingClientRect().top;
       this.canvasX = event.pageX - Input.element.getBoundingClientRect().left;
-      this.x = this.canvasX * _engine.viewport.scale + (_engine.viewport.x - _engine.viewport.width / 2);
-      this.y = this.canvasY * _engine.viewport.scale + (_engine.viewport.y - _engine.viewport.height / 2);
+      this.x = this.canvasX * _engine.viewport.scale + _engine.viewport.x - (_engine.viewport.width * _engine.viewport.scale) / 2;
+      this.y = this.canvasY * _engine.viewport.scale + _engine.viewport.y - (_engine.viewport.height * _engine.viewport.scale) / 2;
       this.realX = event.pageX;
       this.realY = event.pageY;
     },
 
     updateButtonsDown: function (event) {
+      console.log([this.x, this.y], _engine.viewport.x, (_engine.viewport.x - _engine.viewport.width / 2));
       if (event.which === 1)
         this.leftDown = true;
 

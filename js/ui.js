@@ -367,7 +367,7 @@ var UI = {
       // Rotation
       { type: "html", content: Translations.getTranslatedWrapped(11)},
       { type: "inputNumber", value: entity.body.GetAngle() * 180 / Math.PI, id: "entity_rotation",
-        oninput: function (val) {entity.body.SetTransform(entity.body.GetPosition(), (val * 1) * Math.PI / 180);}},
+        oninput: function (val) {entity.body.SetTransform(entity.body.GetPosition(), ((val * 1) * Math.PI / 180)%360);}},
       { type: "html", content: el("p")},
 
       // Fixed rotation

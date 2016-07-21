@@ -18,6 +18,7 @@ var Selection = {
 
     for (var i = _engine.LAYERS_NUMBER - 1; i >= 0; i--) {
       for (var j = 0; j < _engine.layers[i].length; j++) {
+        // console.log([Input.mouse.x, Input.mouse.y], _engine.viewport.x);
         if (_engine.layers[i][j].fixture.TestPoint(
             new b2Vec2(Input.mouse.x, Input.mouse.y))
         ) {
@@ -71,6 +72,7 @@ var Selection = {
 
 var Rectangle = {
   origin: null,
+  worldOrigin: null,
   w: 0,
   h: 0,
   minSize: 5,
@@ -78,23 +80,22 @@ var Rectangle = {
   onclick: function () {
     this.onmove = this.dragging;
     this.origin = [Input.mouse.canvasX, Input.mouse.canvasY];
+    this.worldOrigin = [Input.mouse.x, Input.mouse.y];
   },
 
   onrelease: function () {
     if (this.w >= this.minSize && this.h >= this.minSize) {
-      var x = this.origin[0] * _engine.viewport.scale + _engine.viewport.getOffset()[0];
-      var y = this.origin[1] * _engine.viewport.scale + _engine.viewport.getOffset()[1];
-
       this.w *= _engine.viewport.scale;
       this.h *= _engine.viewport.scale;
 
       _engine.addEntity(new Shape.Rectangle(
-        new b2Vec2(x + this.w / 2, y + this.h / 2),
+        new b2Vec2(this.worldOrigin[0] + this.w / 2, this.worldOrigin[1] + this.h / 2),
         new b2Vec2(this.w / 2, this.h / 2)), Type.DYNAMIC_BODY);
     }
 
     this.onmove = function(){};
     this.origin = null;
+    this.worldOrigin = null;
     this.w = this.h = 0;
   },
 
@@ -119,28 +120,28 @@ var Rectangle = {
 
 var Circle = {
   origin: null,
+  worldOrigin: null,
   radius: 0,
   minRadius: 5,
 
   onclick: function () {
     this.onmove = this.dragging;
     this.origin = [Input.mouse.canvasX, Input.mouse.canvasY];
+    this.worldOrigin = [Input.mouse.x, Input.mouse.y];
   },
 
   onrelease: function () {
     if (this.radius >= this.minRadius) {
-      var x = this.origin[0] * _engine.viewport.scale + _engine.viewport.getOffset()[0];
-      var y = this.origin[1] * _engine.viewport.scale + _engine.viewport.getOffset()[1];
-
       this.radius *= _engine.viewport.scale;
 
       _engine.addEntity(new Shape.Circle(
-        new b2Vec2(x + this.radius, y + this.radius),
+        new b2Vec2(this.worldOrigin[0] + this.radius, this.worldOrigin[1] + this.radius),
         this.radius), Type.DYNAMIC_BODY);
     }
 
     this.onmove = function(){};
     this.origin = null;
+    this.worldOrigin = null;
     this.radius = 0;
   },
 

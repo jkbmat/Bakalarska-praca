@@ -146,7 +146,7 @@ Engine.prototype.setCollision = function(groupA, groupB, value) {
   this.updateCollisions();
 
   return this;
-}
+};
 
 // Changes the ID of an entity
 Engine.prototype.changeId = function (entity, id) {
@@ -157,7 +157,7 @@ Engine.prototype.changeId = function (entity, id) {
 Engine.prototype.selectEntity = function (entity) {
   this.selectedEntity = entity === null ? null : entity;
   UI.buildSidebar(this.selectedEntity);
-}
+};
 
 // Updates collision masks for all entities, based on engine's collisionGroups table
 Engine.prototype.updateCollisions = function() {
@@ -177,7 +177,7 @@ Engine.prototype.updateCollision = function(entity) {
   entity.fixture.SetFilterData(filterData);
 
   return this;
-}
+};
 
 // One simulation step. Simulation logic happens here.
 Engine.prototype.step = function() {
@@ -205,8 +205,6 @@ Engine.prototype.step = function() {
     this.drawArray(this.layers[i], ctx);
   }
 
-
-
   // Released keys are only to be processed once
   Input.mouse.cleanUp();
   Input.keyboard.cleanUp();
@@ -223,8 +221,8 @@ Engine.prototype.drawArray = function(array, ctx) {
   for (var i = array.length - 1; i >= 0; i--) {
     ctx.save();
     ctx.translate(
-      -(this.viewport.x - this.viewport.width / 2) / this.viewport.scale,
-      -(this.viewport.y - this.viewport.height / 2) / this.viewport.scale);
+      -this.viewport.x / this.viewport.scale + this.viewport.width / 2,
+      -this.viewport.y / this.viewport.scale + this.viewport.height / 2);
     ctx.fillStyle = array[i].color;
 
     if(this.selectedEntity === array[i]) {

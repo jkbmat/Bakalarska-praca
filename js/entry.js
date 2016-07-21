@@ -14,7 +14,7 @@ UI.initialize();
 window._engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 20));
 
 
-_engine.addEntity(new Circle(new b2Vec2(40, 6), 2), BodyType.DYNAMIC_BODY)
+_engine.addEntity(new Circle(new b2Vec2(0, 0), 2), BodyType.DYNAMIC_BODY)
   .setCollisionGroup(2)
   .setId("kruh")
   .disableRotation(false)
@@ -37,7 +37,7 @@ _engine.addEntity(new Circle(new b2Vec2(40, 6), 2), BodyType.DYNAMIC_BODY)
     )
   );
 
-_engine.addEntity(new Rectangle(new b2Vec2(42, 35), new b2Vec2(35, 0.2)), BodyType.KINEMATIC_BODY)
+_engine.addEntity(new Rectangle(new b2Vec2(0, 15), new b2Vec2(20, 0.2)), BodyType.KINEMATIC_BODY)
   .setId("platform")
   .setCollisionGroup(1);
 

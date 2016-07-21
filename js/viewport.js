@@ -21,8 +21,8 @@ var Viewport = function(canvasElement, width, height, x, y) {
     this.x = x;
     this.y = y;
   } else {
-    this.x = Math.floor(this.width / 2);
-    this.y = Math.floor(this.height / 2);
+    this.x = 0;
+    this.y = 0;
   }
 
   // Canvas element
@@ -42,7 +42,7 @@ var Viewport = function(canvasElement, width, height, x, y) {
 Viewport.prototype.resetElement = function() {
   this.canvasElement.width = this.width;
   this.canvasElement.height = this.height;
-}
+};
 
 // Automatically resizes the viewport to fill the screen
 Viewport.prototype.autoResize = function() {
@@ -60,7 +60,7 @@ Viewport.prototype.setAutoResize = function(value) {
     window.onresize = function() {
       t.autoResize();
       t.resetElement();
-    }
+    };
   } else {
     window.onresize = null;
   }
