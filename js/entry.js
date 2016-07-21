@@ -11,32 +11,33 @@ var Rectangle = require("./shapes.js").Rectangle;
 
 UI.initialize();
 
-window._engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 500));
+window._engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 20));
 
-_engine.addEntity(new Circle(new b2Vec2(500, 50), 20), BodyType.DYNAMIC_BODY)
+
+_engine.addEntity(new Circle(new b2Vec2(40, 6), 2), BodyType.DYNAMIC_BODY)
   .setCollisionGroup(2)
   .setId("kruh")
   .disableRotation(false)
   .addBehavior(
     new Behavior(
-      _engine.tokenManager.parser.parse("isButtonUp(number(32))"),
-     [ _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), getVelocityX(filterById(text(kruh))), number(-999999999999999999))"),_engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), number(-100), getVelocityY(filterById(text(kruh))))")]
-    )
-  )
-  .addBehavior(
-    new Behavior(
-      _engine.tokenManager.parser.parse("isButtonDown(number(37))"),
-      _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), number(-100), getVelocityY(filterById(text(kruh))))")
+      _engine.tokenManager.parser.parse("isButtonDown( number( 37 ) )"),
+      _engine.tokenManager.parser.parse("setLinearVelocity( filterById( text( kruh ) ), number( -10 ), getVelocityY( filterById( text( kruh ) ) ) )")
     )
   )
   .addBehavior(
     new Behavior(
       _engine.tokenManager.parser.parse("isButtonDown(number(39))"),
-      _engine.tokenManager.parser.parse("setLinearVelocity(filterById(text(kruh)), number(100), getVelocityY(filterById(text(kruh))))")
+      _engine.tokenManager.parser.parse("setLinearVelocity( filterById( text( kruh ) ), number( 10 ), getVelocityY( filterById( text( kruh ) ) ) )")
+    )
+  )
+  .addBehavior(
+    new Behavior(
+      _engine.tokenManager.parser.parse("isButtonDown(number(38))"),
+      _engine.tokenManager.parser.parse("setLinearVelocity( filterById( text( kruh ) ), getVelocityX( filterById( text( kruh ) ) ), number( -10 ) )")
     )
   );
 
-_engine.addEntity(new Rectangle(new b2Vec2(400, 400), new b2Vec2(400, 3)), BodyType.KINEMATIC_BODY)
+_engine.addEntity(new Rectangle(new b2Vec2(42, 35), new b2Vec2(35, 0.2)), BodyType.KINEMATIC_BODY)
   .setId("platform")
   .setCollisionGroup(1);
 

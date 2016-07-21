@@ -350,7 +350,7 @@ var UI = {
 
       // X
       { type: "html", content: Translations.getTranslatedWrapped(9)},
-      { type: "inputNumber", value: entity.body.GetPosition().get_x(),
+      { type: "inputNumber", value: entity.body.GetPosition().get_x(), id: "entity_x",
         oninput: function (val) {
           entity.body.SetTransform(new b2Vec2(val * 1, entity.body.GetPosition().get_y()), entity.body.GetAngle());
         }},
@@ -358,7 +358,7 @@ var UI = {
 
       // Y
       { type: "html", content: Translations.getTranslatedWrapped(10)},
-      { type: "inputNumber", value: entity.body.GetPosition().get_y(),
+      { type: "inputNumber", value: entity.body.GetPosition().get_y(), id: "entity_y",
         oninput: function (val) {
           entity.body.SetTransform(new b2Vec2(entity.body.GetPosition().get_x(), val * 1), entity.body.GetAngle());
         }},
@@ -366,7 +366,7 @@ var UI = {
 
       // Rotation
       { type: "html", content: Translations.getTranslatedWrapped(11)},
-      { type: "inputNumber", value: entity.body.GetAngle() * 180 / Math.PI,
+      { type: "inputNumber", value: entity.body.GetAngle() * 180 / Math.PI, id: "entity_rotation",
         oninput: function (val) {entity.body.SetTransform(entity.body.GetPosition(), (val * 1) * Math.PI / 180);}},
       { type: "html", content: el("p")},
 

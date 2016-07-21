@@ -335,7 +335,7 @@ var UIBuilder = {
 
       sidebar.style.width = sidebarWidth + "px";
       content.style.width = contentWidth + "px";
-    }
+    };
 
     resizer.onmousedown = function (e) {
       sidebar.resizing = true;

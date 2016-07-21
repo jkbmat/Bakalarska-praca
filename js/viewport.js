@@ -4,6 +4,8 @@ var Utils = require("./utils.js");
 // This is basically camera + projector
 
 var Viewport = function(canvasElement, width, height, x, y) {
+  this.scale = 1 / 20;
+
   // Canvas dimensions
   if (width != undefined && height != undefined) {
     this.setAutoResize(false);
@@ -46,8 +48,6 @@ Viewport.prototype.resetElement = function() {
 Viewport.prototype.autoResize = function() {
   this.width = Utils.getBrowserWidth();
   this.height = Utils.getBrowserHeight();
-  this.x = Math.floor(this.width / 2);
-  this.y = Math.floor(this.height / 2);
 };
 
 // Toggles viewport auto resizing
@@ -64,6 +64,11 @@ Viewport.prototype.setAutoResize = function(value) {
   } else {
     window.onresize = null;
   }
+};
+
+Viewport.prototype.getOffset = function()
+{
+  return [this.x - this.width / 2, this.y - this.height / 2];
 };
 
 module.exports = Viewport;

@@ -20,7 +20,7 @@ Circle.prototype.constructor = Circle;
 Circle.prototype.draw = function(ctx) {
   ctx.beginPath();
 
-  ctx.arc(0, 0, this.radius, 0, 2 * Math.PI, false);
+  ctx.arc(0, 0, this.radius / _engine.viewport.scale, 0, 2 * Math.PI, false);
 
   ctx.fill();
 
@@ -29,16 +29,16 @@ Circle.prototype.draw = function(ctx) {
 
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(0, this.radius);
+  ctx.lineTo(0, this.radius / _engine.viewport.scale);
   ctx.stroke();
   ctx.closePath();
-}
+};
 
 
 // Rectangle entity
 var Rectangle = function(center, extents, fixture, id, collisionGroup) {
   var shape = new b2PolygonShape();
-  shape.SetAsBox(extents.get_x(), extents.get_y())
+  shape.SetAsBox(extents.get_x(), extents.get_y());
 
   var body = new b2BodyDef();
   body.set_position(center);
@@ -48,16 +48,16 @@ var Rectangle = function(center, extents, fixture, id, collisionGroup) {
   this.extents = extents;
 
   return this;
-}
+};
 Rectangle.prototype = new Entity();
 Rectangle.prototype.constructor = Rectangle;
 
 Rectangle.prototype.draw = function(ctx) {
-  var halfWidth = this.extents.get_x();
-  var halfHeight = this.extents.get_y();
+  var halfWidth = this.extents.get_x() / _engine.viewport.scale;
+  var halfHeight = this.extents.get_y() / _engine.viewport.scale;
 
   ctx.fillRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2);
-}
+};
 
 
 module.exports.Circle = Circle;

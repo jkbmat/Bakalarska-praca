@@ -9,6 +9,8 @@ window.Input = {
   mouse: {
     x: 0,
     y: 0,
+    canvasX: 0,
+    canvasY: 0,
     realX: 0,
     realY: 0,
     leftDown: false,
@@ -17,8 +19,10 @@ window.Input = {
     rightUp: false,
 
     updatePosition: function (event) {
-      this.x = event.pageX - Input.element.getBoundingClientRect().left;
-      this.y = event.pageY - Input.element.getBoundingClientRect().top;
+      this.canvasY = event.pageY - Input.element.getBoundingClientRect().top;
+      this.canvasX = event.pageX - Input.element.getBoundingClientRect().left;
+      this.x = this.canvasX * _engine.viewport.scale + (_engine.viewport.x - _engine.viewport.width / 2);
+      this.y = this.canvasY * _engine.viewport.scale + (_engine.viewport.y - _engine.viewport.height / 2);
       this.realX = event.pageX;
       this.realY = event.pageY;
     },
@@ -32,7 +36,6 @@ window.Input = {
 
       if (event.target === Input.element) {
         Input.tool.onclick();
-        event.preventDefault();
       }
     },
 
@@ -105,6 +108,9 @@ window.Input = {
     document.onkeyup = function(e) {
       Input.keyboard.updateButtonsUp(e);
     };
+    document.onselectstart = function () {
+      return false;
+    }
   }
 };
 

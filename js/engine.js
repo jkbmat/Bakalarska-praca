@@ -143,7 +143,7 @@ Engine.prototype.setCollision = function(groupA, groupB, value) {
     this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask & ~maskA;
     this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask & ~maskB;
   }
-  this.updateCollisions()
+  this.updateCollisions();
 
   return this;
 }
@@ -191,12 +191,6 @@ Engine.prototype.step = function() {
 
   ctx.save();
 
-  // draw all entities
-  for (var i = 0; i < this.LAYERS_NUMBER; i++)
-  {
-    this.drawArray(this.layers[i], ctx);
-  }
-
   if (!_engine.world.paused) {
     // box2d simulation step
     this.world.Step(1 / 60, 10, 5);
@@ -205,6 +199,13 @@ Engine.prototype.step = function() {
     Input.tool.onmove(ctx);
   }
   
+  // draw all entities
+  for (var i = 0; i < this.LAYERS_NUMBER; i++)
+  {
+    this.drawArray(this.layers[i], ctx);
+  }
+
+
 
   // Released keys are only to be processed once
   Input.mouse.cleanUp();
@@ -221,7 +222,9 @@ Engine.prototype.step = function() {
 Engine.prototype.drawArray = function(array, ctx) {
   for (var i = array.length - 1; i >= 0; i--) {
     ctx.save();
-    ctx.translate(this.viewport.x - this.viewport.width / 2, this.viewport.y - this.viewport.height / 2);
+    ctx.translate(
+      -(this.viewport.x - this.viewport.width / 2) / this.viewport.scale,
+      -(this.viewport.y - this.viewport.height / 2) / this.viewport.scale);
     ctx.fillStyle = array[i].color;
 
     if(this.selectedEntity === array[i]) {
@@ -231,7 +234,7 @@ Engine.prototype.drawArray = function(array, ctx) {
 
     var x = array[i].body.GetPosition().get_x();
     var y = array[i].body.GetPosition().get_y();
-    ctx.translate(x, y);
+    ctx.translate(x / this.viewport.scale, y / this.viewport.scale);
     ctx.rotate(array[i].body.GetAngle());
 
     array[i].draw(ctx);
