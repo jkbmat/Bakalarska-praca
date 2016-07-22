@@ -54,18 +54,18 @@ var UI = {
         id: "tool",
         elements: [
           {
-            text: el.img({src: "./img/selection.png"}), checked: true, onclick: function () {
-            Input.tool = Tools.Selection;
+            text: el.img({src: "./img/selection.png"}), id: "selectionTool", checked: true, onclick: function () {
+            _engine.selectTool(Tools.Selection);
           }
           },
           {
             text: el.img({src: "./img/rectangle.png"}), onclick: function () {
-            Input.tool = Tools.Rectangle;
+            _engine.selectTool(Tools.Rectangle);
           }
           },
           {
             text: el.img({src: "./img/circle.png"}), onclick: function () {
-            Input.tool = Tools.Circle;
+            _engine.selectTool(Tools.Circle);
           }
           },
         ]
@@ -338,13 +338,13 @@ var UI = {
 
       // Collision group
       { type: "html", content: Translations.getTranslatedWrapped(8)},
-      { type: "inputNumber", value: entity.collisionGroup + 1, min: 1, max: _engine.COLLISION_GROUPS_NUMBER,
+      { type: "range", value: entity.collisionGroup + 1, min: 1, max: _engine.COLLISION_GROUPS_NUMBER,
         oninput: function (val) {entity.setCollisionGroup(val * 1 - 1);}},
       { type: "html", content: el("p")},
 
       // Layer
       { type: "html", content: Translations.getTranslatedWrapped(21)},
-      { type: "inputNumber", value: entity.layer + 1, min: 1, max: _engine.LAYERS_NUMBER,
+      { type: "range", value: entity.layer + 1, min: 1, max: _engine.LAYERS_NUMBER,
         oninput: function (val) { _engine.setEntityLayer(entity, val*1 - 1); }},
       { type: "html", content: el("p")},
 
@@ -366,13 +366,31 @@ var UI = {
 
       // Rotation
       { type: "html", content: Translations.getTranslatedWrapped(11)},
-      { type: "inputNumber", value: entity.body.GetAngle() * 180 / Math.PI, id: "entity_rotation",
+      { type: "range", min: 0, max: 360, step: 1, value: (((entity.body.GetAngle() * 180 / Math.PI) % 360)+360)%360, id: "entity_rotation",
         oninput: function (val) {entity.body.SetTransform(entity.body.GetPosition(), ((val * 1) * Math.PI / 180)%360);}},
       { type: "html", content: el("p")},
 
       // Fixed rotation
       { type: "html", content: Translations.getTranslatedWrapped(12)},
       { type: "checkbox", checked: entity.fixedRotation, onchange: function(val) { entity.disableRotation(val); } },
+      { type: "html", content: el("p")},
+
+      // Restitution
+      { type: "html", content: Translations.getTranslatedWrapped(32)},
+      { type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetRestitution(),
+        oninput: function (val) {entity.fixture.SetRestitution(val*1);}},
+      { type: "html", content: el("p")},
+
+      // Friction
+      { type: "html", content: Translations.getTranslatedWrapped(33)},
+      { type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetFriction(),
+        oninput: function (val) {entity.fixture.SetFriction(val*1);}},
+      { type: "html", content: el("p")},
+
+      // Density
+      { type: "html", content: Translations.getTranslatedWrapped(34)},
+      { type: "inputNumber", value: entity.fixture.GetDensity(), min: 0,
+        oninput: function (val) {entity.fixture.SetDensity(val*1);entity.body.ResetMassData();}},
       { type: "html", content: el("p")},
 
       // Color

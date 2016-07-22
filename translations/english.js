@@ -32,5 +32,8 @@ Translations.strings.push(
     "Remove behavior",
     "Done",
     "Cancel",
+    "Restitution:",
+    "Friction:",
+    "Density:",
   ]
 );

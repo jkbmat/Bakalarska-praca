@@ -32,5 +32,8 @@ Translations.strings.push(
     "Odstrániť podmienku",
     "Hotovo",
     "Zrušiť",
+    "Pružnosť:",
+    "Trenie:",
+    "Hustota:"
   ]
 );

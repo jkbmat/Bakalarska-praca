@@ -45,7 +45,7 @@ input.ui[type=text], input.ui[type=number] {
   cursor: text; }
 
 .ui.disabled {
-  color: #999;
+  opacity: 0.4;
   cursor: default; }
 
 input[type=checkbox].ui {
@@ -109,5 +109,36 @@ input[type=checkbox].ui {
     border-left-color: #c4c4c4; }
   .ui.resizer.resizing {
     border-left-color: #9d9d9d; }
+
+.ui.range input {
+  display: inline-block;
+  margin: 0; }
+  .ui.range input[type=number] {
+    width: 55px;
+    float: right; }
+  .ui.range input[type=range] {
+    width: calc(100% - 65px);
+    -webkit-appearance: none;
+    border: none;
+    height: 24px; }
+    .ui.range input[type=range]:focus {
+      outline: none; }
+    .ui.range input[type=range]::-webkit-slider-thumb, .ui.range input[type=range]::-moz-range-thumb {
+      -webkit-appearance: none;
+      width: 8px;
+      height: 16px;
+      border-radius: 3px;
+      background: #ddd;
+      cursor: pointer;
+      margin-top: -6px;
+      border: 1px solid #999; }
+    .ui.range input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 2px;
+      cursor: pointer;
+      background: #ddd;
+      border-radius: 3px; }
+    .ui.range input[type=range]:hover::-webkit-slider-thumb {
+      background: #999; }
 
 /*# sourceMappingURL=ui.css.map */

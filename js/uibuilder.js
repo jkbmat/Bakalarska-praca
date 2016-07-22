@@ -152,10 +152,11 @@ var UIBuilder = {
       value: 0,
       min: -Infinity,
       max: Infinity,
+      step: 1,
       oninput: function(){}
     }, properties);
 
-    var ret = el("input.ui", { type: "number", id: properties.id, value: properties.value, min: properties.min, max: properties.max });
+    var ret = el("input.ui", { type: "number", id: properties.id, value: properties.value, min: properties.min, max: properties.max, step: properties.step });
 
     ret.disable = function () {
       $(this).addClass("disabled");
@@ -206,6 +207,49 @@ var UIBuilder = {
     };
 
     return ret;
+  },
+
+  range: function (properties) {
+    properties = $.extend({}, {
+      id: "range-" + $("input[type=range]").length,
+      value: 0,
+      min: 0,
+      max: 10,
+      step: 1,
+      oninput: function(){}
+    }, properties);
+
+    var slider = el("input.ui", { type: "range", min: properties.min, max: properties.max, step: properties.step, value: properties.value, id: properties.id });
+    var input = this.inputNumber(properties);
+
+    input.oninput = function() {
+      properties.oninput(input.value);
+      slider.value = input.value;
+    };
+
+    slider.disable = function () {
+      $(this).addClass("disabled");
+      this.disabled = true;
+
+      $(input).addClass("disabled");
+      input.disabled = true;
+    };
+
+    slider.enable = function () {
+      $(this).removeClass("disabled");
+      this.disabled = false;
+
+      $(input).removeClass("disabled");
+      input.disabled = false;
+    };
+
+    slider.oninput = function () {
+      properties.oninput(this.value);
+      input.value = this.value;
+    };
+
+
+    return el("div.ui.range", {}, [slider, input]);
   },
 
   checkbox: function (properties) {
@@ -274,6 +318,10 @@ var UIBuilder = {
 
         case "checkbox":
           generated = this.checkbox(element);
+          break;
+
+        case "range":
+          generated = this.range(element);
           break;
 
         case "html":

@@ -23,6 +23,7 @@ ako funguje cela kamera?
 var Engine = function(viewport, gravity) {
   this.viewport = viewport;
   this.selectedEntity = null;
+  this.selectedTool = Tools.Selection;
   
   this.COLLISION_GROUPS_NUMBER = 16;
   this.LAYERS_NUMBER = 10;
@@ -49,17 +50,23 @@ var Engine = function(viewport, gravity) {
   this.tokenManager = new TokenManager();
 
   Input.initialize(viewport.canvasElement);
+
+  $(viewport.canvasElement).on("mousedown", function(){_engine.selectedTool.onclick();});
+  $(viewport.canvasElement).on("mouseup", function(){_engine.selectedTool.onrelease();});
 };
 
 // Changes running state of the simulation
 Engine.prototype.togglePause = function () {
   this.world.paused = !this.world.paused;
-  this.selectedEntity = null;
+  this.selectEntity(null);
 
-  Input.tool = Tools.Blank;
+  this.selectTool(this.world.paused ? Tools.Selection : Tools.Blank);
+  $("#selectionTool")[0].checked = true;
+};
 
-  if(this.world.paused)
-    Input.tool = Tools.Selection;
+Engine.prototype.selectTool = function (tool) {
+  this.selectedTool = tool;
+  this.selectEntity(null);
 };
 
 Engine.prototype.removeEntity = function (entity) {
@@ -196,7 +203,7 @@ Engine.prototype.step = function() {
     this.world.Step(1 / 60, 10, 5);
   }
   else {
-    Input.tool.onmove(ctx);
+    this.selectedTool.onmove(ctx);
   }
   
   // draw all entities

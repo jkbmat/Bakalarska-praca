@@ -1,9 +1,6 @@
 // INPUT CAPTURING
 
-var Tools = require("./tools.js");
-
 window.Input = {
-  tool: Tools.Selection,
   element: null,
 
   mouse: {
@@ -28,22 +25,14 @@ window.Input = {
     },
 
     updateButtonsDown: function (event) {
-      console.log([this.x, this.y], _engine.viewport.x, (_engine.viewport.x - _engine.viewport.width / 2));
       if (event.which === 1)
         this.leftDown = true;
 
       if (event.which === 3)
         this.rightDown = true;
-
-      if (event.target === Input.element) {
-        Input.tool.onclick();
-      }
     },
 
     updateButtonsUp: function (event) {
-      if (event.target === Input.element)
-        Input.tool.onrelease();
-
       if (event.which === 1) {
         this.leftDown = false;
         this.leftUp = true;
@@ -66,7 +55,7 @@ window.Input = {
     up: new Set(),
 
     isDown: function (keyCode) {
-      return this.down.has(keyCode)
+      return this.down.has(keyCode);
     },
 
     isUp: function (keyCode) {
