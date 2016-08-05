@@ -216,7 +216,9 @@ var UIBuilder = {
       min: 0,
       max: 10,
       step: 1,
-      oninput: function(){}
+      width: "100%",
+      disableWrite: false,
+      oninput: function(){},
     }, properties);
 
     var slider = el("input.ui", { type: "range", min: properties.min, max: properties.max, step: properties.step, value: properties.value, id: properties.id });
@@ -248,8 +250,11 @@ var UIBuilder = {
       input.value = this.value;
     };
 
+    var ret = [slider, input];
+    if (properties.disableWrite)
+      ret = [slider];
 
-    return el("div.ui.range", {}, [slider, input]);
+    return el("div.ui.range", {style: "width:"+properties.width}, ret);
   },
 
   checkbox: function (properties) {

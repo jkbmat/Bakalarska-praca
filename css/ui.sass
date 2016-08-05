@@ -6,14 +6,14 @@ $basic-color: #ddd
 $background-color: #fff
 $text-color: #000
 
-$font-size: 12px
+$font-size: 11px
 
 .ui
   box-sizing: border-box
 
 
 body, html
-  font: $font-size sans-serif
+  font: $font-size "Amiko", sans-serif
   overflow: hidden
   color: $text-color
   position: relative
@@ -22,6 +22,11 @@ body, html
   margin: 0
   padding: 0
 
+select
+  font-family: "Amiko", sans-serif
+
+.sidebar .content>div>span:not(.ui), .toolbar>div>span:not(.ui)
+  //font-weight: bold
 
 .ui.radioGroup
   list-style-type: none
@@ -39,7 +44,7 @@ body, html
 .ui.button, select.ui, input.ui
   border: 1px solid $basic-color
   padding: 0.5em
-  font-size: $font-size - 1px
+  font-size: $font-size
   cursor: pointer
   border-radius: 3px
   margin: 0 0.25em
@@ -141,39 +146,65 @@ input[type=checkbox].ui
   &.resizing
     border-left-color: darken($basic-color, 25%)
 
-.ui.range input
-  display: inline-block
-  margin: 0
+.ui.range
+  display: inline-flex
 
-  &[type=number]
-    width: 55px
-    float: right
+  input
+    margin: 0
 
-  &[type=range]
-    width: calc(100% - 65px)
-    -webkit-appearance: none
-    border: none
-    height: 24px
+    &[type=number]
+      width: 55px
+      float: right
 
-    &:focus
-      outline: none
-
-    &::-webkit-slider-thumb, &::-moz-range-thumb
+    &[type=range]
       -webkit-appearance: none
-      width: 8px
-      height: 16px
-      border-radius: 3px
-      background: $basic-color
-      cursor: pointer
-      margin-top: -6px
-      border: 1px solid $highlight-color
+      flex-grow: 3
+      border: none
+      height: 24px
 
-    &::-webkit-slider-runnable-track
-      width: 100%
-      height: 2px
-      cursor: pointer
-      background: $basic-color
-      border-radius: 3px
+      &:focus
+        outline: none
 
-    &:hover::-webkit-slider-thumb
-      background: $highlight-color
+      &::-webkit-slider-thumb
+        -webkit-appearance: none
+        width: 8px
+        height: 16px
+        border-radius: 3px
+        background: $basic-color
+        cursor: pointer
+        margin-top: -6px
+        border: 1px solid $highlight-color
+
+      &::-webkit-slider-runnable-track
+        width: 100%
+        height: 2px
+        cursor: pointer
+        background: $basic-color
+        border-radius: 3px
+
+      &:active::-webkit-slider-thumb
+        background: $highlight-color
+
+.entityList
+  background: $light-color
+  border-radius: 3px
+  padding: 3px
+
+  .layer
+    background: $background-color
+    border-radius: 3px
+    padding: 3px
+    margin-bottom: 3px
+
+    .entity
+      background: $light-color
+      border-radius: 3px
+      padding: 3px
+      margin-bottom: 3px
+      cursor: pointer
+      color: $highlight-color
+
+      .id
+        font-weight: bold
+        color: $text-color
+

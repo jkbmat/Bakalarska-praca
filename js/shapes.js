@@ -12,6 +12,8 @@ var Circle = function(center, radius, fixture, id, collisionGroup) {
 
   this.radius = radius;
 
+  this.nameString = 19;
+
   return this;
 }
 Circle.prototype = new Entity();
@@ -46,6 +48,8 @@ var Rectangle = function(center, extents, fixture, id, collisionGroup) {
   Entity.call(this, shape, fixture, body, id, collisionGroup);
 
   this.extents = extents;
+
+  this.nameString = 18;
 
   return this;
 };

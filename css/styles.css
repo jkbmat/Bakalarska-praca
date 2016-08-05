@@ -1,22 +1,3 @@
-html
-{
-	margin: 0;
-	padding: 0;
-	position: relative;
-	width: 100%;
-	height: 100%;
-}
-
-body
-{
-	margin: 0;
-	padding: 0;
-	position: relative;
-	width: 100%;
-	height: 100%;
-	font: 15px Calibri, sans-serif;
-}
-
 .ui.sidebar input, .ui.sidebar select
 {
 	width: 100%;

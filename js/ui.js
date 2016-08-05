@@ -1,6 +1,7 @@
 var Tools = require("./tools.js");
 var BodyType = require("./bodytype.js");
 var UIBuilder = require("./uibuilder.js");
+var Constants = require("./constants.js");
 
 // Object for building the UI
 var UI = {
@@ -71,6 +72,23 @@ var UI = {
         ]
       },
       {type: "break"},
+      { type: "html", content: Translations.getTranslatedWrapped(36) },
+      {
+        type: "range",
+
+        min: 1,
+        max: 11,
+        step: 1,
+        value: 6,
+        width: "150px",
+        disableWrite: true,
+
+        oninput: function(val) {
+          var a = 1.5;
+          _engine.viewport.scale = (Constants.DEFAULT_SCALE / Math.pow(a, 6)) * Math.pow(a, 12 - val);
+        }
+      },
+      {type: "break"},
       {
         type: "select",
         options: languages,
@@ -91,10 +109,10 @@ var UI = {
   createCollisions: function() {
     var table = el("table.collisionTable");
 
-    for (var i = 0; i < _engine.COLLISION_GROUPS_NUMBER + 1; i++) {
+    for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER + 1; i++) {
       var tr = el("tr");
 
-      for (var j = 0; j < _engine.COLLISION_GROUPS_NUMBER + 1; j++) {
+      for (var j = 0; j < Constants.COLLISION_GROUPS_NUMBER + 1; j++) {
         var td = el("td");
 
         // first row
@@ -327,6 +345,8 @@ var UI = {
     sidebar.html("");
 
     if (entity === null) {
+      $(".sidebar.ui .content").html(this.buildEntityList());
+
       return;
     }
 
@@ -338,13 +358,13 @@ var UI = {
 
       // Collision group
       { type: "html", content: Translations.getTranslatedWrapped(8)},
-      { type: "range", value: entity.collisionGroup + 1, min: 1, max: _engine.COLLISION_GROUPS_NUMBER,
+      { type: "range", value: entity.collisionGroup + 1, min: 1, max: Constants.COLLISION_GROUPS_NUMBER,
         oninput: function (val) {entity.setCollisionGroup(val * 1 - 1);}},
       { type: "html", content: el("p")},
 
       // Layer
       { type: "html", content: Translations.getTranslatedWrapped(21)},
-      { type: "range", value: entity.layer + 1, min: 1, max: _engine.LAYERS_NUMBER,
+      { type: "range", value: entity.layer + 1, min: 1, max: Constants.LAYERS_NUMBER,
         oninput: function (val) { _engine.setEntityLayer(entity, val*1 - 1); }},
       { type: "html", content: el("p")},
 
@@ -424,6 +444,38 @@ var UI = {
     ];
 
     sidebar[0].appendChild(UIBuilder.build(properties));
+  },
+  
+  buildEntityList: function () {
+    var ret = el("div.entityList");
+
+    for (var i = 0; i < Constants.LAYERS_NUMBER; i++)
+    {
+      if (_engine.layers[i].length === 0)
+        continue;
+
+      var layerElement = el("div.layer", {}, [Translations.getTranslatedWrapped(35), " " + (i + 1) + ":"]);
+
+      for (var j = 0; j < _engine.layers[i].length; j++) {
+        var entity = _engine.layers[i][j];
+
+        var entityElement = el("div.entity", {}, [el("span", {}, [
+          el("span.id", {}, [entity.id]), ": ", Translations.getTranslatedWrapped(entity.nameString)
+        ])]);
+
+        entityElement.onclick = (function (entity) {
+          return function () {
+            _engine.selectEntity(entity);
+          };
+        })(entity);
+
+        layerElement.appendChild(entityElement);
+      }
+
+      ret.appendChild(layerElement);
+    }
+
+    return ret;
   }
 };
 

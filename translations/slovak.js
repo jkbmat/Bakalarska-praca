@@ -34,6 +34,8 @@ Translations.strings.push(
     "Zrušiť",
     "Pružnosť:",
     "Trenie:",
-    "Hustota:"
+    "Hustota:",
+    "Vrstva ",
+    "Priblíženie: "
   ]
 );

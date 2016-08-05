@@ -1,0 +1,6 @@
+module.exports = {
+  COLLISION_GROUPS_NUMBER: 16,
+  LAYERS_NUMBER: 10,
+  DEFAULT_SCALE: 1 / 20,
+  AUTO_ID_PREFIX: "Entity "
+};

@@ -20,20 +20,20 @@ _engine.addEntity(new Circle(new b2Vec2(0, 0), 2), BodyType.DYNAMIC_BODY)
   .disableRotation(false)
   .addBehavior(
     new Behavior(
-      _engine.tokenManager.parser.parse("isButtonDown( number( 37 ) )"),
-      _engine.tokenManager.parser.parse("setLinearVelocity( filterById( text( kruh ) ), number( -10 ), getVelocityY( filterById( text( kruh ) ) ) )")
+      _engine.tokenManager.parser.parse("(( getVelocityX( filterById( text( \"kruh\" ) ) ) ) > (number( \"-10\" ))) AND (isButtonDown( number( 37 ) ) )"),
+      _engine.tokenManager.parser.parse("applyLinearImpulse( filterById( text( \"kruh\" ) ), number( -1 ), number( 0 ) )")
     )
   )
   .addBehavior(
     new Behavior(
-      _engine.tokenManager.parser.parse("isButtonDown(number(39))"),
-      _engine.tokenManager.parser.parse("setLinearVelocity( filterById( text( kruh ) ), number( 10 ), getVelocityY( filterById( text( kruh ) ) ) )")
+      _engine.tokenManager.parser.parse("((getVelocityY( filterById( text( \"kruh\" ) ) )) > (number( -15 ))) AND (isButtonDown( number( 38 ) ))"),
+      _engine.tokenManager.parser.parse("applyLinearImpulse( filterById( text( \"kruh\" ) ), number( 0 ), number( -2 ) )")
     )
   )
   .addBehavior(
     new Behavior(
-      _engine.tokenManager.parser.parse("isButtonDown(number(38))"),
-      _engine.tokenManager.parser.parse("setLinearVelocity( filterById( text( kruh ) ), getVelocityX( filterById( text( kruh ) ) ), number( -10 ) )")
+      _engine.tokenManager.parser.parse("((getVelocityX( filterById( text( \"kruh\" ) ) )) < (number( 10 ))) AND (isButtonDown( number( 39 ) ))"),
+      _engine.tokenManager.parser.parse("applyLinearImpulse( filterById( text( \"kruh\" ) ), number( 1 ), number( 0 ) )")
     )
   );
 
@@ -44,7 +44,3 @@ _engine.addEntity(new Rectangle(new b2Vec2(0, 15), new b2Vec2(20, 0.2)), BodyTyp
 window.requestAnimationFrame(function() {
   _engine.step();
 });
-
-
-
-

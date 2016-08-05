@@ -1,54 +1,69 @@
 var FixType = require("./typing").FixType;
 var Type = require("./typing").Type;
+var Literal = require("./token.js").Literal;
 
-var TypeException = function(expected, received, token) {
-  this.expected = expected;
-  this.received = received;
-  this.token = token;
-};
 
 var Parser = function (tokenManager) {
   this.tokenManager = tokenManager;
-
-  this.stopChars = ["(", ")", ","];
 
   this.parserInput = "";
   this.parserInputWhole = "";
   this.parserStack = [];
 };
 
-Parser.prototype.parse = function(input) {
-  this.parserInput = input;
-  this.parserInputWhole = input;
-  this.parserStack = [];
+Parser.prototype.fail = function (message) {
+  throw message + "\nRemaining input: " + this.parserInput;
+};
 
-  do {
-    this.parseStep();
-  } while (this.parserInput.length);
+Parser.prototype.currentChar = function() {
+  return this.parserInput.length ? this.parserInput[0] : "";
+};
 
-  var ret = this.parserStack.pop();
+Parser.prototype.nextChar = function () {
+  return this.parserInput[1];
+};
 
-  if (this.parserStack.length)
-    throw "Unexpected " + ret.name;
+Parser.prototype.removeChar = function () {
+  this.parserInput = this.parserInput.slice(1);
+};
+
+Parser.prototype.readChar = function() {
+  var ret = this.currentChar();
+
+  this.removeChar();
 
   return ret;
 };
 
-Parser.prototype.readWhitespace = function() {
-  while (/\s/.test(this.parserInput[0]) && this.parserInput.length) {
-    this.parserInput = this.parserInput.slice(1);
-  }
+Parser.prototype.readWhitespace = function () {
+  while (this.currentChar() === " ")
+    this.removeChar();
 };
 
-Parser.prototype.parseName = function() {
+Parser.prototype.readName = function () {
   this.readWhitespace();
 
   var ret = "";
 
-  while (!/\s/.test(this.parserInput[0]) && this.parserInput.length && this.stopChars.indexOf(this.parserInput[0]) === -1) // read until a whitespace occurs
-  {
-    ret += this.parserInput[0];
-    this.parserInput = this.parserInput.slice(1);
+  while(/[^ ,)("]/.test(this.currentChar()))
+    ret += this.readChar();
+
+  if (this.currentChar() === '"') {
+    this.readChar();
+
+    while (this.currentChar() !== '"') {
+      if (this.currentChar() === "\\" && this.nextChar() === "\"") {
+        this.readChar();
+        this.readChar();
+
+        ret += "\"";
+      }
+
+      else
+        ret += this.readChar();
+    }
+
+    this.readChar();
   }
 
   this.readWhitespace();
@@ -56,88 +71,63 @@ Parser.prototype.parseName = function() {
   return ret;
 };
 
-Parser.prototype.readChar = function(char) {
+Parser.prototype.readParentheses = function () {
   this.readWhitespace();
 
-  if (this.parserInput[0] !== char) {
-    var position = this.parserInputWhole.length - this.parserInput.length;
-    throw "Expected '" + char + "' at position " + position + " at '" + this.parserInputWhole.substr(position) + "'";
+  if (this.currentChar() !== "(")
+    return;
+
+  this.readChar();
+
+  while (this.currentChar() !== ")"){
+    this.readWhitespace();
+
+    this.parseToken();
+
+    this.readWhitespace();
+
+    if (this.currentChar() === ",") {
+      this.readChar();
+      this.readWhitespace();
+    }
   }
 
-  this.parserInput = this.parserInput.slice(1);
-
-  this.readWhitespace();
+  this.readChar();
 };
 
-Parser.prototype.parseStep = function(expectedType) {
-  var name = this.parseName();
+Parser.prototype.parseToken = function () {
+  this.readParentheses();
+
+  var name = this.readName();
   var token = this.tokenManager.getTokenByName(name);
+  token = token === undefined ? new Literal(name) : new token.constructor();
 
-  if (token === undefined && (expectedType === Type.LITERAL || expectedType == undefined)) {
-    this.parserStack.push(name);
-    return name;
-  }
+  this.readParentheses();
 
-  if (token == undefined && expectedType !== undefined) {
-    throw "Expected argument with type " + expectedType;
-  }
+  if (token.type !== Type.LITERAL)
+  {
+    for(var i = token.argument_types.length - 1; i >= 0; i--) {
+      var arg = this.parserStack.pop();
 
-  if (expectedType !== undefined && token.type !== expectedType) {
-    throw "Unexpected " + token.type + " (was expecting " + expectedType + ")";
-  }
-
-  var numArgs = token.argument_types.length;
-
-  var args = [];
-
-  if (token.fixType === FixType.INFIX) {
-    var a = this.parserStack.pop();
-
-    if (a.type !== token.argument_types[0])
-      throw "Unexpected " + a.type + " (was expecting " + token.argument_types[0] + ")";
-
-    args = [a, this.parseStep(token.argument_types[1])];
-    this.parserStack.pop();
-  }
-
-  if (token.fixType === FixType.PREFIX) {
-    this.readChar("(");
-
-    while(this.parserInput[0] !== ")") {
-      this.readWhitespace();
-
-      this.parseStep();
-
-      if (this.parserInput[0] === ",")
-        this.parserInput = this.parserInput.slice(1);
-
-      this.readWhitespace();
+      if ((token.argument_types[i] !== arg.type))
+        this.fail("Expected " + token.argument_types[i] + ", got " + arg.type);
+      
+      token.args[i] = arg;
     }
-
-    for (i = 0; i < numArgs; i++) {
-      var expectedArg = token.argument_types[token.argument_types.length - i - 1];
-      var actualArg = this.parserStack[this.parserStack.length - 1].type;
-
-      if (expectedArg !== Type.LITERAL && actualArg !== expectedArg)
-      {
-        throw "Unexpected " + actualArg +
-          " (was expecting " + expectedArg + ")";
-      }
-      args.push(this.parserStack.pop());
-    }
-
-    args.reverse();
-
-    this.readChar(")");
   }
 
-  var newToken = new token.constructor();
-  for (var i = 0; i < args.length; i++) {
-    newToken.args[i] = args[i];
-  }
-  this.parserStack.push(newToken);
+  this.parserStack.push(token);
 
-  return newToken;
+  return token;
 };
+
+Parser.prototype.parse = function (input) {
+  this.parserInput = input;
+  this.parserInputWhole = input;
+  this.parserStack = [];
+
+  return this.parseToken();
+};
+
 
 module.exports = Parser;

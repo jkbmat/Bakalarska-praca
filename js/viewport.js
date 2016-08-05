@@ -1,10 +1,11 @@
 var Utils = require("./utils.js");
+var Constants = require("./constants.js");
 
 // VIEWPORT
 // This is basically camera + projector
 
 var Viewport = function(canvasElement, width, height, x, y) {
-  this.scale = 1 / 20;
+  this.scale = Constants.DEFAULT_SCALE;
 
   // Canvas dimensions
   if (width != undefined && height != undefined) {

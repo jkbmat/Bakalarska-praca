@@ -1,20 +1,7 @@
 var UI = require("./ui.js");
 var Tools = require("./tools.js");
 var TokenManager = require("./tokenmanager.js");
-
-
-const AUTO_ID_PREFIX = "ENTITY_NUMBER_";
-
-const DISPLAY_RATIO = 20;
-
-/*/ Myslienky
-
-lockovanie kamery na objekt
- * prechody
-ako funguje cela kamera?
-
-/*/
-
+var Constants = require("./constants.js");
 
 // ENGINE
 
@@ -25,20 +12,17 @@ var Engine = function(viewport, gravity) {
   this.selectedEntity = null;
   this.selectedTool = Tools.Selection;
   
-  this.COLLISION_GROUPS_NUMBER = 16;
-  this.LAYERS_NUMBER = 10;
-
-  this.layers = new Array(this.LAYERS_NUMBER);
-  for (var i = 0; i < this.LAYERS_NUMBER; i++)
+  this.layers = new Array(Constants.LAYERS_NUMBER);
+  for (var i = 0; i < Constants.LAYERS_NUMBER; i++)
   {
     this.layers[i] = [];
   }
 
   this.collisionGroups = [];
-  for (var i = 0; i < this.COLLISION_GROUPS_NUMBER; i++) {
+  for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER; i++) {
     this.collisionGroups.push({
       "name": i + 1,
-      "mask": parseInt(Array(this.COLLISION_GROUPS_NUMBER + 1).join("1"), 2)
+      "mask": parseInt(Array(Constants.COLLISION_GROUPS_NUMBER + 1).join("1"), 2)
     });
   }
 
@@ -62,6 +46,13 @@ Engine.prototype.togglePause = function () {
 
   this.selectTool(this.world.paused ? Tools.Selection : Tools.Blank);
   $("#selectionTool")[0].checked = true;
+
+  if (!this.world.paused)
+  {
+    var entities = this.entities();
+
+    entities.forEach(function(entity){entity.body.SetAwake(1)});
+  }
 };
 
 Engine.prototype.selectTool = function (tool) {
@@ -118,7 +109,7 @@ Engine.prototype.getEntitiesByCollisionGroup = function(group) {
 Engine.prototype.addEntity = function(entity, type) {
   // generate auto id
   if (entity.id === undefined) {
-    entity.id = AUTO_ID_PREFIX + this.lifetimeEntities;
+    entity.id = Constants.AUTO_ID_PREFIX + this.lifetimeEntities;
   }
 
   this.lifetimeEntities++;
@@ -207,7 +198,7 @@ Engine.prototype.step = function() {
   }
   
   // draw all entities
-  for (var i = 0; i < this.LAYERS_NUMBER; i++)
+  for (var i = 0; i < Constants.LAYERS_NUMBER; i++)
   {
     this.drawArray(this.layers[i], ctx);
   }

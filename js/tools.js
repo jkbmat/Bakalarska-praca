@@ -1,5 +1,6 @@
 var Shape = require("./shapes.js");
 var Type = require("./bodytype.js");
+var Constants = require("./constants.js");
 
 var Blank = {
   onclick: function () {},
@@ -16,7 +17,7 @@ var Selection = {
   onclick: function () {
     _engine.selectEntity(null);
 
-    for (var i = _engine.LAYERS_NUMBER - 1; i >= 0; i--) {
+    for (var i = Constants.LAYERS_NUMBER - 1; i >= 0; i--) {
       for (var j = 0; j < _engine.layers[i].length; j++) {
         // console.log([Input.mouse.x, Input.mouse.y], _engine.viewport.x);
         if (_engine.layers[i][j].fixture.TestPoint(

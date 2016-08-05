@@ -8,11 +8,6 @@ var Token = function(name, type, args, argument_types) {
   this.args = args == undefined ? [] : args;
   this.argument_types = argument_types;
   this.args = [];
-
-  for (var i = 0; i < this.args.length; i++) {
-    if (args[i].type !== argument_types[i] && argument_types[i] !== Type.LITERAL)
-      throw new TypeException(argument_types[i], args[i].type, this);
-  }
 };
 
 Token.prototype.toString = function() {
@@ -30,13 +25,26 @@ Token.prototype.toString = function() {
       ret = this.name + "(" + argStrings + ")";
       break;
     case FixType.INFIX:
-      ret = this.args[0].toString() + " " + this.name + " " + this.args[1].toString();
+      ret = "(" + this.args[0].toString() + ")" + this.name + "(" + this.args[1].toString() + ")";
       break;
   }
 
   return ret;
 };
 
+
+var Literal = function(value) {
+  this.type = Type.LITERAL;
+  this.value = value;
+};
+
+Literal.prototype.toString = function () {
+  return '"' + this.value + '"';
+};
+
+Literal.prototype.evaluate = function () {
+  return this.value;
+};
 
 
 var Logic = function(name, type, args, argument_types) {
@@ -90,6 +98,7 @@ EntityFilter.prototype.filter = function() {
 };
 
 module.exports.Token = Token;
+module.exports.Literal = Literal;
 module.exports.Action = Action;
 module.exports.Logic = Logic;
 module.exports.EntityFilter = EntityFilter;

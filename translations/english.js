@@ -35,5 +35,7 @@ Translations.strings.push(
     "Restitution:",
     "Friction:",
     "Density:",
+    "Layer ",
+    "Zoom: ",
   ]
 );

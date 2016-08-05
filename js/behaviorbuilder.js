@@ -33,7 +33,7 @@ BehaviorBuilder.prototype.buildArgument = function (token, argIndex, argHolder) 
     if (token.argument_types[argIndex] === Type.LITERAL) {
       // Literals are dealt with and done
 
-      $(argHolder).replaceWith(document.createTextNode(token.evaluate()));
+      $(argHolder).replaceWith(document.createTextNode(token.args[argIndex]));
       return true;
     }
 
@@ -50,7 +50,7 @@ BehaviorBuilder.prototype.buildArgument = function (token, argIndex, argHolder) 
       if (! token.validate())
         return false;
 
-      $(argHolder).replaceWith(document.createTextNode(token.evaluate()));
+      $(argHolder).replaceWith(document.createTextNode(token.args[argIndex]));
       return true;
     }
 
@@ -96,16 +96,18 @@ BehaviorBuilder.prototype.buildToken = function (token, holder) {
   }
 
   if (token.fixType === FixType.INFIX) {
-    ret.insertBefore(document.createTextNode(" "), ret.firstChild);
-    ret.appendChild(document.createTextNode(" "));
+    ret.insertBefore(document.createTextNode(" ) "), ret.firstChild);
+    ret.appendChild(document.createTextNode(" ( "));
 
     var argHolder = el("span");
     ret.insertBefore(argHolder, ret.firstChild);
+    ret.insertBefore(document.createTextNode(" ( "), ret.firstChild);
 
     this.buildArgument(token, 0, argHolder);
 
     argHolder = el("span");
     ret.appendChild(argHolder);
+    ret.appendChild(document.createTextNode(" ) "));
 
     this.buildArgument(token, 1, argHolder);
   }

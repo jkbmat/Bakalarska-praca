@@ -1,11 +1,5 @@
-var Type = require("./typing.js").Type;
-
 var Behavior = function(logic, results) {
   this.logic = logic;
-
-  if (this.logic.type !== Type.BOOLEAN)
-    throw new TypeException(Type.BOOLEAN, this.logic.type, this);
-
   this.results = Array.isArray(results) ? results : [results];
 };
 

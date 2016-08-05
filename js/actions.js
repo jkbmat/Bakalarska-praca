@@ -28,6 +28,7 @@ var aTorque = function(ef, strength) {
 aTorque.prototype = new Action();
 
 aTorque.prototype.each = function(entity) {
+  entity.body.SetAwake(1);
   entity.body.ApplyTorque(entity.getMass() * this.args[1].evaluate());
 };
 
@@ -44,6 +45,7 @@ var aAngularImpulse = function(ef, strength) {
 aAngularImpulse.prototype = new Action();
 
 aAngularImpulse.prototype.each = function(entity) {
+  entity.body.SetAwake(1);
   entity.body.ApplyAngularImpulse(entity.getMass() * this.args[1].evaluate());
 };
 
@@ -61,6 +63,7 @@ var aLinearVelocity = function(ef, x, y) {
 aLinearVelocity.prototype = new Action();
 
 aLinearVelocity.prototype.each = function(entity) {
+  entity.body.SetAwake(1);
   entity.setLinearVelocity(new b2Vec2(this.args[1].evaluate(), this.args[2].evaluate()));
 };
 
@@ -78,6 +81,7 @@ var aLinearImpulse = function(ef, x, y) {
 aLinearImpulse.prototype = new Action();
 
 aLinearImpulse.prototype.each = function(entity) {
+  entity.body.SetAwake(1);
   entity.applyLinearImpulse(new b2Vec2(entity.getMass() * this.args[1].evaluate(), entity.getMass() * this.args[2].evaluate()));
 };
 

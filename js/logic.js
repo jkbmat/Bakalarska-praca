@@ -1,4 +1,5 @@
 var Logic = require("./token.js").Logic;
+var Literal = require("./token.js").Literal;
 var Type = require("./typing.js").Type;
 var FixType = require("./typing.js").FixType;
 
@@ -66,7 +67,7 @@ var lString = function (value) {
 lString.prototype = new Logic();
 
 lString.prototype.evaluate = function () {
-  return this.args[0];
+  return this.args[0].evaluate();
 };
 
 lString.prototype.validate = function () {
@@ -74,8 +75,7 @@ lString.prototype.validate = function () {
 };
 
 lString.prototype.populate = function () {
-  this.args[0] = prompt(Translations.getTranslated(24) + this.name);
-  this.args[0] = this.args[0] === null ? "" : this.args[0];
+  this.args[0] = new Literal(prompt(Translations.getTranslated(24) + this.name));
 };
 
 lString.prototype.constructor = lString;
@@ -90,15 +90,15 @@ var lNumber = function (value) {
 lNumber.prototype = new Logic();
 
 lNumber.prototype.evaluate = function () {
-  return parseFloat(this.args[0]);
+  return parseFloat(this.args[0].evaluate());
 };
 
 lNumber.prototype.validate = function () {
-  return $.isNumeric(this.args[0]);
+  return $.isNumeric(this.args[0].evaluate());
 };
 
 lNumber.prototype.populate = function () {
-  this.args[0] = prompt(Translations.getTranslated(24) + this.name);
+  this.args[0] = new Literal(prompt(Translations.getTranslated(24) + this.name));
 };
 
 lNumber.prototype.constructor = lNumber;
@@ -281,3 +281,41 @@ lMinus.prototype.evaluate = function () {
 
 lMinus.prototype.constructor = lMinus;
 module.exports.push(lMinus);
+
+
+var lGreater = function (a, b) {
+  Logic.call(this, ">", Type.BOOLEAN, arguments, [Type.NUMBER, Type.NUMBER]);
+
+  this.args.push(a);
+  this.args.push(b);
+
+  this.fixType = FixType.INFIX;
+};
+lGreater.prototype = new Logic();
+
+lGreater.prototype.evaluate = function () {
+  return this.args[0].evaluate() > this.args[1].evaluate();
+};
+
+lGreater.prototype.constructor = lGreater;
+module.exports.push(lGreater);
+
+
+var lLesser = function (a, b) {
+  Logic.call(this, "<", Type.BOOLEAN, arguments, [Type.NUMBER, Type.NUMBER]);
+
+  this.args.push(a);
+  this.args.push(b);
+
+  this.fixType = FixType.INFIX;
+};
+lLesser.prototype = new Logic();
+
+lLesser.prototype.evaluate = function () {
+  return this.args[0].evaluate() < this.args[1].evaluate();
+};
+
+lLesser.prototype.constructor = lLesser;
+module.exports.push(lLesser);
+
+
