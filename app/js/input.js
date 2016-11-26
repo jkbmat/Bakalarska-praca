@@ -16,8 +16,8 @@ window.Input = {
     rightUp: false,
 
     updatePosition: function (event) {
-      this.canvasY = event.pageY - Input.element.getBoundingClientRect().top;
       this.canvasX = event.pageX - Input.element.getBoundingClientRect().left;
+      this.canvasY = event.pageY - Input.element.getBoundingClientRect().top;
       this.x = this.canvasX * _engine.viewport.scale + _engine.viewport.x - (_engine.viewport.width * _engine.viewport.scale) / 2;
       this.y = this.canvasY * _engine.viewport.scale + _engine.viewport.y - (_engine.viewport.height * _engine.viewport.scale) / 2;
       this.realX = event.pageX;

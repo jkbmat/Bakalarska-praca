@@ -1,0 +1,36 @@
+{
+  "name": "scenaria",
+  "version": "0.5.0",
+  "description": "Scene editor using box2d for my bachelor's thesis",
+  "main": "./dist/js/app.js",
+  "dependencies": {
+    "bower": "^1.8.0",
+    "browserify": "^13.1.1",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-sass": "^2.3.2"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.18.2",
+    "gulp-sourcemaps": "^1.9.1",
+    "gulp-uglify": "^2.0.0",
+    "gulp-util": "^3.0.7",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://56db69ea0c1e661c6d00000b@php-jkbmat.rhcloud.com/~/git/php.git/"
+  },
+  "keywords": [
+    "box2d",
+    "bachelor's",
+    "scene",
+    "editor"
+  ],
+  "author": "Jakub Matuska",
+  "license": "ISC"
+}

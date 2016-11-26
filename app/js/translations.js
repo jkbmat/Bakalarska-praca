@@ -1,6 +1,6 @@
 // A class for facilitating internationalisation
-var Translations = {
-  strings: [], // Array of languages (each language is an array of strings)
+module.exports = {
+  strings: [require('../translations/english.js'), require('../translations/slovak.js')], // Array of languages (each language is an array of strings)
   currentLanguage: 0, // selected language
 
   getTranslated: function(index, language) {

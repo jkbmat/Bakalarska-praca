@@ -1,3 +1,4 @@
+require("./translations.js");
 require("./input.js");
 
 var Engine = require("./engine.js");

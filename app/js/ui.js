@@ -2,6 +2,7 @@ var Tools = require("./tools.js");
 var BodyType = require("./bodytype.js");
 var UIBuilder = require("./uibuilder.js");
 var Constants = require("./constants.js");
+var Translations = require("./translations.js");
 
 // Object for building the UI
 var UI = {
@@ -78,7 +79,7 @@ var UI = {
 
         min: 1,
         max: 11,
-        step: 1,
+        step: 0.1,
         value: 6,
         width: "150px",
         disableWrite: true,
@@ -271,7 +272,7 @@ var UI = {
 
       return wrapper;
     };
-    
+
     var ret = el("div.behaviorWrapper");
 
     for (var i = 0; i < entity.behaviors.length; i++) {
@@ -404,7 +405,7 @@ var UI = {
       // Friction
       { type: "html", content: Translations.getTranslatedWrapped(33)},
       { type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetFriction(),
-        oninput: function (val) {entity.fixture.SetFriction(val*1);}},
+        oninput: function (val) {entity.fixture.SetFriction(val*1);entity.body.ResetMassData();}},
       { type: "html", content: el("p")},
 
       // Density
@@ -445,7 +446,7 @@ var UI = {
 
     sidebar[0].appendChild(UIBuilder.build(properties));
   },
-  
+
   buildEntityList: function () {
     var ret = el("div.entityList");
 
