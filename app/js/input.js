@@ -1,9 +1,11 @@
 // INPUT CAPTURING
 
-window.Input = {
-  element: null,
+var Input = function(viewport) {
+  "use strict";
 
-  mouse: {
+  this.viewport = viewport;
+
+  this.mouse = {
     x: 0,
     y: 0,
     canvasX: 0,
@@ -14,43 +16,9 @@ window.Input = {
     rightDown: false,
     leftUp: false,
     rightUp: false,
+  };
 
-    updatePosition: function (event) {
-      this.canvasX = event.pageX - Input.element.getBoundingClientRect().left;
-      this.canvasY = event.pageY - Input.element.getBoundingClientRect().top;
-      this.x = this.canvasX * _engine.viewport.scale + _engine.viewport.x - (_engine.viewport.width * _engine.viewport.scale) / 2;
-      this.y = this.canvasY * _engine.viewport.scale + _engine.viewport.y - (_engine.viewport.height * _engine.viewport.scale) / 2;
-      this.realX = event.pageX;
-      this.realY = event.pageY;
-    },
-
-    updateButtonsDown: function (event) {
-      if (event.which === 1)
-        this.leftDown = true;
-
-      if (event.which === 3)
-        this.rightDown = true;
-    },
-
-    updateButtonsUp: function (event) {
-      if (event.which === 1) {
-        this.leftDown = false;
-        this.leftUp = true;
-      }
-
-      if (event.which === 3) {
-        this.rightDown = false;
-        this.rightUp = true;
-      }
-    },
-
-    cleanUp: function () {
-      this.leftUp = false;
-      this.rightUp = false;
-    }
-  },
-
-  keyboard: {
+  this.keyboard = {
     down: new Set(),
     up: new Set(),
 
@@ -61,46 +29,65 @@ window.Input = {
     isUp: function (keyCode) {
       return this.up.has(keyCode);
     },
+  };
 
-    updateButtonsDown: function (event) {
-      this.down.add(event.which);
+  document.addEventListener('mousemove', this.updateMousePosition.bind(this));
+  document.addEventListener('mousedown', this.updateMouseButtonsDown.bind(this));
+  document.addEventListener('mouseup', this.updateMouseButtonsUp.bind(this));
+  document.addEventListener('keydown', this.updateKeyboardButtonsDown.bind(this));
+  document.addEventListener('keyup', this.updateKeyboardButtonsUp.bind(this));
 
-      if(event.which === 32)
-        event.preventDefault();
-    },
+  document.onselectstart = function () {
+    return false;
+  };
+};
 
-    updateButtonsUp: function (event) {
-      this.down.delete(event.which);
-      this.up.add(event.which);
-    },
+Input.prototype.cleanUp = function () {
+  this.mouse.leftUp = false;
+  this.mouse.rightUp = false;
 
-    cleanUp: function () {
-      this.up.clear();
-    }
-  },
+  this.keyboard.up.clear();
+};
 
-  initialize: function(element) {
-    this.element = element;
+Input.prototype.updateMousePosition = function (event) {
+  this.mouse.canvasX = event.pageX - this.viewport.canvasElement.getBoundingClientRect().left;
+  this.mouse.canvasY = event.pageY - this.viewport.canvasElement.getBoundingClientRect().top;
+  this.mouse.x = this.viewport.toScale(this.mouse.canvasX) + this.viewport.x - this.viewport.toScale(this.viewport.width) / 2;
+  this.mouse.y = this.viewport.toScale(this.mouse.canvasY) + this.viewport.y - this.viewport.toScale(this.viewport.height) / 2;
+  this.mouse.realX = event.pageX;
+  this.mouse.realY = event.pageY;
+};
 
-    document.onmousemove = function(e) {
-      Input.mouse.updatePosition(e);
-    };
-    document.onmousedown = function(e) {
-      Input.mouse.updateButtonsDown(e);
-    };
-    document.onmouseup = function(e) {
-      Input.mouse.updateButtonsUp(e);
-    };
+Input.prototype.updateMouseButtonsDown = function (event) {
+  if (event.which === 1)
+    this.mouse.leftDown = true;
 
-    document.onkeydown = function(e) {
-      Input.keyboard.updateButtonsDown(e);
-    };
-    document.onkeyup = function(e) {
-      Input.keyboard.updateButtonsUp(e);
-    };
-    document.onselectstart = function () {
-      return false;
-    }
+  if (event.which === 3)
+    this.mouse.rightDown = true;
+};
+
+Input.prototype.updateMouseButtonsUp = function (event) {
+  if (event.which === 1) {
+    this.mouse.leftDown = false;
+    this.mouse.leftUp = true;
+  }
+
+  if (event.which === 3) {
+    this.mouse.rightDown = false;
+    this.mouse.rightUp = true;
   }
 };
 
+Input.prototype.updateKeyboardButtonsDown = function (event) {
+  this.keyboard.down.add(event.which);
+
+  if(event.which === 32)
+    event.preventDefault();
+};
+
+Input.prototype.updateKeyboardButtonsUp = function (event) {
+  this.keyboard.down.delete(event.which);
+  this.keyboard.up.add(event.which);
+};
+
+module.exports = Input;

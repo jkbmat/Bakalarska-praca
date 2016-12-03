@@ -1,12 +1,13 @@
 // ENTITY
 var Utils = require("./utils.js");
 
-const AUTO_COLOR_RANGE = [0, 230];
+var AUTO_COLOR_RANGE = [0, 230];
 
 var Entity = function(shape, fixture, body, id, collisionGroup) {
   this.id = id;
   this.dead = false;
   this.layer = 0;
+  this.helpers = [];
 
   this.fixedRotation = false;
 
@@ -19,12 +20,12 @@ var Entity = function(shape, fixture, body, id, collisionGroup) {
 
   this.fixture = fixture;
   if (this.fixture == undefined) {
-    var fixture = new b2FixtureDef();
-    fixture.set_density(10)
-    fixture.set_friction(0.5);
-    fixture.set_restitution(0.2);
+    var fix = new b2FixtureDef();
+    fix.set_density(10);
+    fix.set_friction(0.5);
+    fix.set_restitution(0.2);
 
-    this.fixture = fixture;
+    this.fixture = fix;
   }
   this.fixture.set_shape(shape);
 
@@ -46,7 +47,33 @@ var Entity = function(shape, fixture, body, id, collisionGroup) {
   var g = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); g = g.length == 1 ? "0" + g : g;
   var b = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); b = b.length == 1 ? "0" + b : b;
   this.color = "#" + r  + g + b ;
-}
+};
+
+Entity.prototype.getX = function () {
+  return this.body.GetPosition().get_x();
+};
+
+Entity.prototype.getY = function () {
+  return this.body.GetPosition().get_y();
+};
+
+Entity.prototype.getWidth = function () {
+  throw "ERROR! Cannot get width: Use derived class.";
+};
+
+Entity.prototype.getHeight = function () {
+  throw "ERROR! Cannot get height: Use derived class.";
+};
+
+Entity.prototype.addHelpers = function () {
+  throw "ERROR! Cannot add helpers: Use derived class.";
+};
+
+Entity.prototype.recalculateHelpers = function () {
+  for (var i in this.helpers) {
+    this.helpers[i].recalculatePosition();
+  }
+};
 
 Entity.prototype.die = function() {
   this.dead = true;
@@ -57,20 +84,20 @@ Entity.prototype.die = function() {
 };
 
 Entity.prototype.draw = function() {
-  alert("ERROR! Cannot draw Entity: Use derived classes.");
-}
+  throw "ERROR! Cannot draw Entity: Use derived classes.";
+};
 
 Entity.prototype.setColor = function(color) {
   this.color = color;
 
   return this;
-}
+};
 
 Entity.prototype.setId = function(id) {
   this.id = id;
 
   return this;
-}
+};
 
 
 Entity.prototype.setCollisionGroup = function(group) {
@@ -83,46 +110,46 @@ Entity.prototype.setCollisionGroup = function(group) {
   _engine.updateCollision(this);
 
   return this;
-}
+};
 
 Entity.prototype.getLinearVelocity = function() {
   return this.body.GetLinearVelocity();
-}
+};
 
 Entity.prototype.getMass = function() {
   return Math.max(1, this.body.GetMass());
-}
+};
 
 Entity.prototype.setLinearVelocity = function(vector) {
   this.body.SetLinearVelocity(vector);
 
   return this;
-}
+};
 
 Entity.prototype.applyTorque = function(force) {
   this.body.ApplyTorque(force);
 
   return this;
-}
+};
 
 Entity.prototype.applyLinearImpulse = function(vector) {
   this.body.ApplyLinearImpulse(vector, this.body.GetWorldCenter());
 
   return this;
-}
+};
 
 Entity.prototype.disableRotation = function(value) {
   this.fixedRotation = value;
   this.body.SetFixedRotation(value)
 
   return this;
-}
+};
 
 Entity.prototype.addBehavior = function(behavior) {
   this.behaviors.push(behavior);
 
   return this;
-}
+};
 
 
 module.exports = Entity;

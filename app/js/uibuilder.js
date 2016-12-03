@@ -1,3 +1,5 @@
+var Translations = require("./translations.js");
+
 var UIBuilder = {
   radio: function (properties) {
     properties = $.extend({}, {

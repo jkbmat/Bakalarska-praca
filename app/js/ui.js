@@ -56,17 +56,17 @@ var UI = {
         id: "tool",
         elements: [
           {
-            text: el.img({src: "./img/selection.png"}), id: "selectionTool", checked: true, onclick: function () {
+            text: el.img({src: "./img/selection.svg"}), id: "selectionTool", checked: true, onclick: function () {
             _engine.selectTool(Tools.Selection);
           }
           },
           {
-            text: el.img({src: "./img/rectangle.png"}), onclick: function () {
+            text: el.img({src: "./img/rectangle.svg"}), onclick: function () {
             _engine.selectTool(Tools.Rectangle);
           }
           },
           {
-            text: el.img({src: "./img/circle.png"}), onclick: function () {
+            text: el.img({src: "./img/circle.svg"}), onclick: function () {
             _engine.selectTool(Tools.Circle);
           }
           },
@@ -85,8 +85,7 @@ var UI = {
         disableWrite: true,
 
         oninput: function(val) {
-          var a = 1.5;
-          _engine.viewport.scale = (Constants.DEFAULT_SCALE / Math.pow(a, 6)) * Math.pow(a, 12 - val);
+          _engine.viewport.zoom(val);
         }
       },
       {type: "break"},
@@ -110,10 +109,10 @@ var UI = {
   createCollisions: function() {
     var table = el("table.collisionTable");
 
-    for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER + 1; i++) {
+    for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER; i++) {
       var tr = el("tr");
 
-      for (var j = 0; j < Constants.COLLISION_GROUPS_NUMBER + 1; j++) {
+      for (var j = 0; j < Constants.COLLISION_GROUPS_NUMBER; j++) {
         var td = el("td");
 
         // first row
@@ -141,7 +140,7 @@ var UI = {
                 if ((tds[n].row === i && tds[n].col <= j) || (tds[n].col === j && tds[n].row <= i))
                   tds[n].className = "highlight";
               }
-            }
+            };
           }(i, j, table);
 
           // more highlighting
@@ -151,7 +150,7 @@ var UI = {
               for (var n = 0; n < tds.length; n++) {
                 tds[n].className = "";
               }
-            }
+            };
           }(table);
 
           // checkbox for collision toggling
@@ -163,7 +162,7 @@ var UI = {
           checkbox.onchange = function(i, j, checkbox) {
             return function() {
               _engine.setCollision(i - 1, j - 1, checkbox.checked ? 1 : 0);
-            }
+            };
           }(i, j, checkbox);
 
           // clicking the checkbox's cell should work as well
@@ -359,7 +358,7 @@ var UI = {
 
       // Collision group
       { type: "html", content: Translations.getTranslatedWrapped(8)},
-      { type: "range", value: entity.collisionGroup + 1, min: 1, max: Constants.COLLISION_GROUPS_NUMBER,
+      { type: "range", value: entity.collisionGroup + 1, min: 1, max: Constants.COLLISION_GROUPS_NUMBER - 1,
         oninput: function (val) {entity.setCollisionGroup(val * 1 - 1);}},
       { type: "html", content: el("p")},
 

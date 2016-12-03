@@ -4,7 +4,7 @@ var Constants = require("./constants.js");
 // VIEWPORT
 // This is basically camera + projector
 
-var Viewport = function(canvasElement, width, height, x, y) {
+var Viewport = function (canvasElement, width, height, x, y) {
   this.scale = Constants.DEFAULT_SCALE;
 
   // Canvas dimensions
@@ -40,25 +40,25 @@ var Viewport = function(canvasElement, width, height, x, y) {
 };
 
 // Reloads values for the canvas element
-Viewport.prototype.resetElement = function() {
+Viewport.prototype.resetElement = function () {
   this.canvasElement.width = this.width;
   this.canvasElement.height = this.height;
 };
 
 // Automatically resizes the viewport to fill the screen
-Viewport.prototype.autoResize = function() {
+Viewport.prototype.autoResize = function () {
   this.width = Utils.getBrowserWidth();
   this.height = Utils.getBrowserHeight();
 };
 
 // Toggles viewport auto resizing
-Viewport.prototype.setAutoResize = function(value) {
+Viewport.prototype.setAutoResize = function (value) {
 
   this.autoResizeActive = value;
 
   if (this.autoResizeActive) {
     var t = this;
-    window.onresize = function() {
+    window.onresize = function () {
       t.autoResize();
       t.resetElement();
     };
@@ -67,9 +67,24 @@ Viewport.prototype.setAutoResize = function(value) {
   }
 };
 
-Viewport.prototype.getOffset = function()
-{
+Viewport.prototype.zoom = function (val) {
+  var a = 1.5;
+  this.scale = (Constants.DEFAULT_SCALE / Math.pow(a, 6)) * Math.pow(a, 12 - val);
+
+  if(_engine.selectedEntity)
+    _engine.selectedEntity.recalculateHelpers();
+};
+
+Viewport.prototype.getOffset = function () {
   return [this.x - this.width / 2, this.y - this.height / 2];
+};
+
+Viewport.prototype.toScale = function (number) {
+  return number * this.scale;
+};
+
+Viewport.prototype.fromScale = function (number) {
+  return number / this.scale;
 };
 
 module.exports = Viewport;

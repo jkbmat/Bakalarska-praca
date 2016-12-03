@@ -15,24 +15,33 @@ var Selection = {
   mode: null,
 
   onclick: function () {
+
+    if(_engine.selectedEntity) {
+      for (var i in _engine.selectedEntity.helpers) {
+        if (_engine.selectedEntity.helpers[i].testPoint(_engine.input.mouse.x, _engine.input.mouse.y)) {
+          _engine.selectedEntity.helpers[i].click();
+          return;
+        }
+      }
+    }
+
     _engine.selectEntity(null);
 
     for (var i = Constants.LAYERS_NUMBER - 1; i >= 0; i--) {
       for (var j = 0; j < _engine.layers[i].length; j++) {
-        // console.log([Input.mouse.x, Input.mouse.y], _engine.viewport.x);
         if (_engine.layers[i][j].fixture.TestPoint(
-            new b2Vec2(Input.mouse.x, Input.mouse.y))
+            new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y))
         ) {
           _engine.selectEntity(_engine.layers[i][j]);
 
-          this.origin = [Input.mouse.x, Input.mouse.y];
+          this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
           this.offset = [
             _engine.selectedEntity.body.GetPosition().get_x() - this.origin[0],
             _engine.selectedEntity.body.GetPosition().get_y() - this.origin[1]
           ];
 
           this.mode = "reposition";
-          this.origin = [Input.mouse.x, Input.mouse.y];
+          this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
 
           return;
         }
@@ -42,7 +51,7 @@ var Selection = {
     this.mode = "camera";
 
     this.origin = [_engine.viewport.x, _engine.viewport.y];
-    this.offset = [Input.mouse.canvasX, Input.mouse.canvasY];
+    this.offset = [_engine.input.mouse.canvasX, _engine.input.mouse.canvasY];
     _engine.viewport.canvasElement.style.cursor = "url(img/grabbingcursor.png), move";
   },
   onrelease: function () {
@@ -54,14 +63,14 @@ var Selection = {
       return;
 
     if (this.mode === "camera") {
-      _engine.viewport.x = this.origin[0] + (this.offset[0] - Input.mouse.canvasX) * _engine.viewport.scale;
-      _engine.viewport.y = this.origin[1] + (this.offset[1] - Input.mouse.canvasY) * _engine.viewport.scale;
+      _engine.viewport.x = this.origin[0] + _engine.viewport.toScale(this.offset[0] - _engine.input.mouse.canvasX);
+      _engine.viewport.y = this.origin[1] + _engine.viewport.toScale(this.offset[1] - _engine.input.mouse.canvasY);
     }
 
     if (this.mode === "reposition") {
       var body = _engine.selectedEntity.body;
-      var x = Math.round((Input.mouse.x + this.offset[0]) * 1000) / 1000;
-      var y = Math.round((Input.mouse.y + this.offset[1]) * 1000) / 1000;
+      var x = Math.round((_engine.input.mouse.x + this.offset[0]) * 1000) / 1000;
+      var y = Math.round((_engine.input.mouse.y + this.offset[1]) * 1000) / 1000;
 
       body.SetTransform(new b2Vec2(x, y), body.GetAngle());
       $("#entity_x").val(x);
@@ -76,16 +85,18 @@ var Rectangle = {
   worldOrigin: null,
   w: 0,
   h: 0,
-  minSize: 5,
 
   onclick: function () {
     this.onmove = this.dragging;
-    this.origin = [Input.mouse.canvasX, Input.mouse.canvasY];
-    this.worldOrigin = [Input.mouse.x, Input.mouse.y];
+    this.origin = [_engine.input.mouse.canvasX, _engine.input.mouse.canvasY];
+    this.worldOrigin = [_engine.input.mouse.x, _engine.input.mouse.y];
   },
 
   onrelease: function () {
-    if (this.w >= this.minSize && this.h >= this.minSize) {
+    if (
+      this.w >= _engine.viewport.fromScale(Constants.SHAPE_MIN_SIZE) &&
+      this.h >= _engine.viewport.fromScale(Constants.SHAPE_MIN_SIZE)
+    ) {
       this.w *= _engine.viewport.scale;
       this.h *= _engine.viewport.scale;
 
@@ -105,14 +116,17 @@ var Rectangle = {
   },
 
   dragging: function (ctx) {
-    this.w = Input.mouse.canvasX - this.origin[0];
-    this.h = Input.mouse.canvasY - this.origin[1];
+    this.w = _engine.input.mouse.canvasX - this.origin[0];
+    this.h = _engine.input.mouse.canvasY - this.origin[1];
 
-    if (this.w < this.minSize || this.h < this.minSize)
-      return;
-
-    ctx.save();
     ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+    if (
+      this.w < _engine.viewport.fromScale(Constants.SHAPE_MIN_SIZE) ||
+      this.h < _engine.viewport.fromScale(Constants.SHAPE_MIN_SIZE)
+    ) {
+      ctx.fillStyle = "rgba(255, 0, 0, 0.4)";
+    }
+    ctx.save();
     ctx.fillRect(this.origin[0], this.origin[1], this.w, this.h);
     ctx.restore();
   }
@@ -123,16 +137,15 @@ var Circle = {
   origin: null,
   worldOrigin: null,
   radius: 0,
-  minRadius: 5,
 
   onclick: function () {
     this.onmove = this.dragging;
-    this.origin = [Input.mouse.canvasX, Input.mouse.canvasY];
-    this.worldOrigin = [Input.mouse.x, Input.mouse.y];
+    this.origin = [_engine.input.mouse.canvasX, _engine.input.mouse.canvasY];
+    this.worldOrigin = [_engine.input.mouse.x, _engine.input.mouse.y];
   },
 
   onrelease: function () {
-    if (this.radius >= this.minRadius) {
+    if (this.radius >= _engine.viewport.fromScale(Constants.SHAPE_MIN_SIZE) / 2) {
       this.radius *= _engine.viewport.scale;
 
       _engine.addEntity(new Shape.Circle(
@@ -151,17 +164,19 @@ var Circle = {
   },
 
   dragging: function (ctx) {
-    this.radius = Math.min(Input.mouse.canvasX - this.origin[0], Input.mouse.canvasY - this.origin[1]) / 2;
+    this.radius = Math.min(_engine.input.mouse.canvasX - this.origin[0], _engine.input.mouse.canvasY - this.origin[1]) / 2;
 
-    if (this.radius < this.minRadius)
-      return;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+
+    if (this.radius < _engine.viewport.fromScale(Constants.SHAPE_MIN_SIZE) / 2) {
+      ctx.fillStyle = "rgba(255, 0, 0, 0.4)";
+    }
 
     ctx.save();
+
     ctx.beginPath();
 
     ctx.arc(this.origin[0] + this.radius, this.origin[1] + this.radius, this.radius, 0, 2 * Math.PI, false);
-
-    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
     ctx.fill();
 
     ctx.restore();

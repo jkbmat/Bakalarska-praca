@@ -4,13 +4,12 @@
   "description": "Scene editor using box2d for my bachelor's thesis",
   "main": "./dist/js/app.js",
   "dependencies": {
-    "bower": "^1.8.0",
+  },
+  "devDependencies": {
     "browserify": "^13.1.1",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
-    "gulp-sass": "^2.3.2"
-  },
-  "devDependencies": {
+    "gulp-sass": "^2.3.2",
     "browser-sync": "^2.18.2",
     "gulp-sourcemaps": "^1.9.1",
     "gulp-uglify": "^2.0.0",

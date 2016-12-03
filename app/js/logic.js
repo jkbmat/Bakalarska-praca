@@ -1,4 +1,5 @@
 var Logic = require("./token.js").Logic;
+var Translations = require("./translations.js");
 var Literal = require("./token.js").Literal;
 var Type = require("./typing.js").Type;
 var FixType = require("./typing.js").FixType;
@@ -139,7 +140,7 @@ var lButtonDown = function (button) {
 lButtonDown.prototype = new Logic();
 
 lButtonDown.prototype.evaluate = function () {
-  return Input.keyboard.isDown(this.args[0].evaluate());
+  return _engine.input.keyboard.isDown(this.args[0].evaluate());
 };
 
 lButtonDown.prototype.constructor = lButtonDown;
@@ -154,7 +155,7 @@ var lButtonUp = function (button) {
 lButtonUp.prototype = new Logic();
 
 lButtonUp.prototype.evaluate = function () {
-  return Input.keyboard.isUp(this.args[0].evaluate());
+  return _engine.input.keyboard.isUp(this.args[0].evaluate());
 };
 
 lButtonUp.prototype.constructor = lButtonUp;

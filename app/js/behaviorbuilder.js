@@ -65,6 +65,8 @@ BehaviorBuilder.prototype.buildToken = function (token, holder) {
   ret.type = token.type;
   ret.onclick = this.buildChoiceClick();
 
+  var argHolder;
+
   // Fix, so :hover triggers only on actual hovered token, not its ancestors
   ret.onmouseover = function (e) {
     e.stopPropagation();
@@ -81,7 +83,7 @@ BehaviorBuilder.prototype.buildToken = function (token, holder) {
     var that = this;
 
     for (var index = 0; index < token.argument_types.length; index ++) {
-      var argHolder = el("span.argument");
+      argHolder = el("span.argument");
       ret.appendChild(argHolder);
 
       if (! that.buildArgument(token, index, argHolder)) {
@@ -99,7 +101,7 @@ BehaviorBuilder.prototype.buildToken = function (token, holder) {
     ret.insertBefore(document.createTextNode(" ) "), ret.firstChild);
     ret.appendChild(document.createTextNode(" ( "));
 
-    var argHolder = el("span");
+    argHolder = el("span");
     ret.insertBefore(argHolder, ret.firstChild);
     ret.insertBefore(document.createTextNode(" ( "), ret.firstChild);
 
@@ -146,8 +148,8 @@ BehaviorBuilder.prototype.buildChoice = function (tokens, holder) {
 
   var offset = 15;
 
-  $(container).css("left", Input.mouse.realX + offset + "px");
-  $(container).css("top", Input.mouse.realY + offset + "px");
+  $(container).css("left", _engine.input.mouse.realX + offset + "px");
+  $(container).css("top", _engine.input.mouse.realY + offset + "px");
 };
 
 module.exports = BehaviorBuilder;

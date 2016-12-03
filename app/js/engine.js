@@ -7,24 +7,31 @@ var Constants = require("./constants.js");
 
 // constructor
 
-var Engine = function(viewport, gravity) {
+var Engine = function (viewport, gravity) {
   this.viewport = viewport;
   this.selectedEntity = null;
   this.selectedTool = Tools.Selection;
-  
+
+  this.helpers = [];
+
+  this.bufferVec2 = new b2Vec2(0, 0);
+
   this.layers = new Array(Constants.LAYERS_NUMBER);
-  for (var i = 0; i < Constants.LAYERS_NUMBER; i++)
-  {
+  for (var i = 0; i < Constants.LAYERS_NUMBER; i++) {
     this.layers[i] = [];
   }
 
   this.collisionGroups = [];
-  for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER; i++) {
+  for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER - 1; i++) {
     this.collisionGroups.push({
       "name": i + 1,
-      "mask": parseInt(Array(Constants.COLLISION_GROUPS_NUMBER + 1).join("1"), 2)
+      "mask": parseInt("0" + Array(Constants.COLLISION_GROUPS_NUMBER).join("1"), 2)
     });
   }
+  this.collisionGroups.push({
+    "name": "Helpers",
+    "mask": parseInt(Array(Constants.COLLISION_GROUPS_NUMBER + 1).join("0"), 2)
+  });
 
   this.lifetimeEntities = 0;
 
@@ -33,10 +40,15 @@ var Engine = function(viewport, gravity) {
 
   this.tokenManager = new TokenManager();
 
-  Input.initialize(viewport.canvasElement);
+  var Input = require('./input.js');
+  this.input = new Input(viewport);
 
-  $(viewport.canvasElement).on("mousedown", function(){_engine.selectedTool.onclick();});
-  $(viewport.canvasElement).on("mouseup", function(){_engine.selectedTool.onrelease();});
+  $(viewport.canvasElement).on("mousedown", (function () {
+    this.selectedTool.onclick();
+  }).bind(this));
+  $(viewport.canvasElement).on("mouseup", (function () {
+    this.selectedTool.onrelease();
+  }).bind(this));
 };
 
 // Changes running state of the simulation
@@ -47,12 +59,20 @@ Engine.prototype.togglePause = function () {
   this.selectTool(this.world.paused ? Tools.Selection : Tools.Blank);
   $("#selectionTool")[0].checked = true;
 
-  if (!this.world.paused)
-  {
+  if (!this.world.paused) {
     var entities = this.entities();
 
-    entities.forEach(function(entity){entity.body.SetAwake(1)});
+    entities.forEach(function (entity) {
+      entity.body.SetAwake(1);
+    });
   }
+};
+
+Engine.prototype.vec2 = function (x, y) {
+  this.bufferVec2.set_x(x);
+  this.bufferVec2.set_y(y);
+
+  return this.bufferVec2;
 };
 
 Engine.prototype.selectTool = function (tool) {
@@ -61,6 +81,7 @@ Engine.prototype.selectTool = function (tool) {
 };
 
 Engine.prototype.removeEntity = function (entity) {
+  this.selectEntity(null);
   this.world.DestroyBody(entity.body);
   this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
 };
@@ -81,7 +102,7 @@ Engine.prototype.entities = function () {
 
 
 // Returns the entity with id specified by argument
-Engine.prototype.getEntityById = function(id) {
+Engine.prototype.getEntityById = function (id) {
   var entities = this.entities();
 
   for (var i = 0; i < entities.length; i++) {
@@ -93,7 +114,7 @@ Engine.prototype.getEntityById = function(id) {
 };
 
 // Returns an array of entities with specified collisionGroup
-Engine.prototype.getEntitiesByCollisionGroup = function(group) {
+Engine.prototype.getEntitiesByCollisionGroup = function (group) {
   var ret = [];
   var entities = this.entities();
 
@@ -106,7 +127,7 @@ Engine.prototype.getEntitiesByCollisionGroup = function(group) {
 };
 
 // Adding an entity to the world
-Engine.prototype.addEntity = function(entity, type) {
+Engine.prototype.addEntity = function (entity, type) {
   // generate auto id
   if (entity.id === undefined) {
     entity.id = Constants.AUTO_ID_PREFIX + this.lifetimeEntities;
@@ -121,16 +142,18 @@ Engine.prototype.addEntity = function(entity, type) {
 
   this.layers[entity.layer].push(entity);
 
+  entity.addHelpers();
+
   return entity;
 };
 
 // Checks whether two groups should collide
-Engine.prototype.getCollision = function(groupA, groupB) {
+Engine.prototype.getCollision = function (groupA, groupB) {
   return (this.collisionGroups[groupA].mask >> groupB) & 1;
 };
 
 // Sets two groups up to collide
-Engine.prototype.setCollision = function(groupA, groupB, value) {
+Engine.prototype.setCollision = function (groupA, groupB, value) {
   var maskA = (1 << groupB);
   var maskB = (1 << groupA);
 
@@ -153,12 +176,13 @@ Engine.prototype.changeId = function (entity, id) {
 
 // Selects an entity and shows its properties in the sidebar
 Engine.prototype.selectEntity = function (entity) {
-  this.selectedEntity = entity === null ? null : entity;
+  this.selectedEntity = entity;
+
   UI.buildSidebar(this.selectedEntity);
 };
 
 // Updates collision masks for all entities, based on engine's collisionGroups table
-Engine.prototype.updateCollisions = function() {
+Engine.prototype.updateCollisions = function () {
   var entities = this.entities();
 
   for (var i = 0; i < entities.length; i++) {
@@ -169,7 +193,7 @@ Engine.prototype.updateCollisions = function() {
 };
 
 // Updates collision mask for an entity, based on engine's collisionGroups table
-Engine.prototype.updateCollision = function(entity) {
+Engine.prototype.updateCollision = function (entity) {
   var filterData = entity.fixture.GetFilterData();
   filterData.set_maskBits(this.collisionGroups[entity.collisionGroup].mask);
   entity.fixture.SetFilterData(filterData);
@@ -178,7 +202,7 @@ Engine.prototype.updateCollision = function(entity) {
 };
 
 // One simulation step. Simulation logic happens here.
-Engine.prototype.step = function() {
+Engine.prototype.step = function () {
   // FPS timer
   var start = Date.now();
 
@@ -191,60 +215,124 @@ Engine.prototype.step = function() {
 
   if (!_engine.world.paused) {
     // box2d simulation step
-    this.world.Step(1 / 60, 10, 5);
+    this.world.Step(1 / Constants.TIME_STEP, 10, 5);
   }
   else {
     this.selectedTool.onmove(ctx);
   }
-  
+
   // draw all entities
-  for (var i = 0; i < Constants.LAYERS_NUMBER; i++)
-  {
-    this.drawArray(this.layers[i], ctx);
+  for (var layer = 0; layer < Constants.LAYERS_NUMBER; layer++) {
+    for (var entity = this.layers[layer].length - 1; entity >= 0; entity--) {
+      this.drawEntity(this.layers[layer][entity], ctx);
+    }
+  }
+
+  if (this.selectedEntity) {
+    this.drawBoundary(ctx);
+    this.drawHelpers(this.selectedEntity, ctx);
   }
 
   // Released keys are only to be processed once
-  Input.mouse.cleanUp();
-  Input.keyboard.cleanUp();
+  this.input.cleanUp();
 
   var end = Date.now();
 
   // Call next step
-  setTimeout(window.requestAnimationFrame(function() {
-    _engine.step()
-  }), Math.min(60 - end - start, 0));
+  setTimeout(window.requestAnimationFrame(function () {
+    _engine.step();
+  }), Math.min(Constants.TIME_STEP - end - start, 0));
 };
 
-Engine.prototype.drawArray = function(array, ctx) {
-  for (var i = array.length - 1; i >= 0; i--) {
+Engine.prototype.drawBoundary = function (ctx) {
+  var halfWidth = this.selectedEntity.getWidth() / 2;
+  var halfHeight = this.selectedEntity.getHeight() / 2;
+  var x = this.selectedEntity.getX();
+  var y = this.selectedEntity.getY();
+
+  ctx.save();
+
+  ctx.translate(
+    this.viewport.fromScale(-this.viewport.x + x) + this.viewport.width / 2,
+    this.viewport.fromScale(-this.viewport.y + y) + this.viewport.height / 2);
+
+  ctx.rotate(this.selectedEntity.body.GetAngle());
+
+  ctx.globalCompositeOperation = "xor";
+  ctx.strokeRect(
+    this.viewport.fromScale(-halfWidth),
+    this.viewport.fromScale(-halfHeight),
+    this.viewport.fromScale(2 * halfWidth),
+    this.viewport.fromScale(2 * halfHeight)
+  );
+
+  ctx.restore();
+};
+
+Engine.prototype.drawHelpers = function (entity, ctx) {
+  ctx.save();
+
+  var entityX = entity.body.GetPosition().get_x();
+  var entityY = entity.body.GetPosition().get_y();
+
+  ctx.translate(
+    this.viewport.fromScale(-this.viewport.x + entityX) + this.viewport.width / 2,
+    this.viewport.fromScale(-this.viewport.y + entityY) + this.viewport.height / 2);
+  ctx.rotate(entity.body.GetAngle());
+
+  for (var i in entity.helpers) {
     ctx.save();
-    ctx.translate(
-      -this.viewport.x / this.viewport.scale + this.viewport.width / 2,
-      -this.viewport.y / this.viewport.scale + this.viewport.height / 2);
-    ctx.fillStyle = array[i].color;
 
-    if(this.selectedEntity === array[i]) {
-      ctx.shadowColor = "black";
-      ctx.shadowBlur = 10;
-    }
+    var x = entity.helpers[i].x;
+    var y = entity.helpers[i].y;
 
-    var x = array[i].body.GetPosition().get_x();
-    var y = array[i].body.GetPosition().get_y();
-    ctx.translate(x / this.viewport.scale, y / this.viewport.scale);
-    ctx.rotate(array[i].body.GetAngle());
+    ctx.translate(this.viewport.fromScale(x), this.viewport.fromScale(y));
 
-    array[i].draw(ctx);
+    entity.helpers[i].draw(ctx);
 
     ctx.restore();
-
-    for (var j = 0; j < array[i].behaviors.length; j++) {
-      var behavior = array[i].behaviors[j];
-
-      if (behavior.check(array[i]))
-        behavior.result();
-    }
   }
+  ctx.restore();
+};
+
+Engine.prototype.drawEntity = function (entity, ctx) {
+  ctx.save();
+
+  var x = entity.body.GetPosition().get_x();
+  var y = entity.body.GetPosition().get_y();
+
+  ctx.translate(
+    this.viewport.fromScale(-this.viewport.x + x) + this.viewport.width / 2,
+    this.viewport.fromScale(-this.viewport.y + y) + this.viewport.height / 2);
+
+  ctx.rotate(entity.body.GetAngle());
+
+  if (entity === this.selectedEntity)
+    ctx.globalAlpha = 1;
+
+  ctx.fillStyle = entity.color;
+  entity.draw(ctx);
+
+  ctx.restore();
+
+  for (var j = 0; j < entity.behaviors.length; j++) {
+    var behavior = entity.behaviors[j];
+
+    if (behavior.check(entity))
+      behavior.result();
+  }
+};
+
+Engine.prototype.getDistance = function (a, b) {
+  var x1 = a.get_x();
+  var x2 = b.get_x();
+  var y1 = a.get_y();
+  var y2 = b.get_y();
+
+  return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 };
 
 
 module.exports = Engine;
+
+
