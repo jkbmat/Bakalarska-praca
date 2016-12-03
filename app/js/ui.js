@@ -10,7 +10,7 @@ var UI = {
   initialize: function() {
     var languages = [];
     for (var i = 0; i < Translations.strings.length; i++) {
-      languages.push({text: Translations.getTranslated(0, i), value: i});
+      languages.push({text: Translations.getTranslated("LANGUAGE_NAME", i), value: i});
     }
 
     var properties = [
@@ -18,19 +18,19 @@ var UI = {
         type: "button",
 
         id: "play",
-        text: Translations.getTranslatedWrapped(2),
+        text: Translations.getTranslatedWrapped("START"),
         onclick: function () {
           _engine.togglePause();
 
           if (_engine.world.paused) {
-            $("#play").html(Translations.getTranslatedWrapped(2));
+            $("#play").html(Translations.getTranslatedWrapped("START"));
 
             $("#collisions, #tool").each(function () {
               this.enable();
             });
           }
           else {
-            $("#play").html(Translations.getTranslatedWrapped(3));
+            $("#play").html(Translations.getTranslatedWrapped("PAUSE"));
 
             $("#collisions, #tool").each(function () {
               this.disable();
@@ -43,13 +43,13 @@ var UI = {
         type: "button",
 
         id: "collisions",
-        text: Translations.getTranslatedWrapped(1),
+        text: Translations.getTranslatedWrapped("COLLISION_GROUPS"),
         onclick: function () {
           UIBuilder.popup(UI.createCollisions());
         }
       },
       {type: "break"},
-      { type: "html", content: Translations.getTranslatedWrapped(17) },
+      { type: "html", content: Translations.getTranslatedWrapped("TOOL") },
       {
         type: "radio",
 
@@ -73,7 +73,7 @@ var UI = {
         ]
       },
       {type: "break"},
-      { type: "html", content: Translations.getTranslatedWrapped(36) },
+      { type: "html", content: Translations.getTranslatedWrapped("ZOOM") },
       {
         type: "range",
 
@@ -205,7 +205,7 @@ var UI = {
       var results = el("div");
 
       var remover = UIBuilder.button({
-        text: Translations.getTranslatedWrapped(29), onclick: (function (wrapper) {
+        text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_BEHAVIOR"), onclick: (function (wrapper) {
           return function () {
             // If the function isn't wrapped, only the last instance of behavior gets passed
 
@@ -218,24 +218,24 @@ var UI = {
       if (behavior === null) {
         BehaviorBuilder.initialize(Type.BOOLEAN, logic);
 
-        results.appendChild(oneResult(null, Translations.getTranslatedWrapped(6), false));
+        results.appendChild(oneResult(null, Translations.getTranslatedWrapped("BEHAVIORS.ACTION"), false));
       }
       else {
         BehaviorBuilder.buildToken(behavior.logic, logic.firstChild);
 
-        results.appendChild(oneResult(behavior.results[0], Translations.getTranslatedWrapped(6), false));
+        results.appendChild(oneResult(behavior.results[0], Translations.getTranslatedWrapped("BEHAVIORS.ACTION"), false));
 
         for (var j = 1; j < behavior.results.length; j++) {
-          results.appendChild(oneResult(behavior.results[j], Translations.getTranslatedWrapped(25), true));
+          results.appendChild(oneResult(behavior.results[j], Translations.getTranslatedWrapped("BEHAVIORS.ANOTHER_ACTION"), true));
         }
       }
 
 
-      results.appendChild(UIBuilder.button({text: Translations.getTranslatedWrapped(26), onclick: function (e) {
-        this.parentNode.insertBefore(oneResult(null, Translations.getTranslatedWrapped(25), true), this);
+      results.appendChild(UIBuilder.button({text: Translations.getTranslatedWrapped("BEHAVIORS.NEW_ACTION"), onclick: function (e) {
+        this.parentNode.insertBefore(oneResult(null, Translations.getTranslatedWrapped("BEHAVIORS.ANOTHER_ACTION"), true), this);
       }}));
 
-      wrapper.appendChild(el("h2", {}, [Translations.getTranslatedWrapped(5), remover]));
+      wrapper.appendChild(el("h2", {}, [Translations.getTranslatedWrapped("BEHAVIORS.CONDITION"), remover]));
       wrapper.appendChild(logic);
       wrapper.appendChild(results);
 
@@ -246,7 +246,7 @@ var UI = {
       var wrapper = el("div");
       var resultElement = el("div.tokenBuilder", {}, [""]);
 
-      var resultRemover = UIBuilder.button({text: Translations.getTranslatedWrapped(28), onclick:
+      var resultRemover = UIBuilder.button({text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_BEHAVIOR"), onclick:
         (function(resultElement){return function(){
           // If the function isn't wrapped, only the last instance of result gets passed
 
@@ -282,7 +282,7 @@ var UI = {
 
     var buttons = el("div.bottom", {}, [
       UIBuilder.button({
-        text: Translations.getTranslatedWrapped(27),
+        text: Translations.getTranslatedWrapped("BEHAVIORS.NEW_BEHAVIOR"),
         onclick: function () {
           ret.appendChild(oneBehavior(null));
           ret.scrollTop = ret.scrollHeight;
@@ -290,13 +290,13 @@ var UI = {
       }),
       UIBuilder.break(),
       UIBuilder.button({
-        text: Translations.getTranslatedWrapped(31),
+        text: Translations.getTranslatedWrapped("BEHAVIORS.CANCEL_BUTTON"),
         onclick: function () {
           UIBuilder.closePopup();
         }
       }),
       UIBuilder.button({
-        text: Translations.getTranslatedWrapped(30),
+        text: Translations.getTranslatedWrapped("BEHAVIORS.DONE_BUTTON"),
         onclick: function () {
           that.saveBehavior(entity);
           UIBuilder.closePopup();
@@ -352,24 +352,24 @@ var UI = {
 
     var properties = [
       // ID
-      { type: "html", content: Translations.getTranslatedWrapped(7)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
       { type: "inputText", value: entity.id, oninput: function (val) {_engine.changeId(entity, val);}},
       { type: "html", content: el("p")},
 
       // Collision group
-      { type: "html", content: Translations.getTranslatedWrapped(8)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLLISION_GROUP")},
       { type: "range", value: entity.collisionGroup + 1, min: 1, max: Constants.COLLISION_GROUPS_NUMBER - 1,
         oninput: function (val) {entity.setCollisionGroup(val * 1 - 1);}},
       { type: "html", content: el("p")},
 
       // Layer
-      { type: "html", content: Translations.getTranslatedWrapped(21)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.LAYER")},
       { type: "range", value: entity.layer + 1, min: 1, max: Constants.LAYERS_NUMBER,
         oninput: function (val) { _engine.setEntityLayer(entity, val*1 - 1); }},
       { type: "html", content: el("p")},
 
       // X
-      { type: "html", content: Translations.getTranslatedWrapped(9)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.X")},
       { type: "inputNumber", value: entity.body.GetPosition().get_x(), id: "entity_x",
         oninput: function (val) {
           entity.body.SetTransform(new b2Vec2(val * 1, entity.body.GetPosition().get_y()), entity.body.GetAngle());
@@ -377,7 +377,7 @@ var UI = {
       { type: "html", content: el("p")},
 
       // Y
-      { type: "html", content: Translations.getTranslatedWrapped(10)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.Y")},
       { type: "inputNumber", value: entity.body.GetPosition().get_y(), id: "entity_y",
         oninput: function (val) {
           entity.body.SetTransform(new b2Vec2(entity.body.GetPosition().get_x(), val * 1), entity.body.GetAngle());
@@ -385,58 +385,58 @@ var UI = {
       { type: "html", content: el("p")},
 
       // Rotation
-      { type: "html", content: Translations.getTranslatedWrapped(11)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ROTATION")},
       { type: "range", min: 0, max: 360, step: 1, value: (((entity.body.GetAngle() * 180 / Math.PI) % 360)+360)%360, id: "entity_rotation",
         oninput: function (val) {entity.body.SetTransform(entity.body.GetPosition(), ((val * 1) * Math.PI / 180)%360);}},
       { type: "html", content: el("p")},
 
       // Fixed rotation
-      { type: "html", content: Translations.getTranslatedWrapped(12)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FIXED_ROTATION")},
       { type: "checkbox", checked: entity.fixedRotation, onchange: function(val) { entity.disableRotation(val); } },
       { type: "html", content: el("p")},
 
       // Restitution
-      { type: "html", content: Translations.getTranslatedWrapped(32)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.RESTITUTION")},
       { type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetRestitution(),
         oninput: function (val) {entity.fixture.SetRestitution(val*1);}},
       { type: "html", content: el("p")},
 
       // Friction
-      { type: "html", content: Translations.getTranslatedWrapped(33)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FRICTION")},
       { type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetFriction(),
         oninput: function (val) {entity.fixture.SetFriction(val*1);entity.body.ResetMassData();}},
       { type: "html", content: el("p")},
 
       // Density
-      { type: "html", content: Translations.getTranslatedWrapped(34)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.DENSITY")},
       { type: "inputNumber", value: entity.fixture.GetDensity(), min: 0,
         oninput: function (val) {entity.fixture.SetDensity(val*1);entity.body.ResetMassData();}},
       { type: "html", content: el("p")},
 
       // Color
-      { type: "html", content: Translations.getTranslatedWrapped(13)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLOR")},
       { type: "inputColor", value: entity.color, oninput: function (val) {entity.color = val}},
       { type: "html", content: el("p")},
 
       // Body type
-      { type: "html", content: Translations.getTranslatedWrapped(14)},
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPE")},
       {
         type: "select", selected: entity.body.GetType(), onchange: function (val) {entity.body.SetType(val * 1)},
         options: [
-          { text: Translations.getTranslatedWrapped(15), value: BodyType.DYNAMIC_BODY },
-          { text: Translations.getTranslatedWrapped(20), value: BodyType.KINEMATIC_BODY },
-          { text: Translations.getTranslatedWrapped(16), value: BodyType.STATIC_BODY },
+          { text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.DYNAMIC"), value: BodyType.DYNAMIC_BODY },
+          { text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.KINEMATIC"), value: BodyType.KINEMATIC_BODY },
+          { text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.STATIC"), value: BodyType.STATIC_BODY },
         ]
       },
       { type: "html", content: el("p")},
 
-      { type: "button", text: Translations.getTranslatedWrapped(22), onclick: function () {
-        if(confirm(Translations.getTranslated(23)))
+      { type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.DELETE_BUTTON"), onclick: function () {
+        if(confirm(Translations.getTranslated("SIDEBAR.DELETE_CONFIRM")))
           _engine.removeEntity(entity);
       }},
       { type: "html", content: el("p")},
 
-      { type: "button", text: Translations.getTranslatedWrapped(4), onclick: function () {
+      { type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.SET_BEHAVIORS"), onclick: function () {
         UIBuilder.popup(UI.createBehavior(entity));
       }},
       { type: "html", content: el("p")},
@@ -454,7 +454,7 @@ var UI = {
       if (_engine.layers[i].length === 0)
         continue;
 
-      var layerElement = el("div.layer", {}, [Translations.getTranslatedWrapped(35), " " + (i + 1) + ":"]);
+      var layerElement = el("div.layer", {}, [Translations.getTranslatedWrapped("LAYER"), " " + (i + 1) + ":"]);
 
       for (var j = 0; j < _engine.layers[i].length; j++) {
         var entity = _engine.layers[i][j];

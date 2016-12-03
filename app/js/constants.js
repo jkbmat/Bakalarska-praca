@@ -3,7 +3,7 @@ module.exports = {
   LAYERS_NUMBER: 10,
   DEFAULT_SCALE: 1 / 70,
   AUTO_ID_PREFIX: "Entity ",
-  SHAPE_MIN_SIZE: 0.5,
+  SHAPE_MIN_SIZE: 0.2,
   TIME_STEP: 60,
 
   POSITION_TOP_LEFT: [-1, -1],

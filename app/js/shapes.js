@@ -14,7 +14,7 @@ var Circle = function(center, radius, fixture, id, collisionGroup) {
 
   this.radius = radius;
 
-  this.nameString = 19;
+  this.nameString = "CIRCLE";
 
   return this;
 };
@@ -113,7 +113,7 @@ var Rectangle = function(center, extents, fixture, id, collisionGroup) {
 
   this.extents = extents;
 
-  this.nameString = 18;
+  this.nameString = "RECTANGLE";
 
   return this;
 };

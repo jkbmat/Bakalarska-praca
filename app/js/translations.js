@@ -3,20 +3,29 @@ module.exports = {
   strings: [require('../translations/english.js'), require('../translations/slovak.js')], // Array of languages (each language is an array of strings)
   currentLanguage: 0, // selected language
 
-  getTranslated: function(index, language) {
+  getTranslated: function(route, language) {
     if (language == undefined) {
       language = this.currentLanguage;
     }
 
-    if (index < this.strings[language].length && index >= 0)
-      return this.strings[language][index];
+    var translation = this.strings[language];
 
-    alert("ERROR! No translation for string number " + index);
+    var steps = route.split('.');
+    for (var i = 0; i < steps.length; ++i) {
+      var step = steps[i];
+      if (step in translation) {
+        translation = translation[step];
+      }
+      else {
+        throw "ERROR! No translation for " + route;
+      }
+    }
+    return translation;
   },
 
-  getTranslatedWrapped: function(index, language) {
-    var ret = el("span", {stringId: index});
-    ret.innerHTML = this.getTranslated(index, language);
+  getTranslatedWrapped: function(route, language) {
+    var ret = el("span", {translation: route});
+    ret.innerHTML = this.getTranslated(route, language);
 
     return ret;
   },
@@ -24,10 +33,9 @@ module.exports = {
   setLanguage: function(index) {
     this.currentLanguage = index;
 
-    var translated = document.querySelectorAll("[stringId]");
-    for (var i = 0; i < translated.length; i++)
-    {
-      translated[i].innerHTML = this.getTranslated(translated[i].getAttribute("stringId"));
+    var translated = document.querySelectorAll("[translation]");
+    for (var i = 0; i < translated.length; i++) {
+      translated[i].innerHTML = this.getTranslated(translated[i].getAttribute("translation"));
     }
   },
 
