@@ -61,6 +61,22 @@ module.exports = {
     var AB = Math.sqrt(Math.pow(xB - xA, 2) + Math.pow(yB - yA, 2));
 
     return Math.acos((CB * CB + AC * AC - AB * AB) / (2 * CB * AC));
+  },
+  
+  findAngleWithNegative: function (oldPoint, newPoint, center) {
+    var xC = center.get_x();
+    var yC = center.get_y();
+    var xO = oldPoint.get_x();
+    var yO = oldPoint.get_y();
+    var xN = newPoint.get_x();
+    var yN = newPoint.get_y();
+
+    var v1x = xO - xC;
+    var v1y = yO - yC;
+    var v2x = xN - xC;
+    var v2y = yN - yC;
+
+    return Math.atan2(v1x, v1y) - Math.atan2(v2x, v2y);
   }
 
 };

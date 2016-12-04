@@ -416,8 +416,8 @@ var UI = {
 
       // Rotation
       { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ROTATION")},
-      { type: "range", min: 0, max: 360, step: 1, value: (((entity.body.GetAngle() * 180 / Math.PI) % 360)+360)%360, id: "entity_rotation",
-        oninput: function (val) {entity.body.SetTransform(entity.body.GetPosition(), ((val * 1) * Math.PI / 180)%360);}},
+      { type: "range", min: 0, max: 360, step: 1, value: (entity.body.GetAngle() * 180 / Math.PI) % 360, id: "entity_rotation",
+        oninput: function (val) { entity.rotate(val * (Math.PI / 180)); }},
       { type: "html", content: el("p")},
 
       // Fixed rotation

@@ -223,8 +223,11 @@ var UIBuilder = {
       oninput: function(){},
     }, properties);
 
+    var inputProperties = $.extend({}, properties);
+    inputProperties.id += "-input";
+
     var slider = el("input.ui", { type: "range", min: properties.min, max: properties.max, step: properties.step, value: properties.value, id: properties.id });
-    var input = this.inputNumber(properties);
+    var input = this.inputNumber(inputProperties);
 
     input.oninput = function() {
       properties.oninput(input.value);

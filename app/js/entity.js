@@ -80,6 +80,33 @@ Entity.prototype.recalculateHelpers = function () {
   }
 };
 
+Entity.prototype.startRotate = function () {
+  this.startRotation = this.entity.body.GetAngle();
+  this.startPosition = new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y);
+};
+
+Entity.prototype.moveRotate = function () {
+  this.entity.rotate(
+    this.startRotation + Geometry.findAngleWithNegative(
+      this.startPosition,
+      new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y),
+      this.entity.body.GetPosition()
+    )
+  );
+};
+
+Entity.prototype.rotate = function (angle) {console.log(angle);
+  var radians = (angle + 2 * Math.PI) % (2 * Math.PI);
+  var degrees = radians * (180 / Math.PI);
+
+  this.body.SetTransform(this.body.GetPosition(), radians);
+
+  if(this === _engine.selectedEntity) {
+    $("#entity_rotation").val(degrees);
+    $("#entity_rotation-input").val(degrees);
+  }
+};
+
 Entity.prototype.getSide = function (position) {
   var centerX = this.getX();
   var centerY = this.getY();

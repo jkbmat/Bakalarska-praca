@@ -28,9 +28,8 @@ gulp.task('default', ['img', 'sass', 'js-lib', 'js', 'html', 'browserSync'], fun
   gulp.watch(imgSource, ['img']);
 });
 
-gulp.task('deploy', ['img-deploy', 'sass-deploy', 'js-lib-deploy', 'js-deploy', 'html-deploy'], function () {
-
-});
+gulp.task('deploy', ['img-deploy', 'sass-deploy', 'js-lib-deploy', 'js-deploy', 'html-deploy'], function () {});
+gulp.task('deploy-no-lib', ['img-deploy', 'sass-deploy', 'js-deploy', 'html-deploy'], function () {});
 
 
 gulp.task('img', function () {

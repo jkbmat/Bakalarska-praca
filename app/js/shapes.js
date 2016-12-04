@@ -33,6 +33,7 @@ Circle.prototype.getHeight = function () {
 Circle.prototype.addHelpers = function () {
   this.helpers = [
     new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate)
   ];
 };
 
@@ -139,6 +140,7 @@ Rectangle.prototype.getHeight = function () {
 Rectangle.prototype.addHelpers = function () {
   this.helpers = [
     new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate),
     new ClickableHelper(this, 7, 7, Constants.POSITION_BOTTOM, 'img/handle.svg', this.moveResizeSide, this.startResizeSide),
     new ClickableHelper(this, 7, 7, Constants.POSITION_TOP, 'img/handle.svg', this.moveResizeSide, this.startResizeSide),
     new ClickableHelper(this, 7, 7, Constants.POSITION_LEFT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide),

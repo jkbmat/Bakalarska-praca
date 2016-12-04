@@ -15,8 +15,8 @@ UI.initialize();
 window._engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 10));
 
 
-// _engine.addEntity(new Circle(new b2Vec2(0, 0), 2), BodyType.DYNAMIC_BODY)
-_engine.addEntity(new Rectangle(new b2Vec2(0, 0), new b2Vec2(0.5, 0.5)), BodyType.DYNAMIC_BODY)
+_engine.addEntity(new Circle(new b2Vec2(0, 0), 0.5), BodyType.DYNAMIC_BODY)
+// _engine.addEntity(new Rectangle(new b2Vec2(0, 0), new b2Vec2(0.5, 0.5)), BodyType.DYNAMIC_BODY)
   .setCollisionGroup(2)
   .setId("kruh")
   .disableRotation(false)
