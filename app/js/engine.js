@@ -177,8 +177,10 @@ Engine.prototype.changeId = function (entity, id) {
 // Selects an entity and shows its properties in the sidebar
 Engine.prototype.selectEntity = function (entity) {
   this.selectedEntity = entity;
-
   UI.buildSidebar(this.selectedEntity);
+
+  if (entity)
+    entity.recalculateHelpers();
 };
 
 // Updates collision masks for all entities, based on engine's collisionGroups table
