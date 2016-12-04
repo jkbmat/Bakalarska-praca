@@ -17,7 +17,7 @@ var Selection = {
   onclick: function () {
 
     if(_engine.selectedEntity) {
-      for (var i in _engine.selectedEntity.helpers) {
+      for (var i = 0; i < _engine.selectedEntity.helpers.length; i++) {
         if (_engine.selectedEntity.helpers[i].testPoint(_engine.input.mouse.x, _engine.input.mouse.y)) {
           _engine.selectedEntity.helpers[i].click();
           return;

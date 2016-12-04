@@ -28,6 +28,8 @@ module.exports = {
     COLLISION_GROUP: "Collision group:",
     X: "X-axis position:",
     Y: "Y-axis position:",
+    WIDTH: "Width:",
+    HEIGHT: "Height:",
     ROTATION: "Rotation:",
     FIXED_ROTATION: "Fixed rotation:",
     RESTITUTION: "Restitution:",

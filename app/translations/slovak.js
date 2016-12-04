@@ -28,6 +28,8 @@ module.exports = {
     COLLISION_GROUP: "Skupina pre kolízie:",
     X: "Pozícia na osi X:",
     Y: "Pozícia na osi Y:",
+    WIDTH: "Šírka:",
+    HEIGHT: "Výška:",
     ROTATION: "Rotácia:",
     FIXED_ROTATION: "Fixná rotácia:",
     RESTITUTION: "Pružnosť:",

@@ -1,9 +1,11 @@
 // ENTITY
 var Utils = require("./utils.js");
+var Constants = require("./constants.js");
+var Geometry = require("./geometry.js");
 
 var AUTO_COLOR_RANGE = [0, 230];
 
-var Entity = function(shape, fixture, body, id, collisionGroup) {
+var Entity = function (shape, fixture, body, id, collisionGroup) {
   this.id = id;
   this.dead = false;
   this.layer = 0;
@@ -43,10 +45,13 @@ var Entity = function(shape, fixture, body, id, collisionGroup) {
     this.body.set_fixedRotation(false);
 
   // Auto generate color
-  var r = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); r = r.length == 1 ? "0" + r : r;
-  var g = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); g = g.length == 1 ? "0" + g : g;
-  var b = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16); b = b.length == 1 ? "0" + b : b;
-  this.color = "#" + r  + g + b ;
+  var r = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16);
+  r = r.length == 1 ? "0" + r : r;
+  var g = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16);
+  g = g.length == 1 ? "0" + g : g;
+  var b = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16);
+  b = b.length == 1 ? "0" + b : b;
+  this.color = "#" + r + g + b;
 };
 
 Entity.prototype.getX = function () {
@@ -70,37 +75,51 @@ Entity.prototype.addHelpers = function () {
 };
 
 Entity.prototype.recalculateHelpers = function () {
-  for (var i in this.helpers) {
+  for (var i = 0; i < this.helpers.length; i++) {
     this.helpers[i].recalculatePosition();
   }
 };
 
-Entity.prototype.die = function() {
-  this.dead = true;
+Entity.prototype.getSide = function (position) {
+  var centerX = this.getX();
+  var centerY = this.getY();
+  var center = new b2Vec2(centerX, centerY);
+  var width = this.getWidth();
+  var height = this.getHeight();
 
-  
+  var rotation = Constants.sideOrder.equalIndexOf(position) * (Math.PI / 2);
+  var topA = new b2Vec2(centerX - (width / 2), centerY - (height / 2));
+  var topB = new b2Vec2(centerX + (width / 2), centerY - (height / 2));
+  var a = Geometry.pointRotate(center, topA, rotation);
+  var b = Geometry.pointRotate(center, topB, rotation);
+
+  return [a, b];
+};
+
+Entity.prototype.die = function () {
+  this.dead = true;
 
   return this;
 };
 
-Entity.prototype.draw = function() {
+Entity.prototype.draw = function () {
   throw "ERROR! Cannot draw Entity: Use derived classes.";
 };
 
-Entity.prototype.setColor = function(color) {
+Entity.prototype.setColor = function (color) {
   this.color = color;
 
   return this;
 };
 
-Entity.prototype.setId = function(id) {
+Entity.prototype.setId = function (id) {
   this.id = id;
 
   return this;
 };
 
 
-Entity.prototype.setCollisionGroup = function(group) {
+Entity.prototype.setCollisionGroup = function (group) {
   this.collisionGroup = group;
 
   var filterData = this.fixture.GetFilterData();
@@ -112,40 +131,40 @@ Entity.prototype.setCollisionGroup = function(group) {
   return this;
 };
 
-Entity.prototype.getLinearVelocity = function() {
+Entity.prototype.getLinearVelocity = function () {
   return this.body.GetLinearVelocity();
 };
 
-Entity.prototype.getMass = function() {
+Entity.prototype.getMass = function () {
   return Math.max(1, this.body.GetMass());
 };
 
-Entity.prototype.setLinearVelocity = function(vector) {
+Entity.prototype.setLinearVelocity = function (vector) {
   this.body.SetLinearVelocity(vector);
 
   return this;
 };
 
-Entity.prototype.applyTorque = function(force) {
+Entity.prototype.applyTorque = function (force) {
   this.body.ApplyTorque(force);
 
   return this;
 };
 
-Entity.prototype.applyLinearImpulse = function(vector) {
+Entity.prototype.applyLinearImpulse = function (vector) {
   this.body.ApplyLinearImpulse(vector, this.body.GetWorldCenter());
 
   return this;
 };
 
-Entity.prototype.disableRotation = function(value) {
+Entity.prototype.disableRotation = function (value) {
   this.fixedRotation = value;
   this.body.SetFixedRotation(value)
 
   return this;
 };
 
-Entity.prototype.addBehavior = function(behavior) {
+Entity.prototype.addBehavior = function (behavior) {
   this.behaviors.push(behavior);
 
   return this;

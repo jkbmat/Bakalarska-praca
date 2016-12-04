@@ -384,6 +384,36 @@ var UI = {
         }},
       { type: "html", content: el("p")},
 
+      // WIDTH
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.WIDTH")},
+      { type: "inputNumber", value: entity.getWidth(), step: 0.1, id: "entity_width",
+        oninput: function (val) {
+          if(entity.nameString === "CIRCLE") {
+            entity.resize(val / 2);
+            $("#entity_height").val(val);
+
+            return;
+          }
+
+          entity.resize(val / 2, entity.getHeight() / 2);
+        }},
+      { type: "html", content: el("p")},
+
+      // HEIGHT
+      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.HEIGHT")},
+      { type: "inputNumber", value: entity.getHeight(), step: 0.1, id: "entity_height",
+        oninput: function (val) {
+          if(entity.nameString === "CIRCLE") {
+            entity.resize(val / 2);
+            $("#entity_width").val(val);
+
+            return;
+          }
+
+          entity.resize(entity.getWidth() / 2, val / 2);
+        }},
+      { type: "html", content: el("p")},
+
       // Rotation
       { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ROTATION")},
       { type: "range", min: 0, max: 360, step: 1, value: (((entity.body.GetAngle() * 180 / Math.PI) % 360)+360)%360, id: "entity_rotation",

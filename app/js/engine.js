@@ -280,7 +280,7 @@ Engine.prototype.drawHelpers = function (entity, ctx) {
     this.viewport.fromScale(-this.viewport.y + entityY) + this.viewport.height / 2);
   ctx.rotate(entity.body.GetAngle());
 
-  for (var i in entity.helpers) {
+  for (var i = 0; i < entity.helpers.length; i++) {
     ctx.save();
 
     var x = entity.helpers[i].x;
@@ -321,15 +321,6 @@ Engine.prototype.drawEntity = function (entity, ctx) {
     if (behavior.check(entity))
       behavior.result();
   }
-};
-
-Engine.prototype.getDistance = function (a, b) {
-  var x1 = a.get_x();
-  var x2 = b.get_x();
-  var y1 = a.get_y();
-  var y2 = b.get_y();
-
-  return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 };
 
 

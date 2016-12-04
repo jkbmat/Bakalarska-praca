@@ -14,4 +14,11 @@ module.exports = {
   POSITION_BOTTOM: [0, 1],
   POSITION_BOTTOM_LEFT: [-1, 1],
   POSITION_LEFT: [-1, 0],
+
+  sideOrder: [
+    [0, -1],
+    [1, 0],
+    [0, 1],
+    [-1, 0]
+  ]
 };
