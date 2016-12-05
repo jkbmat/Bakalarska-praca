@@ -17,7 +17,7 @@ var Selection = {
   onclick: function () {
 
     if(_engine.selectedEntity) {
-      for (var i = 0; i < _engine.selectedEntity.helpers.length; i++) {
+      for (var i = _engine.selectedEntity.helpers.length - 1; i >= 0; i--) {
         if (_engine.selectedEntity.helpers[i].testPoint(_engine.input.mouse.x, _engine.input.mouse.y)) {
           _engine.selectedEntity.helpers[i].click();
           return;
@@ -42,6 +42,7 @@ var Selection = {
 
           this.mode = "reposition";
           this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
+          _engine.selectedEntity.drawHelpers = false;
 
           return;
         }
@@ -55,6 +56,9 @@ var Selection = {
     _engine.viewport.canvasElement.style.cursor = "url(img/grabbingcursor.png), move";
   },
   onrelease: function () {
+    if (this.mode === "reposition")
+      _engine.selectedEntity.drawHelpers = true;
+
     this.origin = this.offset = this.mode = null;
     _engine.viewport.canvasElement.style.cursor = "default";
   },

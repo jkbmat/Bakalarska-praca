@@ -99,7 +99,7 @@ lNumber.prototype.validate = function () {
 };
 
 lNumber.prototype.populate = function () {
-  this.args[0] = new Literal(prompt(Translations.getTranslated(BEHAVIORS.INPUT_DIALOG) + this.name));
+  this.args[0] = new Literal(prompt(Translations.getTranslated("BEHAVIORS.INPUT_DIALOG") + this.name));
 };
 
 lNumber.prototype.constructor = lNumber;

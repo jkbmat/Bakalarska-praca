@@ -9,7 +9,9 @@ var Entity = function (shape, fixture, body, id, collisionGroup) {
   this.id = id;
   this.dead = false;
   this.layer = 0;
+
   this.helpers = [];
+  this.drawHelpers = true;
 
   this.fixedRotation = false;
 

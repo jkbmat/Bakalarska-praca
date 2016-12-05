@@ -230,7 +230,7 @@ Engine.prototype.step = function () {
     }
   }
 
-  if (this.selectedEntity) {
+  if (this.selectedEntity && this.selectedEntity.drawHelpers) {
     this.drawBoundary(ctx);
     this.drawHelpers(this.selectedEntity, ctx);
   }
