@@ -24,7 +24,6 @@ gulp.task('default', ['img', 'sass', 'js-lib', 'js', 'html', 'browserSync'], fun
   gulp.watch(htmlSource, ['html']);
   gulp.watch(jsSource, ['js']);
   gulp.watch(translationsSource, ['js']);
-  gulp.watch(jsLibSource, ['js-lib']);
   gulp.watch(imgSource, ['img']);
 });
 
@@ -71,9 +70,6 @@ gulp.task('js-lib', function () {
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(dist + '/js'))
-    .pipe(browserSync.reload({
-      stream: true
-    }));
 });
 
 gulp.task('js-lib-deploy', function () {

@@ -2,6 +2,7 @@
 var Utils = require("./utils.js");
 var Constants = require("./constants.js");
 var Geometry = require("./geometry.js");
+var UpdateEvent = require("./updateevent.js");
 
 var AUTO_COLOR_RANGE = [0, 230];
 
@@ -11,7 +12,7 @@ var Entity = function (shape, fixture, body, id, collisionGroup) {
   this.layer = 0;
 
   this.helpers = [];
-  this.drawHelpers = true;
+  this.showHelpers = true;
 
   this.fixedRotation = false;
 
@@ -56,12 +57,47 @@ var Entity = function (shape, fixture, body, id, collisionGroup) {
   this.color = "#" + r + g + b;
 };
 
+Entity.prototype.getPosition = function () {
+  return this.body.GetPosition();
+};
+
+Entity.prototype.setPosition = function (x, y) {
+  if(arguments.length === 1) { // supplied a b2Vec2
+    y = x.get_y();
+    x = x.get_x();
+  }
+
+  this.body.SetTransform(new b2Vec2(x, y), this.getAngle());
+  UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [this]});
+};
+
+Entity.prototype.getAngle = function (degrees) {
+  return degrees ?
+    Geometry.clampDegrees(Geometry.toDegrees(this.body.GetAngle())) :
+    Geometry.clampRadians(this.body.GetAngle());
+};
+
+Entity.prototype.setAngle = function (val, degrees) {
+  var radians = degrees ? Geometry.toRadians(val) : val;
+
+  this.body.SetTransform(this.getPosition(), Geometry.clampRadians(radians));
+  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [this]});
+};
+
 Entity.prototype.getX = function () {
   return this.body.GetPosition().get_x();
 };
 
 Entity.prototype.getY = function () {
   return this.body.GetPosition().get_y();
+};
+
+Entity.prototype.setX = function (val) {
+  this.setPosition(val, this.getY());
+};
+
+Entity.prototype.setY = function () {
+  this.setPosition(this.getX(), val);
 };
 
 Entity.prototype.getWidth = function () {
@@ -76,6 +112,10 @@ Entity.prototype.addHelpers = function () {
   throw "ERROR! Cannot add helpers: Use derived class.";
 };
 
+Entity.prototype.toggleHelpers = function (val) {
+  _engine.selectedEntity.showHelpers = val ? val : !_engine.selectedEntity.showHelpers;
+};
+
 Entity.prototype.recalculateHelpers = function () {
   for (var i = 0; i < this.helpers.length; i++) {
     this.helpers[i].recalculatePosition();
@@ -83,30 +123,19 @@ Entity.prototype.recalculateHelpers = function () {
 };
 
 Entity.prototype.startRotate = function () {
-  this.startRotation = this.entity.body.GetAngle();
+  this.startRotation = this.entity.getAngle();
   this.startPosition = new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y);
+  this.entity.toggleHelpers(false);
 };
 
 Entity.prototype.moveRotate = function () {
-  this.entity.rotate(
+  this.entity.setAngle(
     this.startRotation + Geometry.findAngleWithNegative(
       this.startPosition,
       new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y),
-      this.entity.body.GetPosition()
+      this.entity.getPosition()
     )
   );
-};
-
-Entity.prototype.rotate = function (angle) {console.log(angle);
-  var radians = (angle + 2 * Math.PI) % (2 * Math.PI);
-  var degrees = radians * (180 / Math.PI);
-
-  this.body.SetTransform(this.body.GetPosition(), radians);
-
-  if(this === _engine.selectedEntity) {
-    $("#entity_rotation").val(degrees);
-    $("#entity_rotation-input").val(degrees);
-  }
 };
 
 Entity.prototype.getSide = function (position) {
@@ -143,6 +172,7 @@ Entity.prototype.setColor = function (color) {
 
 Entity.prototype.setId = function (id) {
   this.id = id;
+  UpdateEvent.fire(UpdateEvent.ID_CHANGE, {entities: [this]});
 
   return this;
 };
@@ -150,10 +180,6 @@ Entity.prototype.setId = function (id) {
 
 Entity.prototype.setCollisionGroup = function (group) {
   this.collisionGroup = group;
-
-  var filterData = this.fixture.GetFilterData();
-  filterData.set_categoryBits(1 << group);
-  this.fixture.SetFilterData(filterData);
 
   _engine.updateCollision(this);
 
@@ -188,7 +214,9 @@ Entity.prototype.applyLinearImpulse = function (vector) {
 
 Entity.prototype.disableRotation = function (value) {
   this.fixedRotation = value;
-  this.body.SetFixedRotation(value)
+  this.body.SetFixedRotation(value);
+
+  UpdateEvent.fire(UpdateEvent.ROTATION_LOCKED, {entities: [this]});
 
   return this;
 };

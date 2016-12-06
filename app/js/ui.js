@@ -3,11 +3,12 @@ var BodyType = require("./bodytype.js");
 var UIBuilder = require("./uibuilder.js");
 var Constants = require("./constants.js");
 var Translations = require("./translations.js");
+var UpdateEvent = require("./updateevent.js");
 
 // Object for building the UI
 var UI = {
   // UI initialisation
-  initialize: function() {
+  initialize: function () {
     var languages = [];
     for (var i = 0; i < Translations.strings.length; i++) {
       languages.push({text: Translations.getTranslated("LANGUAGE_NAME", i), value: i});
@@ -49,7 +50,7 @@ var UI = {
         }
       },
       {type: "break"},
-      { type: "html", content: Translations.getTranslatedWrapped("TOOL") },
+      {type: "html", content: Translations.getTranslatedWrapped("TOOL")},
       {
         type: "radio",
 
@@ -73,7 +74,7 @@ var UI = {
         ]
       },
       {type: "break"},
-      { type: "html", content: Translations.getTranslatedWrapped("ZOOM") },
+      {type: "html", content: Translations.getTranslatedWrapped("ZOOM")},
       {
         type: "range",
 
@@ -84,7 +85,7 @@ var UI = {
         width: "150px",
         disableWrite: true,
 
-        oninput: function(val) {
+        oninput: function (val) {
           _engine.viewport.zoom(val);
         }
       },
@@ -106,7 +107,7 @@ var UI = {
   },
 
   // Building the collision group table
-  createCollisions: function() {
+  createCollisions: function () {
     var table = el("table.collisionTable");
 
     for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER; i++) {
@@ -130,8 +131,8 @@ var UI = {
           td.col = j;
 
           // highlighting
-          td.onmouseover = function(i, j, table) {
-            return function() {
+          td.onmouseover = function (i, j, table) {
+            return function () {
               var tds = table.getElementsByTagName("td");
               for (var n = 0; n < tds.length; n++) {
                 tds[n].className = "";
@@ -144,8 +145,8 @@ var UI = {
           }(i, j, table);
 
           // more highlighting
-          td.onmouseout = function(table) {
-            return function() {
+          td.onmouseout = function (table) {
+            return function () {
               var tds = table.getElementsByTagName("td");
               for (var n = 0; n < tds.length; n++) {
                 tds[n].className = "";
@@ -159,15 +160,15 @@ var UI = {
           if (_engine.getCollision(i - 1, j - 1))
             checkbox.setAttribute("checked", "checked");
 
-          checkbox.onchange = function(i, j, checkbox) {
-            return function() {
+          checkbox.onchange = function (i, j, checkbox) {
+            return function () {
               _engine.setCollision(i - 1, j - 1, checkbox.checked ? 1 : 0);
             };
           }(i, j, checkbox);
 
           // clicking the checkbox's cell should work as well
-          td.onclick = function(checkbox) {
-            return function(e) {
+          td.onclick = function (checkbox) {
+            return function (e) {
               if (e.target === checkbox)
                 return true;
 
@@ -199,7 +200,7 @@ var UI = {
     var UIBuilder = require("./uibuilder.js");
     var Type = require("./typing.js").Type;
 
-    var oneBehavior = function(behavior) {
+    var oneBehavior = function (behavior) {
       var wrapper = el("div.behavior");
       var logic = el("div.tokenBuilder", {}, [""]);
       var results = el("div");
@@ -231,9 +232,11 @@ var UI = {
       }
 
 
-      results.appendChild(UIBuilder.button({text: Translations.getTranslatedWrapped("BEHAVIORS.NEW_ACTION"), onclick: function (e) {
-        this.parentNode.insertBefore(oneResult(null, Translations.getTranslatedWrapped("BEHAVIORS.ANOTHER_ACTION"), true), this);
-      }}));
+      results.appendChild(UIBuilder.button({
+        text: Translations.getTranslatedWrapped("BEHAVIORS.NEW_ACTION"), onclick: function (e) {
+          this.parentNode.insertBefore(oneResult(null, Translations.getTranslatedWrapped("BEHAVIORS.ANOTHER_ACTION"), true), this);
+        }
+      }));
 
       wrapper.appendChild(el("h2", {}, [Translations.getTranslatedWrapped("BEHAVIORS.CONDITION"), remover]));
       wrapper.appendChild(logic);
@@ -242,20 +245,23 @@ var UI = {
       return wrapper;
     };
 
-    var oneResult = function(result, text, enableRemove) {
+    var oneResult = function (result, text, enableRemove) {
       var wrapper = el("div");
       var resultElement = el("div.tokenBuilder", {}, [""]);
 
-      var resultRemover = UIBuilder.button({text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_BEHAVIOR"), onclick:
-        (function(resultElement){return function(){
-          // If the function isn't wrapped, only the last instance of result gets passed
+      var resultRemover = UIBuilder.button({
+        text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_BEHAVIOR"), onclick: (function (resultElement) {
+          return function () {
+            // If the function isn't wrapped, only the last instance of result gets passed
 
-          $(resultElement).prev().remove(); // Remove the header
-          $(resultElement).remove(); // And the token builder
-        };})(resultElement)});
+            $(resultElement).prev().remove(); // Remove the header
+            $(resultElement).remove(); // And the token builder
+          };
+        })(resultElement)
+      });
       resultRemover.style.float = "right";
 
-      if(! enableRemove)
+      if (!enableRemove)
         resultRemover = "";
 
       wrapper.appendChild(el("h2", {}, [
@@ -264,7 +270,7 @@ var UI = {
       ]));
       wrapper.appendChild(resultElement);
 
-      if(result === null)
+      if (result === null)
         BehaviorBuilder.initialize(Type.ACTION, resultElement);
       else
         BehaviorBuilder.buildToken(result, resultElement.firstChild);
@@ -314,18 +320,19 @@ var UI = {
     entity.behaviors = [];
     var behaviors = $(".behaviorWrapper .behavior");
 
-    for(var i = 0; i < behaviors.length; i++) {
+    for (var i = 0; i < behaviors.length; i++) {
       var tokenBuilders = $(".tokenBuilder", behaviors[i]);
 
       try {
         var logic = _engine.tokenManager.parser.parse(tokenBuilders[0].textContent);
         var results = [];
 
-        for(var j = 1; j < tokenBuilders.length; j++) {
+        for (var j = 1; j < tokenBuilders.length; j++) {
           try {
             results.push(_engine.tokenManager.parser.parse(tokenBuilders[j].textContent));
           }
-          catch (err) {}
+          catch (err) {
+          }
         }
 
         if (results.length === 0)
@@ -352,124 +359,197 @@ var UI = {
 
     var properties = [
       // ID
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
-      { type: "inputText", value: entity.id, oninput: function (val) {_engine.changeId(entity, val);}},
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
+      {
+        type: "inputText", value: entity.id, oninput: function (val) {
+        entity.setId(val);
+      }
+      },
+      {type: "html", content: el("p")},
 
       // Collision group
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLLISION_GROUP")},
-      { type: "range", value: entity.collisionGroup + 1, min: 1, max: Constants.COLLISION_GROUPS_NUMBER - 1,
-        oninput: function (val) {entity.setCollisionGroup(val * 1 - 1);}},
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLLISION_GROUP")},
+      {
+        type: "range", value: entity.collisionGroup + 1, min: 1, max: Constants.COLLISION_GROUPS_NUMBER - 1,
+        oninput: function (val) {
+          entity.setCollisionGroup(val * 1 - 1);
+        }
+      },
+      {type: "html", content: el("p")},
 
       // Layer
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.LAYER")},
-      { type: "range", value: entity.layer + 1, min: 1, max: Constants.LAYERS_NUMBER,
-        oninput: function (val) { _engine.setEntityLayer(entity, val*1 - 1); }},
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.LAYER")},
+      {
+        type: "range", value: entity.layer + 1, min: 1, max: Constants.LAYERS_NUMBER,
+        oninput: function (val) {
+          _engine.setEntityLayer(entity, val * 1 - 1);
+        }
+      },
+      {type: "html", content: el("p")},
 
       // X
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.X")},
-      { type: "inputNumber", value: entity.body.GetPosition().get_x(), id: "entity_x",
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.X")},
+      {
+        type: "inputNumber", value: entity.getX(), id: "entity_x",
         oninput: function (val) {
-          entity.body.SetTransform(new b2Vec2(val * 1, entity.body.GetPosition().get_y()), entity.body.GetAngle());
-        }},
-      { type: "html", content: el("p")},
+          entity.setX(val * 1);
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.REPOSITION) {
+            $("#" + this.id).val(entity.getX());
+          }
+        }
+      },
+      {type: "html", content: el("p")},
 
       // Y
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.Y")},
-      { type: "inputNumber", value: entity.body.GetPosition().get_y(), id: "entity_y",
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.Y")},
+      {
+        type: "inputNumber", value: entity.getY(), id: "entity_y",
         oninput: function (val) {
-          entity.body.SetTransform(new b2Vec2(entity.body.GetPosition().get_x(), val * 1), entity.body.GetAngle());
-        }},
-      { type: "html", content: el("p")},
-
-      // WIDTH
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.WIDTH")},
-      { type: "inputNumber", value: entity.getWidth(), step: 0.1, id: "entity_width",
-        oninput: function (val) {
-          if(entity.nameString === "CIRCLE") {
-            entity.resize(val / 2);
-            $("#entity_height").val(val);
-
-            return;
+          entity.setY(val * 1);
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.REPOSITION) {
+            $("#" + this.id).val(entity.getY());
           }
+        }
+      },
+      {type: "html", content: el("p")},
 
-          entity.resize(val / 2, entity.getHeight() / 2);
-        }},
-      { type: "html", content: el("p")},
-
-      // HEIGHT
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.HEIGHT")},
-      { type: "inputNumber", value: entity.getHeight(), step: 0.1, id: "entity_height",
+      // Width
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.WIDTH")},
+      {
+        type: "inputNumber", value: entity.getWidth(), step: 0.1, id: "entity_width",
         oninput: function (val) {
-          if(entity.nameString === "CIRCLE") {
+          entity.resize(val / 2, entity.getHeight() / 2);
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.RESIZE)
+            $("#" + this.id).val(entity.getWidth());
+        }
+      },
+      {type: "html", content: el("p")},
+
+      // Height
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.HEIGHT")},
+      {
+        type: "inputNumber", value: entity.getHeight(), step: 0.1, id: "entity_height",
+        oninput: function (val) {
+          if (entity.nameString === "CIRCLE") {
             entity.resize(val / 2);
-            $("#entity_width").val(val);
 
             return;
           }
 
           entity.resize(entity.getWidth() / 2, val / 2);
-        }},
-      { type: "html", content: el("p")},
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.RESIZE)
+            $("#" + this.id).val(entity.getHeight());
+        }
+      },
+      {type: "html", content: el("p")},
 
       // Rotation
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ROTATION")},
-      { type: "range", min: 0, max: 360, step: 1, value: (entity.body.GetAngle() * 180 / Math.PI) % 360, id: "entity_rotation",
-        oninput: function (val) { entity.rotate(val * (Math.PI / 180)); }},
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ROTATION")},
+      {
+        type: "range",
+        min: 0,
+        max: 360,
+        step: 1,
+        value: entity.getAngle(true),
+        id: "entity_rotation",
+        oninput: function (val) {
+          entity.setAngle(val * 1, true);
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.ROTATE) {
+            $("#" + this.id).val(entity.getAngle(true));
+            $("#" + this.id + "-input").val(entity.getAngle(true));
+          }
+        }
+      },
+      {type: "html", content: el("p")},
 
       // Fixed rotation
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FIXED_ROTATION")},
-      { type: "checkbox", checked: entity.fixedRotation, onchange: function(val) { entity.disableRotation(val); } },
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FIXED_ROTATION")},
+      {
+        type: "checkbox", checked: entity.fixedRotation, onchange: function (val) {
+        entity.disableRotation(val);
+      }
+      },
+      {type: "html", content: el("p")},
 
-      // Restitution
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.RESTITUTION")},
-      { type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetRestitution(),
-        oninput: function (val) {entity.fixture.SetRestitution(val*1);}},
-      { type: "html", content: el("p")},
+      // Restitution // TODO: start here, vpisovanie blbne
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.RESTITUTION")},
+      {
+        type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetRestitution(),
+        oninput: function (val) {
+          entity.fixture.SetRestitution(val * 1);
+        }
+      },
+      {type: "html", content: el("p")},
 
       // Friction
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FRICTION")},
-      { type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetFriction(),
-        oninput: function (val) {entity.fixture.SetFriction(val*1);entity.body.ResetMassData();}},
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FRICTION")},
+      {
+        type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetFriction(),
+        oninput: function (val) {
+          entity.fixture.SetFriction(val * 1);
+          entity.body.ResetMassData();
+        }
+      },
+      {type: "html", content: el("p")},
 
       // Density
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.DENSITY")},
-      { type: "inputNumber", value: entity.fixture.GetDensity(), min: 0,
-        oninput: function (val) {entity.fixture.SetDensity(val*1);entity.body.ResetMassData();}},
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.DENSITY")},
+      {
+        type: "inputNumber", value: entity.fixture.GetDensity(), min: 0,
+        oninput: function (val) {
+          entity.fixture.SetDensity(val * 1);
+          entity.body.ResetMassData();
+        }
+      },
+      {type: "html", content: el("p")},
 
       // Color
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLOR")},
-      { type: "inputColor", value: entity.color, oninput: function (val) {entity.color = val}},
-      { type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLOR")},
+      {
+        type: "inputColor", value: entity.color, oninput: function (val) {
+        entity.color = val
+      }
+      },
+      {type: "html", content: el("p")},
 
       // Body type
-      { type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPE")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPE")},
       {
-        type: "select", selected: entity.body.GetType(), onchange: function (val) {entity.body.SetType(val * 1)},
+        type: "select", selected: entity.body.GetType(), onchange: function (val) {
+        entity.body.SetType(val * 1)
+      },
         options: [
-          { text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.DYNAMIC"), value: BodyType.DYNAMIC_BODY },
-          { text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.KINEMATIC"), value: BodyType.KINEMATIC_BODY },
-          { text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.STATIC"), value: BodyType.STATIC_BODY },
+          {text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.DYNAMIC"), value: BodyType.DYNAMIC_BODY},
+          {text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.KINEMATIC"), value: BodyType.KINEMATIC_BODY},
+          {text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.STATIC"), value: BodyType.STATIC_BODY},
         ]
       },
-      { type: "html", content: el("p")},
+      {type: "html", content: el("p")},
 
-      { type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.DELETE_BUTTON"), onclick: function () {
-        if(confirm(Translations.getTranslated("SIDEBAR.DELETE_CONFIRM")))
+      {
+        type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.DELETE_BUTTON"), onclick: function () {
+        if (confirm(Translations.getTranslated("SIDEBAR.DELETE_CONFIRM")))
           _engine.removeEntity(entity);
-      }},
-      { type: "html", content: el("p")},
+      }
+      },
+      {type: "html", content: el("p")},
 
-      { type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.SET_BEHAVIORS"), onclick: function () {
+      {
+        type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.SET_BEHAVIORS"), onclick: function () {
         UIBuilder.popup(UI.createBehavior(entity));
-      }},
-      { type: "html", content: el("p")},
+      }
+      },
+      {type: "html", content: el("p")},
 
     ];
 
@@ -479,8 +559,7 @@ var UI = {
   buildEntityList: function () {
     var ret = el("div.entityList");
 
-    for (var i = 0; i < Constants.LAYERS_NUMBER; i++)
-    {
+    for (var i = 0; i < Constants.LAYERS_NUMBER; i++) {
       if (_engine.layers[i].length === 0)
         continue;
 

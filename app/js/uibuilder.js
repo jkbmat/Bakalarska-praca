@@ -155,7 +155,8 @@ var UIBuilder = {
       min: -Infinity,
       max: Infinity,
       step: 1,
-      oninput: function(){}
+      oninput: function(){},
+      onupdate: function () {}
     }, properties);
 
     var ret = el("input.ui", { type: "number", id: properties.id, value: properties.value, min: properties.min, max: properties.max, step: properties.step });
@@ -173,6 +174,10 @@ var UIBuilder = {
     ret.oninput = function (e) {
       properties.oninput(this.value);
     };
+
+    document.addEventListener("update", function (e) {
+      properties.onupdate(e.detail.action, e.detail);
+    });
 
     return ret;
   },
@@ -221,6 +226,7 @@ var UIBuilder = {
       width: "100%",
       disableWrite: false,
       oninput: function(){},
+      onupdate: function(){}
     }, properties);
 
     var inputProperties = $.extend({}, properties);
@@ -254,6 +260,10 @@ var UIBuilder = {
       properties.oninput(this.value);
       input.value = this.value;
     };
+
+    document.addEventListener("update", function (e) {
+      properties.onupdate(e.detail.action, e.detail);
+    });
 
     var ret = [slider, input];
     if (properties.disableWrite)

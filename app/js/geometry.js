@@ -77,6 +77,21 @@ module.exports = {
     var v2y = yN - yC;
 
     return Math.atan2(v1x, v1y) - Math.atan2(v2x, v2y);
-  }
+  },
 
+  toDegrees: function (radians) {
+    return radians * (180 / Math.PI);
+  },
+
+  toRadians: function (degrees) {
+    return degrees * (Math.PI / 180);
+  },
+  
+  clampDegrees: function (angle) {
+    return ((angle % 360) + 360) % 360;
+  },
+  
+  clampRadians: function (angle) {
+    return ((angle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+  }
 };

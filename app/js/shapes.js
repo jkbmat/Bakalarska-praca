@@ -2,6 +2,7 @@ var Entity = require("./entity.js");
 var Constants = require("./constants.js");
 var ClickableHelper = require("./clickablehelper.js");
 var Geometry = require("./geometry.js");
+var UpdateEvent = require("./updateevent.js");
 
 // Circle entity
 var Circle = function (center, radius, fixture, id, collisionGroup) {
@@ -32,8 +33,8 @@ Circle.prototype.getHeight = function () {
 
 Circle.prototype.addHelpers = function () {
   this.helpers = [
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize),
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate)
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.toggleHelpers),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.toggleHelpers)
   ];
 };
 
@@ -65,6 +66,8 @@ Circle.prototype.startResize = function () {
       _engine.input.mouse.y
     )
   );
+
+  this.entity.toggleHelpers(false);
 };
 
 Circle.prototype.moveResize = function () {
@@ -100,11 +103,7 @@ Circle.prototype.resize = function (radius) {
   this.fixture = this.body.CreateFixture(newFix);
 
   this.recalculateHelpers();
-
-  if (this === _engine.selectedEntity) {
-    $("#entity_width").val(radius * 2);
-    $("#entity_height").val(radius * 2);
-  }
+  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [this]});
 
   return true;
 };
@@ -139,12 +138,12 @@ Rectangle.prototype.getHeight = function () {
 
 Rectangle.prototype.addHelpers = function () {
   this.helpers = [
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize),
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_BOTTOM, 'img/handle.svg', this.moveResizeSide, this.startResizeSide),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_TOP, 'img/handle.svg', this.moveResizeSide, this.startResizeSide),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_LEFT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_RIGHT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.toggleHelpers),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.toggleHelpers),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_BOTTOM, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_TOP, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_LEFT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_RIGHT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
   ];
 };
 
@@ -165,13 +164,15 @@ Rectangle.prototype.startResizeSide = function () {
     this.entity.getX(),
     this.entity.getY()
   );
+
+  this.entity.toggleHelpers(false);
 };
 
 Rectangle.prototype.moveResizeSide = function () {
   var mouseRotated = Geometry.pointRotate(
     this.startPosition,
     new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y),
-    -(this.entity.body.GetAngle() + Constants.sideOrder.equalIndexOf(this.position) * (Math.PI / 2))
+    -(this.entity.getAngle() + Constants.sideOrder.equalIndexOf(this.position) * (Math.PI / 2))
   );
 
   var distance = this.startPosition.get_y() - mouseRotated.get_y();
@@ -181,17 +182,15 @@ Rectangle.prototype.moveResizeSide = function () {
       (this.startSize[1] + this.startSize[1] * Math.abs(this.position[0]) + distance * Math.abs(this.position[1])) / 2
     )) {
 
-    this.entity.body.SetTransform(
+    this.entity.setPosition(
       Geometry.pointRotate(
         this.startPosition,
         new b2Vec2(
           this.startPosition.get_x() + ((distance - this.startSize[0]) / 2) * this.position[0],
           this.startPosition.get_y() + ((distance - this.startSize[1]) / 2) * this.position[1]
         ),
-        this.entity.body.GetAngle()
-      ),
-
-      this.entity.body.GetAngle()
+        this.entity.getAngle()
+      )
     );
 
   }
@@ -204,18 +203,20 @@ Rectangle.prototype.startResize = function () {
   ];
 
   this.startDistance = Geometry.pointPointDistance(
-    this.entity.body.GetPosition(),
+    this.entity.getPosition(),
 
     new b2Vec2(
       _engine.input.mouse.x,
       _engine.input.mouse.y
     )
   );
+
+  this.entity.toggleHelpers(false);
 };
 
 Rectangle.prototype.moveResize = function () {
   var scale = Geometry.pointPointDistance(
-      this.entity.body.GetPosition(),
+      this.entity.getPosition(),
 
       new b2Vec2(
         _engine.input.mouse.x,
@@ -249,11 +250,7 @@ Rectangle.prototype.resize = function (halfWidth, halfHeight) {
   this.fixture = this.body.CreateFixture(newFix);
 
   this.recalculateHelpers();
-
-  if (this === _engine.selectedEntity) {
-    $("#entity_width").val(halfWidth * 2);
-    $("#entity_height").val(halfHeight * 2);
-  }
+  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [this]});
 
   return true;
 };

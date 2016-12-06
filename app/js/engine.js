@@ -2,6 +2,7 @@ var UI = require("./ui.js");
 var Tools = require("./tools.js");
 var TokenManager = require("./tokenmanager.js");
 var Constants = require("./constants.js");
+var UpdateEvent = require("./updateevent.js");
 
 // ENGINE
 
@@ -93,6 +94,8 @@ Engine.prototype.setEntityLayer = function (entity, newLayer) {
   // Set new layer
   entity.layer = newLayer;
   this.layers[newLayer].push(entity);
+
+  UpdateEvent.fire(UpdateEvent.LAYER_CHANGE, {entities: [entity]});
 };
 
 // Returns all entities in one array
@@ -169,11 +172,6 @@ Engine.prototype.setCollision = function (groupA, groupB, value) {
   return this;
 };
 
-// Changes the ID of an entity
-Engine.prototype.changeId = function (entity, id) {
-  entity.id = id;
-};
-
 // Selects an entity and shows its properties in the sidebar
 Engine.prototype.selectEntity = function (entity) {
   this.selectedEntity = entity;
@@ -199,6 +197,8 @@ Engine.prototype.updateCollision = function (entity) {
   var filterData = entity.fixture.GetFilterData();
   filterData.set_maskBits(this.collisionGroups[entity.collisionGroup].mask);
   entity.fixture.SetFilterData(filterData);
+
+  UpdateEvent.fire(UpdateEvent.COL_GROUP_CHANGE, {entities: [entity]});
 
   return this;
 };
@@ -230,9 +230,11 @@ Engine.prototype.step = function () {
     }
   }
 
-  if (this.selectedEntity && this.selectedEntity.drawHelpers) {
+  if (this.selectedEntity) {
     this.drawBoundary(ctx);
-    this.drawHelpers(this.selectedEntity, ctx);
+
+    if (this.selectedEntity.showHelpers)
+      this.drawHelpers(this.selectedEntity, ctx);
   }
 
   // Released keys are only to be processed once
@@ -258,7 +260,7 @@ Engine.prototype.drawBoundary = function (ctx) {
     this.viewport.fromScale(-this.viewport.x + x) + this.viewport.width / 2,
     this.viewport.fromScale(-this.viewport.y + y) + this.viewport.height / 2);
 
-  ctx.rotate(this.selectedEntity.body.GetAngle());
+  ctx.rotate(this.selectedEntity.getAngle());
 
   ctx.globalCompositeOperation = "xor";
   ctx.strokeRect(
@@ -274,13 +276,10 @@ Engine.prototype.drawBoundary = function (ctx) {
 Engine.prototype.drawHelpers = function (entity, ctx) {
   ctx.save();
 
-  var entityX = entity.body.GetPosition().get_x();
-  var entityY = entity.body.GetPosition().get_y();
-
   ctx.translate(
-    this.viewport.fromScale(-this.viewport.x + entityX) + this.viewport.width / 2,
-    this.viewport.fromScale(-this.viewport.y + entityY) + this.viewport.height / 2);
-  ctx.rotate(entity.body.GetAngle());
+    this.viewport.fromScale(-this.viewport.x + entity.getX()) + this.viewport.width / 2,
+    this.viewport.fromScale(-this.viewport.y + entity.getY()) + this.viewport.height / 2);
+  ctx.rotate(entity.getAngle());
 
   for (var i = 0; i < entity.helpers.length; i++) {
     ctx.save();
@@ -300,14 +299,11 @@ Engine.prototype.drawHelpers = function (entity, ctx) {
 Engine.prototype.drawEntity = function (entity, ctx) {
   ctx.save();
 
-  var x = entity.body.GetPosition().get_x();
-  var y = entity.body.GetPosition().get_y();
-
   ctx.translate(
-    this.viewport.fromScale(-this.viewport.x + x) + this.viewport.width / 2,
-    this.viewport.fromScale(-this.viewport.y + y) + this.viewport.height / 2);
+    this.viewport.fromScale(-this.viewport.x + entity.getX()) + this.viewport.width / 2,
+    this.viewport.fromScale(-this.viewport.y + entity.getY()) + this.viewport.height / 2);
 
-  ctx.rotate(entity.body.GetAngle());
+  ctx.rotate(entity.getAngle());
 
   if (entity === this.selectedEntity)
     ctx.globalAlpha = 1;

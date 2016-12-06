@@ -1,6 +1,7 @@
 var Shape = require("./shapes.js");
 var Type = require("./bodytype.js");
 var Constants = require("./constants.js");
+var UpdateEvent = require("./updateevent.js");
 
 var Blank = {
   onclick: function () {},
@@ -42,7 +43,7 @@ var Selection = {
 
           this.mode = "reposition";
           this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
-          _engine.selectedEntity.drawHelpers = false;
+          _engine.selectedEntity.toggleHelpers(false);
 
           return;
         }
@@ -57,7 +58,7 @@ var Selection = {
   },
   onrelease: function () {
     if (this.mode === "reposition")
-      _engine.selectedEntity.drawHelpers = true;
+      _engine.selectedEntity.toggleHelpers(true);
 
     this.origin = this.offset = this.mode = null;
     _engine.viewport.canvasElement.style.cursor = "default";
@@ -72,13 +73,10 @@ var Selection = {
     }
 
     if (this.mode === "reposition") {
-      var body = _engine.selectedEntity.body;
       var x = Math.round((_engine.input.mouse.x + this.offset[0]) * 1000) / 1000;
       var y = Math.round((_engine.input.mouse.y + this.offset[1]) * 1000) / 1000;
 
-      body.SetTransform(new b2Vec2(x, y), body.GetAngle());
-      $("#entity_x").val(x);
-      $("#entity_y").val(y);
+      _engine.selectedEntity.setPosition(x, y);
     }
   }
 };
