@@ -2,7 +2,6 @@ var FixType = require("./typing").FixType;
 var Type = require("./typing").Type;
 var Literal = require("./token.js").Literal;
 
-
 var Parser = function (tokenManager) {
   this.tokenManager = tokenManager;
 

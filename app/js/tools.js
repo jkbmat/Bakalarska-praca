@@ -41,7 +41,7 @@ var Selection = {
             _engine.selectedEntity.body.GetPosition().get_y() - this.origin[1]
           ];
 
-          this.mode = "reposition";
+          this.mode = "reposition-start";
           this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
           _engine.selectedEntity.toggleHelpers(false);
 
@@ -57,8 +57,14 @@ var Selection = {
     _engine.viewport.canvasElement.style.cursor = "url(img/grabbingcursor.png), move";
   },
   onrelease: function () {
-    if (this.mode === "reposition")
+    if (this.mode === "reposition") {
       _engine.selectedEntity.toggleHelpers(true);
+      UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [_engine.selectedEntity]});
+    }
+
+    if (this.mode === "reposition-start") {
+      _engine.selectedEntity.toggleHelpers(true);
+    }
 
     this.origin = this.offset = this.mode = null;
     _engine.viewport.canvasElement.style.cursor = "default";
@@ -72,11 +78,18 @@ var Selection = {
       _engine.viewport.y = this.origin[1] + _engine.viewport.toScale(this.offset[1] - _engine.input.mouse.canvasY);
     }
 
+    if (
+      this.mode === "reposition-start" &&
+      !this.origin.equalTo([_engine.input.mouse.x, _engine.input.mouse.y])
+    ) {
+      this.mode = "reposition";
+    }
+
     if (this.mode === "reposition") {
       var x = Math.round((_engine.input.mouse.x + this.offset[0]) * 1000) / 1000;
       var y = Math.round((_engine.input.mouse.y + this.offset[1]) * 1000) / 1000;
 
-      _engine.selectedEntity.setPosition(x, y);
+      _engine.selectedEntity.setPosition(x, y, true);
     }
   }
 };

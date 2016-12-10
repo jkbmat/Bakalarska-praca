@@ -3,6 +3,7 @@ var Tools = require("./tools.js");
 var TokenManager = require("./tokenmanager.js");
 var Constants = require("./constants.js");
 var UpdateEvent = require("./updateevent.js");
+var StateManager = require("./statemanager.js");
 
 // ENGINE
 
@@ -44,11 +45,19 @@ var Engine = function (viewport, gravity) {
   var Input = require('./input.js');
   this.input = new Input(viewport);
 
+  this.stateManager = new StateManager(this);
+
   $(viewport.canvasElement).on("mousedown", (function () {
     this.selectedTool.onclick();
   }).bind(this));
+
   $(viewport.canvasElement).on("mouseup", (function () {
     this.selectedTool.onrelease();
+  }).bind(this));
+
+  $(document).on("update", (function (e) {
+    if(!e.detail.noState)
+      this.stateManager.addState();
   }).bind(this));
 };
 
@@ -215,9 +224,20 @@ Engine.prototype.step = function () {
 
   ctx.save();
 
-  if (!_engine.world.paused) {
+  if (!this.world.paused) {
     // box2d simulation step
     this.world.Step(1 / Constants.TIME_STEP, 10, 5);
+
+    var entities = this.entities();
+
+    for (var i = 0; i < entities.length; i++) {
+      for (var j = 0; j < entities[i].behaviors.length; j++) {
+        var behavior = entities[i].behaviors[j];
+
+        if (behavior.check(entities[i]))
+          behavior.result();
+      }
+    }
   }
   else {
     this.selectedTool.onmove(ctx);
@@ -312,13 +332,6 @@ Engine.prototype.drawEntity = function (entity, ctx) {
   entity.draw(ctx);
 
   ctx.restore();
-
-  for (var j = 0; j < entity.behaviors.length; j++) {
-    var behavior = entity.behaviors[j];
-
-    if (behavior.check(entity))
-      behavior.result();
-  }
 };
 
 

@@ -305,6 +305,7 @@ var UI = {
         text: Translations.getTranslatedWrapped("BEHAVIORS.DONE_BUTTON"),
         onclick: function () {
           that.saveBehavior(entity);
+          UpdateEvent.fire(UpdateEvent.BEHAVIOR_CHANGE, {entities: [this]});
           UIBuilder.closePopup();
         }
       }),
@@ -436,7 +437,7 @@ var UI = {
       {
         type: "inputNumber", value: entity.getHeight(), step: 0.1, id: "entity_height",
         oninput: function (val) {
-          if (entity.nameString === "CIRCLE") {
+          if (entity.type === "CIRCLE") {
             entity.resize(val / 2);
 
             return;
@@ -481,12 +482,12 @@ var UI = {
       },
       {type: "html", content: el("p")},
 
-      // Restitution // TODO: start here, vpisovanie blbne
+      // Restitution
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.RESTITUTION")},
       {
-        type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetRestitution(),
+        type: "range", min: 0, max: 1, step: 0.1, value: entity.getRestitution(),
         oninput: function (val) {
-          entity.fixture.SetRestitution(val * 1);
+          entity.setRestitution(val * 1);
         }
       },
       {type: "html", content: el("p")},
@@ -494,10 +495,9 @@ var UI = {
       // Friction
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FRICTION")},
       {
-        type: "range", min: 0, max: 1, step: 0.1, value: entity.fixture.GetFriction(),
+        type: "range", min: 0, max: 1, step: 0.1, value: entity.getFriction(),
         oninput: function (val) {
-          entity.fixture.SetFriction(val * 1);
-          entity.body.ResetMassData();
+          entity.setFriction(val * 1);
         }
       },
       {type: "html", content: el("p")},
@@ -505,10 +505,9 @@ var UI = {
       // Density
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.DENSITY")},
       {
-        type: "inputNumber", value: entity.fixture.GetDensity(), min: 0,
+        type: "inputNumber", value: entity.getDensity(), min: 0,
         oninput: function (val) {
-          entity.fixture.SetDensity(val * 1);
-          entity.body.ResetMassData();
+          entity.setDensity(val * 1);
         }
       },
       {type: "html", content: el("p")},
@@ -516,8 +515,8 @@ var UI = {
       // Color
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLOR")},
       {
-        type: "inputColor", value: entity.color, oninput: function (val) {
-        entity.color = val
+        type: "inputColor", value: entity.getColor(), oninput: function (val) {
+        entity.setColor(val);
       }
       },
       {type: "html", content: el("p")},
@@ -525,8 +524,8 @@ var UI = {
       // Body type
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPE")},
       {
-        type: "select", selected: entity.body.GetType(), onchange: function (val) {
-        entity.body.SetType(val * 1)
+        type: "select", selected: entity.getBodyType(), onchange: function (val) {
+        entity.setBodyType(val * 1);
       },
         options: [
           {text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.DYNAMIC"), value: BodyType.DYNAMIC_BODY},
@@ -569,7 +568,7 @@ var UI = {
         var entity = _engine.layers[i][j];
 
         var entityElement = el("div.entity", {}, [el("span", {}, [
-          el("span.id", {}, [entity.id]), ": ", Translations.getTranslatedWrapped(entity.nameString)
+          el("span.id", {}, [entity.id]), ": ", Translations.getTranslatedWrapped(entity.type)
         ])]);
 
         entityElement.onclick = (function (entity) {

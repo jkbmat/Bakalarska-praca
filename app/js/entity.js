@@ -61,14 +61,16 @@ Entity.prototype.getPosition = function () {
   return this.body.GetPosition();
 };
 
-Entity.prototype.setPosition = function (x, y) {
-  if(arguments.length === 1) { // supplied a b2Vec2
+Entity.prototype.setPosition = function (x, y, silent) {
+  if(y == undefined) { // supplied a b2Vec2
     y = x.get_y();
     x = x.get_x();
   }
 
   this.body.SetTransform(new b2Vec2(x, y), this.getAngle());
-  UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [this]});
+
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [this]});
 };
 
 Entity.prototype.getAngle = function (degrees) {
@@ -77,11 +79,13 @@ Entity.prototype.getAngle = function (degrees) {
     Geometry.clampRadians(this.body.GetAngle());
 };
 
-Entity.prototype.setAngle = function (val, degrees) {
+Entity.prototype.setAngle = function (val, degrees, silent) {
   var radians = degrees ? Geometry.toRadians(val) : val;
 
   this.body.SetTransform(this.getPosition(), Geometry.clampRadians(radians));
-  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [this]});
+
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [this]});
 };
 
 Entity.prototype.getX = function () {
@@ -96,7 +100,7 @@ Entity.prototype.setX = function (val) {
   this.setPosition(val, this.getY());
 };
 
-Entity.prototype.setY = function () {
+Entity.prototype.setY = function (val) {
   this.setPosition(this.getX(), val);
 };
 
@@ -106,6 +110,65 @@ Entity.prototype.getWidth = function () {
 
 Entity.prototype.getHeight = function () {
   throw "ERROR! Cannot get height: Use derived class.";
+};
+
+Entity.prototype.getRestitution = function () {
+  return this.fixture.GetRestitution();
+};
+
+Entity.prototype.setRestitution = function (val) {
+  this.fixture.SetRestitution(val);
+  this.body.ResetMassData();
+  this.resize(this.getWidth() / 2, this.getHeight() / 2);
+  _engine.world.Step(0, 0, 0);
+
+  UpdateEvent.fire(UpdateEvent.RESTITUTION_CHANGE, {entities: [this]});
+};
+
+Entity.prototype.getFriction = function () {
+  return this.fixture.GetFriction();
+};
+
+Entity.prototype.setFriction = function (val) {
+  this.fixture.SetFriction(val);
+  this.body.ResetMassData();
+  this.resize(this.getWidth() / 2, this.getHeight() / 2);
+  _engine.world.Step(0, 0, 0);
+
+  UpdateEvent.fire(UpdateEvent.FRICTION_CHANGE, {entities: [this]});
+};
+
+Entity.prototype.getDensity = function () {
+  return this.fixture.GetDensity();
+};
+
+Entity.prototype.setDensity = function (val) {
+  this.fixture.SetDensity(val);
+  this.body.ResetMassData();
+  this.resize(this.getWidth() / 2, this.getHeight() / 2);
+  _engine.world.Step(0, 0, 0);
+
+  UpdateEvent.fire(UpdateEvent.DENSITY_CHANGE, {entities: [this]});
+};
+
+Entity.prototype.getColor = function () {
+  return this.color;
+};
+
+Entity.prototype.setColor = function (color) {
+  this.color = color;
+
+  UpdateEvent.fire(UpdateEvent.COLOR_CHANGE, {entities: [this]});
+};
+
+Entity.prototype.getBodyType = function () {
+  return this.body.GetType();
+};
+
+Entity.prototype.setBodyType = function (type) {
+  this.body.SetType(type);
+
+  UpdateEvent.fire(UpdateEvent.BODY_TYPE_CHANGE, {entities: [this]});
 };
 
 Entity.prototype.addHelpers = function () {
@@ -134,7 +197,8 @@ Entity.prototype.moveRotate = function () {
       this.startPosition,
       new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y),
       this.entity.getPosition()
-    )
+    ),
+    false, true
   );
 };
 
@@ -164,8 +228,11 @@ Entity.prototype.draw = function () {
   throw "ERROR! Cannot draw Entity: Use derived classes.";
 };
 
-Entity.prototype.setColor = function (color) {
+Entity.prototype.setColor = function (color, silent) {
   this.color = color;
+
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.COLOR_CHANGE, {entities: [this]});
 
   return this;
 };
@@ -212,11 +279,12 @@ Entity.prototype.applyLinearImpulse = function (vector) {
   return this;
 };
 
-Entity.prototype.disableRotation = function (value) {
+Entity.prototype.disableRotation = function (value, silent) {
   this.fixedRotation = value;
   this.body.SetFixedRotation(value);
 
-  UpdateEvent.fire(UpdateEvent.ROTATION_LOCKED, {entities: [this]});
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.ROTATION_LOCKED, {entities: [this]});
 
   return this;
 };

@@ -16,7 +16,7 @@ var Circle = function (center, radius, fixture, id, collisionGroup) {
 
   this.radius = radius;
 
-  this.nameString = "CIRCLE";
+  this.type = "CIRCLE";
 
   return this;
 };
@@ -33,8 +33,8 @@ Circle.prototype.getHeight = function () {
 
 Circle.prototype.addHelpers = function () {
   this.helpers = [
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.toggleHelpers),
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.toggleHelpers)
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.endResizeRotate),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.endResizeRotate)
   ];
 };
 
@@ -80,10 +80,17 @@ Circle.prototype.moveResize = function () {
       )
     ) / this.startDistance;
 
-  this.entity.resize(this.startSize * scale);
+  this.entity.resize(this.startSize * scale, true);
 };
 
-Circle.prototype.resize = function (radius) {
+Circle.prototype.endResizeRotate = function() {
+  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [_engine.selectedEntity], noState: true});
+  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [_engine.selectedEntity]});
+
+  _engine.selectedEntity.toggleHelpers(false);
+};
+
+Circle.prototype.resize = function (radius, silent) {
   if (radius < Constants.SHAPE_MIN_SIZE / 2)
     return false;
 
@@ -103,7 +110,9 @@ Circle.prototype.resize = function (radius) {
   this.fixture = this.body.CreateFixture(newFix);
 
   this.recalculateHelpers();
-  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [this]});
+
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [this]});
 
   return true;
 };
@@ -121,7 +130,7 @@ var Rectangle = function (center, extents, fixture, id, collisionGroup) {
 
   this.extents = extents;
 
-  this.nameString = "RECTANGLE";
+  this.type = "RECTANGLE";
 
   return this;
 };
@@ -138,12 +147,12 @@ Rectangle.prototype.getHeight = function () {
 
 Rectangle.prototype.addHelpers = function () {
   this.helpers = [
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.toggleHelpers),
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.toggleHelpers),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_BOTTOM, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_TOP, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_LEFT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_RIGHT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.toggleHelpers),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.endResizeRotate),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_BOTTOM, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_TOP, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_LEFT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_RIGHT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
   ];
 };
 
@@ -179,7 +188,8 @@ Rectangle.prototype.moveResizeSide = function () {
 
   if (this.entity.resize(
       (this.startSize[0] + this.startSize[0] * Math.abs(this.position[1]) + distance * Math.abs(this.position[0])) / 2,
-      (this.startSize[1] + this.startSize[1] * Math.abs(this.position[0]) + distance * Math.abs(this.position[1])) / 2
+      (this.startSize[1] + this.startSize[1] * Math.abs(this.position[0]) + distance * Math.abs(this.position[1])) / 2,
+      true
     )) {
 
     this.entity.setPosition(
@@ -190,7 +200,7 @@ Rectangle.prototype.moveResizeSide = function () {
           this.startPosition.get_y() + ((distance - this.startSize[1]) / 2) * this.position[1]
         ),
         this.entity.getAngle()
-      )
+      ), null, true
     );
 
   }
@@ -214,6 +224,13 @@ Rectangle.prototype.startResize = function () {
   this.entity.toggleHelpers(false);
 };
 
+Rectangle.prototype.endResizeRotate = function() {
+  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [_engine.selectedEntity], noState: true});
+  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [_engine.selectedEntity]});
+
+  _engine.selectedEntity.toggleHelpers(false);
+};
+
 Rectangle.prototype.moveResize = function () {
   var scale = Geometry.pointPointDistance(
       this.entity.getPosition(),
@@ -224,10 +241,10 @@ Rectangle.prototype.moveResize = function () {
       )
     ) / this.startDistance;
 
-  this.entity.resize(this.startSize[0] * scale, this.startSize[1] * scale);
+  this.entity.resize(this.startSize[0] * scale, this.startSize[1] * scale, true);
 };
 
-Rectangle.prototype.resize = function (halfWidth, halfHeight) {
+Rectangle.prototype.resize = function (halfWidth, halfHeight, silent) {
   if (
     halfWidth * 2 < Constants.SHAPE_MIN_SIZE ||
     halfHeight * 2 < Constants.SHAPE_MIN_SIZE
@@ -250,7 +267,9 @@ Rectangle.prototype.resize = function (halfWidth, halfHeight) {
   this.fixture = this.body.CreateFixture(newFix);
 
   this.recalculateHelpers();
-  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [this]});
+
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [this]});
 
   return true;
 };

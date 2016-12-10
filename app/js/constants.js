@@ -5,6 +5,7 @@ module.exports = {
   AUTO_ID_PREFIX: "Entity ",
   SHAPE_MIN_SIZE: 0.2,
   TIME_STEP: 60,
+  STATE_STACK_SIZE: 30,
 
   POSITION_TOP_LEFT: [-1, -1],
   POSITION_TOP: [0, -1],
