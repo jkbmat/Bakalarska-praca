@@ -61,7 +61,9 @@ var UIBuilder = {
   button: function (properties) {
     properties = $.extend({}, {
       id: "button-" + $(".button").length,
-      onclick: function(){}
+      onclick: function(){},
+      onupdate: function(){},
+      disabled: false
     }, properties);
 
     var ret = el("span.ui.button", { id: properties.id }, [properties.text]);
@@ -81,6 +83,13 @@ var UIBuilder = {
 
       properties.onclick.call(this, e);
     };
+
+    document.addEventListener("update", function (e) {
+      properties.onupdate(e.detail.action, e.detail);
+    });
+
+    if(properties.disabled)
+      ret.disable();
 
     return ret;
   },

@@ -57,6 +57,7 @@ gulp.task('sass', function () {
 
 gulp.task('sass-deploy', function () {
   return gulp.src(cssSource)
+    // .pipe(sass())
     .pipe(sass({outputStyle: 'compressed'}))
     .pipe(concat('styles.css'))
     .pipe(gulp.dest(dist_deploy + '/css'));

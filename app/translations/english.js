@@ -3,6 +3,8 @@ module.exports = {
   COLLISION_GROUPS: "Collision groups",
   START: "Start",
   PAUSE: "Pause",
+  UNDO: "Undo",
+  REDO: "Redo",
   LAYER: "Layer ",
   ZOOM: "Zoom: ",
 

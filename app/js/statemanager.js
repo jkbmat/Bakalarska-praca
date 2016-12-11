@@ -1,10 +1,12 @@
 var Constants = require("./constants.js");
 var Shapes = require("./shapes.js");
 var Behavior = require("./behavior.js");
+var UpdateEvent = require("./updateevent.js");
 
 var StateManager = function (engine) {
   this.engine = engine;
   this.stateStack = [];
+  this.currentState = -1;
 
   this.addState();
 };
@@ -12,12 +14,19 @@ var StateManager = function (engine) {
 StateManager.prototype.addState = function (state) {
   state = state ? state : this.createState();
 
-  this.stateStack.push(state);
+  this.currentState += 1;
+  this.stateStack.splice(this.currentState, this.stateStack.length - this.currentState, state);
 
-  if (this.stateStack.length > Constants.STATE_STACK_SIZE)
+  if (this.stateStack.length > Constants.STATE_STACK_SIZE) {
     this.stateStack.shift();
+    this.currentState -= 1;
+  }
 
-  console.log(this.stateStack.length);
+  UpdateEvent.fire(UpdateEvent.STATE_CHANGE, {
+    noState: true,
+    first: this.currentState === 0,
+    last: this.currentState === this.stateStack.length - 1
+  });
 };
 
 StateManager.prototype.createState = function () {
@@ -120,6 +129,28 @@ StateManager.prototype.buildState = function (state) {
       ));
     }
   }
+
+  UpdateEvent.fire(UpdateEvent.STATE_CHANGE, {
+    noState: true,
+    first: this.currentState === 0,
+    last: this.currentState === this.stateStack.length - 1
+  });
+};
+
+StateManager.prototype.undo = function () {
+  if (this.currentState === 0)
+    return;
+
+  this.currentState -= 1;
+  this.buildState(this.stateStack[this.currentState]);
+};
+
+StateManager.prototype.redo = function () {
+  if (this.currentState === this.stateStack.length - 1)
+    return;
+
+  this.currentState += 1;
+  this.buildState(this.stateStack[this.currentState]);
 };
 
 StateManager.prototype.clearWorld = function () {

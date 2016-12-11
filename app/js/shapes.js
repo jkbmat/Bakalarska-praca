@@ -33,8 +33,8 @@ Circle.prototype.getHeight = function () {
 
 Circle.prototype.addHelpers = function () {
   this.helpers = [
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.endResizeRotate),
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.endResizeRotate)
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, endResizeRotate),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, endResizeRotate)
   ];
 };
 
@@ -81,13 +81,6 @@ Circle.prototype.moveResize = function () {
     ) / this.startDistance;
 
   this.entity.resize(this.startSize * scale, true);
-};
-
-Circle.prototype.endResizeRotate = function() {
-  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [_engine.selectedEntity], noState: true});
-  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [_engine.selectedEntity]});
-
-  _engine.selectedEntity.toggleHelpers(false);
 };
 
 Circle.prototype.resize = function (radius, silent) {
@@ -147,12 +140,12 @@ Rectangle.prototype.getHeight = function () {
 
 Rectangle.prototype.addHelpers = function () {
   this.helpers = [
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, this.endResizeRotate),
-    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, this.endResizeRotate),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_BOTTOM, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_TOP, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_LEFT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
-    new ClickableHelper(this, 7, 7, Constants.POSITION_RIGHT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, this.endResizeRotate),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_RIGHT, 'img/resize-sw-ne.svg', this.moveResize, this.startResize, endResizeRotate),
+    new ClickableHelper(this, 15, 15, Constants.POSITION_TOP_LEFT, 'img/rotate.svg', this.moveRotate, this.startRotate, endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_BOTTOM, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_TOP, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_LEFT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, endResizeRotate),
+    new ClickableHelper(this, 7, 7, Constants.POSITION_RIGHT, 'img/handle.svg', this.moveResizeSide, this.startResizeSide, endResizeRotate),
   ];
 };
 
@@ -224,13 +217,6 @@ Rectangle.prototype.startResize = function () {
   this.entity.toggleHelpers(false);
 };
 
-Rectangle.prototype.endResizeRotate = function() {
-  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [_engine.selectedEntity], noState: true});
-  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [_engine.selectedEntity]});
-
-  _engine.selectedEntity.toggleHelpers(false);
-};
-
 Rectangle.prototype.moveResize = function () {
   var scale = Geometry.pointPointDistance(
       this.entity.getPosition(),
@@ -274,6 +260,13 @@ Rectangle.prototype.resize = function (halfWidth, halfHeight, silent) {
   return true;
 };
 
+function endResizeRotate() {
+  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [_engine.selectedEntity], noState: true});
+  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [_engine.selectedEntity], noState: true});
+  UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [_engine.selectedEntity]});
+
+  _engine.selectedEntity.toggleHelpers(false);
+}
 
 module.exports.Circle = Circle;
 module.exports.Rectangle = Rectangle;

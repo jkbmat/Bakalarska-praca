@@ -1,5 +1,6 @@
 var UpdateEvent = {
   fire: function(type, data) {
+    $.extend({}, data);
     data.action = type;
     var event = new CustomEvent("update", {detail: data});
     document.dispatchEvent(event);
@@ -21,6 +22,8 @@ var UpdateEvent = {
   BODY_TYPE_CHANGE: "body_type_change",
   BEHAVIOR_CHANGE: "behavior_change",
   ENTITY_DELETE: "entity_delete",
+  STATE_CHANGE: "state_change",
+  // TODO add entity
 };
 
 module.exports = UpdateEvent;

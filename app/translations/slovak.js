@@ -3,6 +3,8 @@ module.exports = {
   COLLISION_GROUPS: "Skupiny pre kolízie",
   START: "Štart",
   PAUSE: "Pauza",
+  UNDO: "Krok späť",
+  REDO: "Krok vpred",
   LAYER: "Vrstva ",
   ZOOM: "Priblíženie: ",
 

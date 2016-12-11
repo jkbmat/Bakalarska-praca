@@ -43,6 +43,43 @@ var UI = {
       {
         type: "button",
 
+        id: "undo",
+        disabled: true,
+        text: Translations.getTranslatedWrapped("UNDO"),
+        onclick: function () {
+          _engine.stateManager.undo();
+        },
+        onupdate: function (action, detail) {
+          var elem = $("#" + this.id)[0];
+
+          elem.enable();
+
+          if (action === UpdateEvent.STATE_CHANGE && detail.first)
+            elem.disable();
+        }
+      },
+      {
+        type: "button",
+
+        id: "redo",
+        disabled: true,
+        text: Translations.getTranslatedWrapped("REDO"),
+        onclick: function () {
+          _engine.stateManager.redo();
+        },
+        onupdate: function (action, detail) {
+          var elem = $("#" + this.id)[0];
+
+          elem.enable();
+
+          if (action === UpdateEvent.STATE_CHANGE && detail.last)
+            elem.disable();
+        }
+      },
+      {type: "break"},
+      {
+        type: "button",
+
         id: "collisions",
         text: Translations.getTranslatedWrapped("COLLISION_GROUPS"),
         onclick: function () {
