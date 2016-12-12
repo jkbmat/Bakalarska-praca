@@ -1,6 +1,74 @@
 var Translations = require("./translations.js");
 
 var UIBuilder = {
+  element: function(elem, properties) {
+    properties = $.extend({
+      disabled: false,
+      onclick: function(){},
+      onupdate: function(){},
+      tooltip: ""
+    }, properties);
+
+    elem.disable = function () {
+      this.disabled = true;
+      $(this).addClass("disabled");
+    };
+
+    elem.enable = function () {
+      this.disabled = false;
+      $(this).removeClass("disabled");
+    };
+
+    elem.onclick = function (e) {
+      if($(this).hasClass("disabled")) {
+        e.preventDefault();
+        return;
+      }
+
+      properties.onclick();
+    };
+
+    if (properties.disabled) {
+      elem.disable();
+    }
+
+    document.addEventListener("update", function(e) {
+      properties.onupdate(e.detail.action, e.detail);
+    });
+
+    if (properties.tooltip !== "") {
+      var offset = [15, 20];
+      elem.setAttribute("tooltip", properties.tooltip);
+
+      elem.addEventListener("mouseover", function(e) {
+        $("#tooltip").remove();
+        if (elem.disabled)
+          return;
+
+        var tooltip = el.div({id: "tooltip"}, [Translations.getTranslatedWrapped(elem.getAttribute("tooltip"))]);
+        document.body.appendChild(tooltip);
+        tooltip.style.left = e.pageX + offset[0];
+        tooltip.style.top = e.pageY + offset[1];
+      });
+
+      elem.addEventListener("mouseout", function (e) {
+        $("#tooltip").remove();
+      });
+
+      elem.addEventListener("mousemove", function (e) {
+        if (elem.disabled)
+          return;
+
+        var tooltip = $("#tooltip")[0];
+
+        tooltip.style.left = e.pageX + offset[0];
+        tooltip.style.top = e.pageY + offset[1];
+      });
+    }
+
+    return elem;
+  },
+
   radio: function (properties) {
     properties = $.extend({}, {
       id: "radioGroup-" + $(".radioGroup").length,
@@ -9,20 +77,20 @@ var UIBuilder = {
     var ret = el("div.ui.radioGroup", {id: properties.id});
 
     ret.disable = function () {
-      $("input[type=radio]", this).each(function(){
+      $("label", this).each(function(){
         this.disable();
       });
     };
 
     ret.enable = function () {
-      $("input[type=radio]", this).each(function(){
+      $("label", this).each(function(){
         this.enable();
       });
     };
     
     var idCount = $("input[type=radio]").length;
 
-    properties.elements.forEach(function(element) {
+    properties.elements.forEach((function(element) {
       element = $.extend({}, {
         id: "radio-" + idCount++,
         checked: false,
@@ -32,28 +100,13 @@ var UIBuilder = {
       var input = el("input.ui", {type: "radio", id: element.id, name: properties.id});
       var label = el("label.ui.button", {for: element.id}, [element.text]);
 
-      input.enable = function() {
-        this.disabled = false;
-        $("+label", this).removeClass("disabled");
-      };
-
-      input.disable = function() {
-        this.disabled = true;
-        $("+label", this).addClass("disabled");
-      };
-
-      label.onclick = function () {
-        if($(this).hasClass("disabled"))
-          return;
-
-        element.onclick();
-      };
+      label = this.element(label, element);
 
       input.checked = element.checked;
 
       ret.appendChild(input);
       ret.appendChild(label);
-    });
+    }).bind(this));
 
     return ret;
   },
@@ -68,30 +121,7 @@ var UIBuilder = {
 
     var ret = el("span.ui.button", { id: properties.id }, [properties.text]);
 
-    ret.disable = function ()
-    {
-      $(this).addClass("disabled");
-    };
-
-    ret.enable = function () {
-      $(this).removeClass("disabled");
-    };
-
-    ret.onclick = function (e) {
-      if($(this).hasClass("disabled"))
-        return;
-
-      properties.onclick.call(this, e);
-    };
-
-    document.addEventListener("update", function (e) {
-      properties.onupdate(e.detail.action, e.detail);
-    });
-
-    if(properties.disabled)
-      ret.disable();
-
-    return ret;
+    return this.element(ret, properties);
   },
 
   select: function (properties) {
@@ -107,16 +137,6 @@ var UIBuilder = {
       properties.onchange(this.value);
     };
 
-    ret.disable = function () {
-      $(this).addClass("disabled");
-      this.disabled = true;
-    };
-
-    ret.enable = function () {
-      $(this).removeClass("disabled");
-      this.disabled = enable;
-    };
-
     properties.options.forEach(function (option, index) {
       ret.appendChild(el("option", {value: option.value}, [option.text]));
 
@@ -124,7 +144,7 @@ var UIBuilder = {
         ret.selectedIndex = index;
     });
 
-    return ret;
+    return this.element(ret, properties);
   },
 
   break: function () {
@@ -140,21 +160,11 @@ var UIBuilder = {
 
     var ret = el("input.ui", { type: "text", id: properties.id, value: properties.value });
 
-    ret.disable = function () {
-      $(this).addClass("disabled");
-      this.disabled = true;
-    };
-
-    ret.enable = function () {
-      $(this).removeClass("disabled");
-      this.disabled = false;
-    };
-
     ret.oninput = function () {
       properties.oninput(this.value);
     };
 
-    return ret;
+    return this.element(ret, properties);
   },
 
   inputNumber: function (properties) {
@@ -170,25 +180,11 @@ var UIBuilder = {
 
     var ret = el("input.ui", { type: "number", id: properties.id, value: properties.value, min: properties.min, max: properties.max, step: properties.step });
 
-    ret.disable = function () {
-      $(this).addClass("disabled");
-      this.disabled = true;
-    };
-
-    ret.enable = function () {
-      $(this).removeClass("disabled");
-      this.disabled = false;
-    };
-
     ret.oninput = function (e) {
       properties.oninput(this.value);
     };
 
-    document.addEventListener("update", function (e) {
-      properties.onupdate(e.detail.action, e.detail);
-    });
-
-    return ret;
+    return this.element(ret, properties);
   },
 
   html: function (properties) {
@@ -208,21 +204,11 @@ var UIBuilder = {
 
     var ret = el("input.ui.button", { type: "color", id: properties.id, value: properties.value });
 
-    ret.disable = function () {
-      $(this).addClass("disabled");
-      this.disabled = true;
-    };
-
-    ret.enable = function () {
-      $(this).removeClass("disabled");
-      this.disabled = false;
-    };
-
     ret.oninput = function () {
       properties.oninput(this.value);
     };
 
-    return ret;
+    return this.element(ret, properties);
   },
 
   range: function (properties) {
@@ -241,6 +227,7 @@ var UIBuilder = {
     var inputProperties = $.extend({}, properties);
     inputProperties.id += "-input";
 
+    var ret = this.element(el("div.ui.range", {style: "width:"+properties.width}), properties);
     var slider = el("input.ui", { type: "range", min: properties.min, max: properties.max, step: properties.step, value: properties.value, id: properties.id });
     var input = this.inputNumber(inputProperties);
 
@@ -249,36 +236,16 @@ var UIBuilder = {
       slider.value = input.value;
     };
 
-    slider.disable = function () {
-      $(this).addClass("disabled");
-      this.disabled = true;
-
-      $(input).addClass("disabled");
-      input.disabled = true;
-    };
-
-    slider.enable = function () {
-      $(this).removeClass("disabled");
-      this.disabled = false;
-
-      $(input).removeClass("disabled");
-      input.disabled = false;
-    };
-
     slider.oninput = function () {
       properties.oninput(this.value);
       input.value = this.value;
     };
 
-    document.addEventListener("update", function (e) {
-      properties.onupdate(e.detail.action, e.detail);
-    });
+    ret.appendChild(slider);
+    if (!properties.disableWrite)
+      ret.appendChild(input);
 
-    var ret = [slider, input];
-    if (properties.disableWrite)
-      ret = [slider];
-
-    return el("div.ui.range", {style: "width:"+properties.width}, ret);
+    return ret;
   },
 
   checkbox: function (properties) {
@@ -288,22 +255,12 @@ var UIBuilder = {
       onchange: function(){}
     }, properties);
 
-    var ret = el("span");
+    var ret = this.element(el("span"), properties);
     var checkbox = el("input.ui", { type: "checkbox", id: properties.id });
     var label = el("label.ui.button", { for: properties.id });
 
     ret.appendChild(checkbox);
     ret.appendChild(label);
-
-    checkbox.disable = function () {
-      $("+label", this).addClass("disabled");
-      this.disabled = true;
-    };
-
-    checkbox.enable = function () {
-      $("+label", this).removeClass("disabled");
-      this.disabled = false;
-    };
 
     checkbox.checked = properties.checked;
 

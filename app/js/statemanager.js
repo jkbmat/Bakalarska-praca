@@ -113,7 +113,7 @@ StateManager.prototype.buildState = function (state) {
         throw "Error! Couldn't build a state: unknown entity type " + entity.type;
     }
 
-    this.engine.addEntity(newEntity, entity.bodyType);
+    this.engine.addEntity(newEntity, entity.bodyType, true);
 
     newEntity.setColor(entity.color, true);
     newEntity.setAngle(entity.angle, false, true);

@@ -2,7 +2,7 @@ module.exports = {
   LANGUAGE_NAME: "Slovensky",
   COLLISION_GROUPS: "Skupiny pre kolízie",
   START: "Štart",
-  PAUSE: "Pauza",
+  STOP: "Stop",
   UNDO: "Krok späť",
   REDO: "Krok vpred",
   LAYER: "Vrstva ",
@@ -11,6 +11,7 @@ module.exports = {
   TOOL: "Nástroj: ",
   RECTANGLE: "Obdĺžnik",
   CIRCLE: "Kruh",
+  SELECTION: "Výber",
 
   BEHAVIORS: {
     CONDITION: "Keď platí nasledujúca podmienka:",

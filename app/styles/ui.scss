@@ -46,12 +46,14 @@ select {
 
 .ui.button, select.ui, input.ui {
   border: 1px solid $basic-color;
-  padding: 0.5em;
+  padding: 0 0.5em;
   font-size: $font-size;
   cursor: pointer;
   border-radius: 3px;
   margin: 0 0.25em;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
   background: $background-color;
   font-weight: normal;
   color: $text-color;
@@ -76,6 +78,18 @@ input.ui[type=text], input.ui[type=number] {
 .ui.disabled {
   opacity: 0.4;
   cursor: default;
+}
+
+#tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  padding: 0.5em;
+  background: rgba(black, 0.7);
+  color: white;
+  box-shadow: rgba(black, 0.5) 2px 2px 7px;
+  border-radius: 3px;
 }
 
 input[type=checkbox].ui {
@@ -137,6 +151,11 @@ input[type=checkbox].ui {
   background: white;
   padding: 0.3em;
   font-size: 11px;
+
+  & > div {
+    display: flex;
+    align-items: center;
+  }
 }
 
 .ui.resizer {

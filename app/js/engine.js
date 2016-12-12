@@ -76,6 +76,10 @@ Engine.prototype.togglePause = function () {
       entity.body.SetAwake(1);
     });
   }
+
+  else {
+    this.stateManager.buildState(this.stateManager.stateStack[this.stateManager.currentState]);
+  }
 };
 
 Engine.prototype.vec2 = function (x, y) {
@@ -139,7 +143,7 @@ Engine.prototype.getEntitiesByCollisionGroup = function (group) {
 };
 
 // Adding an entity to the world
-Engine.prototype.addEntity = function (entity, type) {
+Engine.prototype.addEntity = function (entity, type, silent) {
   // generate auto id
   if (entity.id === undefined) {
     entity.id = Constants.AUTO_ID_PREFIX + this.lifetimeEntities;
@@ -155,6 +159,9 @@ Engine.prototype.addEntity = function (entity, type) {
   this.layers[entity.layer].push(entity);
 
   entity.addHelpers();
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.ENTITY_ADD, {entities: [entity]});
 
   return entity;
 };

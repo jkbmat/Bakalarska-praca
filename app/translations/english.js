@@ -2,7 +2,7 @@ module.exports = {
   LANGUAGE_NAME: "English",
   COLLISION_GROUPS: "Collision groups",
   START: "Start",
-  PAUSE: "Pause",
+  STOP: "Stop",
   UNDO: "Undo",
   REDO: "Redo",
   LAYER: "Layer ",
@@ -11,6 +11,7 @@ module.exports = {
   TOOL: "Tool: ",
   RECTANGLE: "Rectangle",
   CIRCLE: "Circle",
+  SELECTION: "Selection",
 
   BEHAVIORS: {
     CONDITION: "When the following conditon is met:",

@@ -19,21 +19,25 @@ var UI = {
         type: "button",
 
         id: "play",
+        tooltip: "START",
         text: Translations.getTranslatedWrapped("START"),
         onclick: function () {
           _engine.togglePause();
+          var elem = $("#" + this.id);
 
           if (_engine.world.paused) {
-            $("#play").html(Translations.getTranslatedWrapped("START"));
+            elem.attr("tooltip", "START");
+            elem.html(Translations.getTranslatedWrapped("START"));
 
             $("#collisions, #tool").each(function () {
               this.enable();
             });
           }
           else {
-            $("#play").html(Translations.getTranslatedWrapped("PAUSE"));
+            elem.attr("tooltip", "STOP");
+            elem.html(Translations.getTranslatedWrapped("STOP"));
 
-            $("#collisions, #tool").each(function () {
+            $("#collisions, #tool, #undo, #redo").each(function () {
               this.disable();
             });
           }
@@ -44,8 +48,10 @@ var UI = {
         type: "button",
 
         id: "undo",
+        tooltip: "UNDO",
         disabled: true,
-        text: Translations.getTranslatedWrapped("UNDO"),
+        // text: Translations.getTranslatedWrapped("UNDO"),
+        text: el.img({src: "./img/undo.svg"}),
         onclick: function () {
           _engine.stateManager.undo();
         },
@@ -62,8 +68,10 @@ var UI = {
         type: "button",
 
         id: "redo",
+        tooltip: "REDO",
         disabled: true,
-        text: Translations.getTranslatedWrapped("REDO"),
+        // text: Translations.getTranslatedWrapped("REDO"),
+        text: el.img({src: "./img/redo.svg"}),
         onclick: function () {
           _engine.stateManager.redo();
         },
@@ -81,6 +89,7 @@ var UI = {
         type: "button",
 
         id: "collisions",
+        tooltip: "COLLISION_GROUPS",
         text: Translations.getTranslatedWrapped("COLLISION_GROUPS"),
         onclick: function () {
           UIBuilder.popup(UI.createCollisions());
@@ -94,17 +103,17 @@ var UI = {
         id: "tool",
         elements: [
           {
-            text: el.img({src: "./img/selection.svg"}), id: "selectionTool", checked: true, onclick: function () {
+            text: el.img({src: "./img/selection.svg"}), tooltip: "SELECTION", id: "selectionTool", checked: true, onclick: function () {
             _engine.selectTool(Tools.Selection);
           }
           },
           {
-            text: el.img({src: "./img/rectangle.svg"}), onclick: function () {
+            text: el.img({src: "./img/rectangle.svg"}), tooltip: "RECTANGLE", onclick: function () {
             _engine.selectTool(Tools.Rectangle);
           }
           },
           {
-            text: el.img({src: "./img/circle.svg"}), onclick: function () {
+            text: el.img({src: "./img/circle.svg"}), tooltip: "CIRCLE", onclick: function () {
             _engine.selectTool(Tools.Circle);
           }
           },

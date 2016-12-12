@@ -21,9 +21,9 @@ var UpdateEvent = {
   COLOR_CHANGE: "color_change",
   BODY_TYPE_CHANGE: "body_type_change",
   BEHAVIOR_CHANGE: "behavior_change",
+  ENTITY_ADD: "entity_add",
   ENTITY_DELETE: "entity_delete",
   STATE_CHANGE: "state_change",
-  // TODO add entity
 };
 
 module.exports = UpdateEvent;
