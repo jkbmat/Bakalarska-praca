@@ -2,7 +2,7 @@
 var Utils = require("./utils.js");
 var Constants = require("./constants.js");
 var Geometry = require("./geometry.js");
-var UpdateEvent = require("./updateevent.js");
+var UpdateEvent = require("./updateEvent.js");
 
 var AUTO_COLOR_RANGE = [0, 230];
 

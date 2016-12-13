@@ -40,7 +40,7 @@ var UIBuilder = {
       var offset = [15, 20];
       elem.setAttribute("tooltip", properties.tooltip);
 
-      elem.addEventListener("mouseover", function(e) {
+      elem.addEventListener("mouseenter", function(e) {
         $("#tooltip").remove();
         if (elem.disabled)
           return;
@@ -51,7 +51,7 @@ var UIBuilder = {
         tooltip.style.top = e.pageY + offset[1];
       });
 
-      elem.addEventListener("mouseout", function (e) {
+      elem.addEventListener("mouseleave", function (e) {
         $("#tooltip").remove();
       });
 

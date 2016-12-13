@@ -5,7 +5,7 @@ var TokenManager = function () {
 
   this.registerTokens(require("./logic.js"));
   this.registerTokens(require("./actions.js"));
-  this.registerTokens(require("./entityfilters.js"));
+  this.registerTokens(require("./entityFilters.js"));
 
   this.parser = new Parser(this);
 };

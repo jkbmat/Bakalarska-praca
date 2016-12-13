@@ -1,9 +1,10 @@
 var Tools = require("./tools.js");
-var BodyType = require("./bodytype.js");
-var UIBuilder = require("./uibuilder.js");
+var BodyType = require("./bodyType.js");
+var UIBuilder = require("./UIBuilder.js");
 var Constants = require("./constants.js");
 var Translations = require("./translations.js");
-var UpdateEvent = require("./updateevent.js");
+var UpdateEvent = require("./updateEvent.js");
+var Saver = require("./saver.js");
 
 // Object for building the UI
 var UI = {
@@ -19,14 +20,14 @@ var UI = {
         type: "button",
 
         id: "play",
-        tooltip: "START",
+        tooltip: "START_TOOLTIP",
         text: Translations.getTranslatedWrapped("START"),
         onclick: function () {
           _engine.togglePause();
           var elem = $("#" + this.id);
 
           if (_engine.world.paused) {
-            elem.attr("tooltip", "START");
+            elem.attr("tooltip", "START_TOOLTIP");
             elem.html(Translations.getTranslatedWrapped("START"));
 
             $("#collisions, #tool").each(function () {
@@ -34,12 +35,52 @@ var UI = {
             });
           }
           else {
-            elem.attr("tooltip", "STOP");
+            elem.attr("tooltip", "STOP_TOOLTIP");
             elem.html(Translations.getTranslatedWrapped("STOP"));
 
-            $("#collisions, #tool, #undo, #redo").each(function () {
+            $("#collisions, #tool, #undo, #redo, #clearWorld").each(function () {
               this.disable();
             });
+          }
+        }
+      },
+      {type: "break"},
+      {
+        type: "button",
+
+        id: "save",
+        tooltip: "SAVE_TOOLTIP",
+        text: Translations.getTranslatedWrapped("SAVE"),
+        onclick: function () {
+          UIBuilder.popup(UI.createSave());
+        }
+      },
+      {
+        type: "button",
+
+        id: "load",
+        tooltip: "LOAD_TOOLTIP",
+        text: Translations.getTranslatedWrapped("LOAD"),
+        onclick: function () {
+          UIBuilder.popup(UI.createLoad());
+        }
+      },
+      {type: "break"},
+      {
+        type: "button",
+
+        id: "clearWorld",
+        tooltip: "CLEAR_WORLD_TOOLTIP",
+        text: el.img({src: "./img/trash.svg"}),
+        onclick: function () {
+          _engine.stateManager.clearWorld();
+        },
+        onupdate: function (action, details) {
+          if (typeof(_engine) !== "undefined" && (_engine.entities().length === 0 || !_engine.world.paused)) {
+            $("#" + this.id)[0].disable();
+          }
+          else {
+            $("#" + this.id)[0].enable();
           }
         }
       },
@@ -58,10 +99,12 @@ var UI = {
         onupdate: function (action, detail) {
           var elem = $("#" + this.id)[0];
 
-          elem.enable();
+          if (action === UpdateEvent.STATE_CHANGE) {
+            elem.enable();
 
-          if (action === UpdateEvent.STATE_CHANGE && detail.first)
-            elem.disable();
+            if (detail.first)
+              elem.disable();
+          }
         }
       },
       {
@@ -78,10 +121,12 @@ var UI = {
         onupdate: function (action, detail) {
           var elem = $("#" + this.id)[0];
 
-          elem.enable();
+          if (action === UpdateEvent.STATE_CHANGE) {
+            elem.enable();
 
-          if (action === UpdateEvent.STATE_CHANGE && detail.last)
-            elem.disable();
+            if (detail.last)
+              elem.disable();
+          }
         }
       },
       {type: "break"},
@@ -89,7 +134,7 @@ var UI = {
         type: "button",
 
         id: "collisions",
-        tooltip: "COLLISION_GROUPS",
+        tooltip: "COLLISION_GROUPS_TOOLTIP",
         text: Translations.getTranslatedWrapped("COLLISION_GROUPS"),
         onclick: function () {
           UIBuilder.popup(UI.createCollisions());
@@ -103,17 +148,21 @@ var UI = {
         id: "tool",
         elements: [
           {
-            text: el.img({src: "./img/selection.svg"}), tooltip: "SELECTION", id: "selectionTool", checked: true, onclick: function () {
-            _engine.selectTool(Tools.Selection);
-          }
+            text: el.img({src: "./img/selection.svg"}),
+            tooltip: "SELECTION_TOOL",
+            id: "selectionTool",
+            checked: true,
+            onclick: function () {
+              _engine.selectTool(Tools.Selection);
+            }
           },
           {
-            text: el.img({src: "./img/rectangle.svg"}), tooltip: "RECTANGLE", onclick: function () {
+            text: el.img({src: "./img/rectangle.svg"}), tooltip: "RECTANGLE_TOOL", onclick: function () {
             _engine.selectTool(Tools.Rectangle);
           }
           },
           {
-            text: el.img({src: "./img/circle.svg"}), tooltip: "CIRCLE", onclick: function () {
+            text: el.img({src: "./img/circle.svg"}), tooltip: "CIRCLE_TOOL", onclick: function () {
             _engine.selectTool(Tools.Circle);
           }
           },
@@ -138,6 +187,7 @@ var UI = {
       {type: "break"},
       {
         type: "select",
+        tooltip: "LANGUAGE_TOOLTIP",
         options: languages,
 
         onchange: function (value) {
@@ -242,8 +292,8 @@ var UI = {
   },
 
   createBehavior: function (entity) {
-    var BehaviorBuilder = new (require("./behaviorbuilder.js"))(_engine.tokenManager);
-    var UIBuilder = require("./uibuilder.js");
+    var BehaviorBuilder = new (require("./behaviorBuilder.js"))(_engine.tokenManager);
+    var UIBuilder = require("./UIBuilder.js");
     var Type = require("./typing.js").Type;
 
     var oneBehavior = function (behavior) {
@@ -359,6 +409,140 @@ var UI = {
     var wrapper = el("div", {}, [ret, buttons]);
 
     return wrapper;
+  },
+
+  createSave: function () {
+    return UIBuilder.build([
+      {type: "html", content: el("h1", {}, [Translations.getTranslatedWrapped("SAVEUI.TITLE")])},
+      {type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SAVEUI.NAME")},
+      {type: "inputText", id: "sceneName", value: (new Date()).toLocaleString()},
+      {
+        type: "button",
+        id: "localSave",
+        text: Translations.getTranslatedWrapped("SAVEUI.SAVE_BUTTON"),
+        onclick: function () {
+          var name = $("#sceneName").val();
+
+          Saver.saveLocal(name);
+
+          $("#localSave").remove();
+          $("#sceneName").replaceWith(el("span.success", {}, [name]));
+        }
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: el("hr")},
+      {type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SAVEUI.SHARE_CODE")},
+      {
+        type: "button",
+        id: "generateButton",
+        text: Translations.getTranslatedWrapped("SAVEUI.GENERATE"),
+        onclick: function () {
+          $("#popupContent").addClass("loading");
+
+          Saver.saveRemote().then(function (id) {
+            $("#popupContent").removeClass("loading");
+
+            $("#generateButton").replaceWith($("" +
+              "<span class='success'>" + id + "</span>" +
+              "<br>"));
+          });
+
+        }
+      },
+
+    ]);
+  },
+
+  createLoad: function () {
+    var storedSaves = Saver.getLocalSaves();
+    var saveElements = el("div");
+
+    var loadClick = function () {
+      Saver.load(this.toString());
+      UIBuilder.closePopup();
+    };
+
+    var removeClick = function () {
+      var title = this.toString();
+
+      if (confirm(Translations.getTranslated("LOADUI.CONFIRM_DELETE") + "\"" + title + "\"?")) {
+        Saver.removeLocal(title);
+
+        $(".one-save").each(function () {
+          if ($(this).attr("title") === title)
+            $(this).remove();
+        });
+      }
+    };
+
+    for (var i in storedSaves) {
+      if (!storedSaves.hasOwnProperty(i))
+        continue;
+
+      var content = UIBuilder.build([
+        {type: "html", content: el("h2", {}, [i])},
+        {
+          type: "button",
+          text: Translations.getTranslatedWrapped("LOADUI.REMOVE_BUTTON"),
+          onclick: removeClick.bind(i)
+        },
+        {
+          type: "button",
+          text: Translations.getTranslatedWrapped("LOADUI.LOAD_BUTTON"),
+          onclick: loadClick.bind(storedSaves[i])
+        }
+      ]);
+      content.classList.add("content");
+
+      saveElements.appendChild(
+        el("div.one-save", {title: i}, [
+          el.img({src: Saver.getLocalSaveScreenshot(i)}),
+          content
+        ])
+      );
+    }
+
+
+    return UIBuilder.build([
+      {type: "html", content: el("h1", {}, [Translations.getTranslatedWrapped("LOADUI.TITLE")])},
+      {type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("LOADUI.SHARE_CODE")},
+      {
+        type: "inputText", id: "shareCode", oninput: function () {
+        $("#shareCode").removeClass("invalid");
+        $("#codeError").replaceWith(el("span#codeError"));
+      }
+      },
+      {
+        type: "button",
+        id: "remoteLoad",
+        text: Translations.getTranslatedWrapped("LOADUI.LOAD_BUTTON"),
+        onclick: function () {
+          $("#popupContent").addClass("loading");
+
+          Saver.loadRemote($("#shareCode").val()).then(function (success) {
+            $("#popupContent").removeClass("loading");
+
+            if (success) {
+              UIBuilder.closePopup();
+            }
+            else {
+              $("#shareCode").addClass("invalid");
+              $("#codeError").replaceWith(
+                el("span.failure#codeError", {}, [Translations.getTranslatedWrapped("LOADUI.INVALID_CODE")])
+              );
+            }
+          });
+        }
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: el("span#codeError")},
+      {type: "html", content: el("hr")},
+      {type: "html", content: saveElements},
+
+    ]);
   },
 
   saveBehavior: function (entity) {

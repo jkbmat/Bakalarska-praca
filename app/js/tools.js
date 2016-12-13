@@ -1,7 +1,7 @@
 var Shape = require("./shapes.js");
-var Type = require("./bodytype.js");
+var Type = require("./bodyType.js");
 var Constants = require("./constants.js");
-var UpdateEvent = require("./updateevent.js");
+var UpdateEvent = require("./updateEvent.js");
 
 var Blank = {
   onclick: function () {},

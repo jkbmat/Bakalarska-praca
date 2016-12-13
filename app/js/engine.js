@@ -1,9 +1,9 @@
-var UI = require("./ui.js");
+var UI = require("./UI.js");
 var Tools = require("./tools.js");
-var TokenManager = require("./tokenmanager.js");
+var TokenManager = require("./tokenManager.js");
 var Constants = require("./constants.js");
-var UpdateEvent = require("./updateevent.js");
-var StateManager = require("./statemanager.js");
+var UpdateEvent = require("./updateEvent.js");
+var StateManager = require("./stateManager.js");
 
 // ENGINE
 
@@ -94,10 +94,13 @@ Engine.prototype.selectTool = function (tool) {
   this.selectEntity(null);
 };
 
-Engine.prototype.removeEntity = function (entity) {
+Engine.prototype.removeEntity = function (entity, silent) {
   this.selectEntity(null);
   this.world.DestroyBody(entity.body);
   this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.ENTITY_DELETE, {entities: [entity]});
 };
 
 Engine.prototype.setEntityLayer = function (entity, newLayer) {

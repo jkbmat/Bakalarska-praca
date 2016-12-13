@@ -1,8 +1,8 @@
 var Entity = require("./entity.js");
 var Constants = require("./constants.js");
-var ClickableHelper = require("./clickablehelper.js");
+var ClickableHelper = require("./clickableHelper.js");
 var Geometry = require("./geometry.js");
-var UpdateEvent = require("./updateevent.js");
+var UpdateEvent = require("./updateEvent.js");
 
 // Circle entity
 var Circle = function (center, radius, fixture, id, collisionGroup) {

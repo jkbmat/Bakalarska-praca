@@ -1,8 +1,17 @@
 module.exports = {
   LANGUAGE_NAME: "Slovensky",
+  LANGUAGE_TOOLTIP: "Zmena jazyku",
   COLLISION_GROUPS: "Skupiny pre kolízie",
+  COLLISION_GROUPS_TOOLTIP: "Nastaví, ktoré skupiny objektov majú navzájom kolidovať",
   START: "Štart",
   STOP: "Stop",
+  START_TOOLTIP: "Spustí simuláciu",
+  STOP_TOOLTIP: "Ukončí simuláciu",
+  CLEAR_WORLD_TOOLTIP: "Odstráni všetky objekty zo scény",
+  SAVE: "Uložiť",
+  LOAD: "Načítať",
+  SAVE_TOOLTIP: "Uloží scénu a poskytne kód pre zdieľanie",
+  LOAD_TOOLTIP: "Načíta scénu z počítača alebo kódu pre zdieľanie",
   UNDO: "Krok späť",
   REDO: "Krok vpred",
   LAYER: "Vrstva ",
@@ -11,7 +20,27 @@ module.exports = {
   TOOL: "Nástroj: ",
   RECTANGLE: "Obdĺžnik",
   CIRCLE: "Kruh",
-  SELECTION: "Výber",
+
+  SELECTION_TOOL: "Nástroj výberu",
+  CIRCLE_TOOL: "Nástroj kruh",
+  RECTANGLE_TOOL: "Nástroj obdĺžnik",
+
+  SAVEUI: {
+    TITLE: "Ukladanie scény",
+    SAVE_BUTTON: "Uložiť",
+    NAME: "Názov scény: ",
+    SHARE_CODE: "Kód pre zdieľanie: ",
+    GENERATE: "Vygenerovať",
+  },
+
+  LOADUI: {
+    TITLE: "Načítanie scény",
+    LOAD_BUTTON: "Načítať",
+    REMOVE_BUTTON: "Odstrániť",
+    SHARE_CODE: "Pomocou kódu pre zdieľanie: ",
+    INVALID_CODE: "Zadaný kód pre zdieľanie neexistuje.",
+    CONFIRM_DELETE: "Naozaj chcete odstrániť uložený stav "
+  },
 
   BEHAVIORS: {
     CONDITION: "Keď platí nasledujúca podmienka:",

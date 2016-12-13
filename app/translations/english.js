@@ -1,8 +1,17 @@
 module.exports = {
   LANGUAGE_NAME: "English",
+  LANGUAGE_TOOLTIP: "Changes the language",
   COLLISION_GROUPS: "Collision groups",
+  COLLISION_GROUPS_TOOLTIP: "Sets which object groups should collide with each other",
   START: "Start",
   STOP: "Stop",
+  START_TOOLTIP: "Starts the simulation",
+  STOP_TOOLTIP: "Stops the simulation",
+  CLEAR_WORLD_TOOLTIP: "Removes all objects from the scene",
+  SAVE: "Save",
+  LOAD: "Load",
+  SAVE_TOOLTIP: "Saves the scene and provides a sharing code",
+  LOAD_TOOLTIP: "Loads a scene from the computer or a sharing code",
   UNDO: "Undo",
   REDO: "Redo",
   LAYER: "Layer ",
@@ -11,7 +20,27 @@ module.exports = {
   TOOL: "Tool: ",
   RECTANGLE: "Rectangle",
   CIRCLE: "Circle",
-  SELECTION: "Selection",
+
+  RECTANGLE_TOOL: "Rectangle tool",
+  CIRCLE_TOOL: "Circle tool",
+  SELECTION_TOOL: "Selection tool",
+
+  SAVEUI: {
+    TITLE: "Scene saving",
+    SAVE_BUTTON: "Save",
+    NAME: "Name of the scene: ",
+    SHARE_CODE: "Sharing code: ",
+    GENERATE: "Generate",
+  },
+
+  LOADUI: {
+    TITLE: "Scene loading",
+    LOAD_BUTTON: "Load",
+    REMOVE_BUTTON: "Remove",
+    SHARE_CODE: "Using a sharing code: ",
+    INVALID_CODE: "This sharing code doesn't exist.",
+    CONFIRM_DELETE: "Are you sure you want to delete the saved state "
+  },
 
   BEHAVIORS: {
     CONDITION: "When the following conditon is met:",

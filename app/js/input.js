@@ -37,7 +37,7 @@ var Input = function(viewport) {
   document.addEventListener('keydown', this.updateKeyboardButtonsDown.bind(this));
   document.addEventListener('keyup', this.updateKeyboardButtonsUp.bind(this));
 
-  document.onselectstart = function () {
+  this.viewport.onselectstart = function () {
     return false;
   };
 };

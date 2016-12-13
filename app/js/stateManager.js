@@ -1,14 +1,16 @@
 var Constants = require("./constants.js");
 var Shapes = require("./shapes.js");
 var Behavior = require("./behavior.js");
-var UpdateEvent = require("./updateevent.js");
+var UpdateEvent = require("./updateEvent.js");
 
 var StateManager = function (engine) {
   this.engine = engine;
   this.stateStack = [];
   this.currentState = -1;
+};
 
-  this.addState();
+StateManager.prototype.getCurrentState = function () {
+  return this.stateStack[this.currentState];
 };
 
 StateManager.prototype.addState = function (state) {
@@ -34,7 +36,9 @@ StateManager.prototype.createState = function () {
 
   state.world = {
     gravity: [this.engine.world.GetGravity().get_x(), this.engine.world.GetGravity().get_y()],
-    collisionGroups: JSON.parse(JSON.stringify(this.engine.collisionGroups)) // Deep copy trick
+    collisionGroups: JSON.parse(JSON.stringify(this.engine.collisionGroups)), // Deep copy trick
+    camera: [this.engine.viewport.x, this.engine.viewport.y],
+    lifetimeEntities: this.engine.lifetimeEntities
   };
 
   state.entities = [];
@@ -73,10 +77,13 @@ StateManager.prototype.createState = function () {
 };
 
 StateManager.prototype.buildState = function (state) {
-  this.clearWorld();
+  this.clearWorld(true);
 
   this.engine.world.SetGravity(new b2Vec2(state.world.gravity[0], state.world.gravity[1]));
   this.engine.collisionGroups = state.world.collisionGroups;
+  this.engine.viewport.x = state.world.camera[0];
+  this.engine.viewport.y = state.world.camera[1];
+  this.engine.lifetimeEntities = state.world.lifetimeEntities;
 
   for (var i = 0; i < state.entities.length; i++) {
     var entity = state.entities[i];
@@ -153,12 +160,15 @@ StateManager.prototype.redo = function () {
   this.buildState(this.stateStack[this.currentState]);
 };
 
-StateManager.prototype.clearWorld = function () {
+StateManager.prototype.clearWorld = function (silent) {
   var entities = this.engine.entities();
 
   for (var i = 0; i < entities.length; i++) {
-    this.engine.removeEntity(entities[i]);
+    this.engine.removeEntity(entities[i], true);
   }
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.WORLD_CLEARED);
 };
 
 module.exports = StateManager;

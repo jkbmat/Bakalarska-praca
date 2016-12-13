@@ -1,169 +1,228 @@
 @charset "UTF-8";
 
-.ui.sidebar input, .ui.sidebar select
-{
-	width: 100%;
+.ui.sidebar input, .ui.sidebar select {
+  width: 100%;
 }
 
-input[type=color]
-{
-	padding: 0;
+input[type=color] {
+  padding: 0;
 }
 
-#collisionsbutton
-{
-	position: absolute;
+#collisionsbutton {
+  position: absolute;
 }
 
-.uiContainer, #popupContent
-{
-	z-index: 999;
-	position: relative;
-	padding: 7px;
-	background: white;
-	border: 2px solid black;
-	border-radius: 4px;
+.uiContainer, #popupContent {
+  z-index: 999;
+  position: relative;
+  padding: 7px;
+  background: white;
+  border: 2px solid black;
+  border-radius: 4px;
 }
 
-.collisionTable
-{
-	border-collapse: collapse;
-	margin: auto;
-	margin-top: 2em;
+.collisionTable {
+  border-collapse: collapse;
+  margin: auto;
+  margin-top: 2em;
 }
 
-.collisionTable td
-{
-	border: 1px dashed #aaa;
-	white-space: nowrap;
-	text-align: center;
+.collisionTable td {
+  border: 1px dashed #aaa;
+  white-space: nowrap;
+  text-align: center;
 }
 
-.collisionTable tr:first-child td > div
-{
-	transform:
-		rotate(-45deg);
-	width: 20px;
+.collisionTable tr:first-child td > div {
+  transform: rotate(-45deg);
+  width: 20px;
 }
 
-.collisionTable tr td:first-child, .collisionTable tr:first-child td
-{
-	font-weight: bold;
-	padding: 3px;
-	border: none;
-	width: 20px;
-	height: 20px;
+.collisionTable tr td:first-child, .collisionTable tr:first-child td {
+  font-weight: bold;
+  padding: 3px;
+  border: none;
+  width: 20px;
+  height: 20px;
 }
 
-td.highlight
-{
-	background: #aaa;
+td.highlight {
+  background: #aaa;
 }
 
-#popupOverlay
-{
-	position: fixed;
-		top: 0;
-		left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 1000;
-	cursor: pointer;
-	background-color: rgba(0, 0, 0, 0.5);
-	text-align: center;
+@mixin result {
+  font-size: 120%;
+  font-weight: bold;
+  padding: 0.2em 0.4em;
+  background: transparent;
+  border-radius: 3px;
 }
 
-#popupContent
-{
-	z-index: 1001;
-	cursor: default;
-	position: relative;
-	width: 50%;
-	margin: auto;
-	margin-top: 3em;
-	min-width: 600px;
-  height: 90%;
+.success {
+  @include result;
+
+  animation: fade-success-bg 5s;
+}
+
+@keyframes fade-success-bg {
+  from {
+    background: rgba(#a0ff90, 1)
+  }
+  to {
+    background: transparent
+  }
+}
+
+.failure {
+  @include result;
+  //color: #ff5b60;
+  animation: fade-failure-bg 5s;
+}
+
+@keyframes fade-failure-bg {
+  from {
+    background: rgba(#ff5b60, 1)
+  }
+  to {
+    background: transparent
+  }
+}
+
+.one-save {
+  margin-bottom: 1em;
+  padding: 0.5em;
+  min-width: 500px;
+  background: #eee;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-between;
+
+  img {
+    width: 150px;
+    height: 100px;
+    flex-shrink: 1;
+  }
+
+  .content {
+    flex-grow: 1;
+  }
+}
+
+.loading {
+  &:before {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: rgba(white, 0.8) url('../img/loading.svg') no-repeat center;
+    background-size: 80px 80px;
+    border-radius: inherit;
+    content: " ";
+    z-index: 9999999;
+  }
+}
+
+hr {
+  width: 60%;
+  height: 1px;
+  background-color: black;
+  border: none;
+  margin: 2em auto;
+}
+
+#popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#popupContent {
+  z-index: 1001;
+  cursor: default;
+  position: relative;
+  max-height: 90%;
+  padding: 3em;
+  padding-top: 1em;
   overflow-y: auto;
 }
 
-#tokenChoice
-{
-	z-index: 1500;
-	position: absolute;
-	background: white;
-	border: 1px solid black;
-	border-radius: 3px;
-	padding: 0.5em;
-	max-height: 400px;
-	overflow-y: auto;
+#tokenChoice {
+  z-index: 1500;
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  border-radius: 3px;
+  padding: 0.5em;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
-#tokenChoice .token
-{
-	position: relative;
-	padding: 0.5em;
-	cursor: pointer;
+#tokenChoice .token {
+  position: relative;
+  padding: 0.5em;
+  cursor: pointer;
 }
 
-#tokenChoice .token:hover
-{
-	background: #eee;
+#tokenChoice .token:hover {
+  background: #eee;
 }
 
-#tokenChoice .token .argument
-{
-	font-size: 90%;
-	color: grey;
+#tokenChoice .token .argument {
+  font-size: 90%;
+  color: grey;
 }
 
-#tokenChoice .token .argument+.name, #tokenChoice .token .name+.argument
-{
-	padding-left: 0.5em;
+#tokenChoice .token .argument + .name, #tokenChoice .token .name + .argument {
+  padding-left: 0.5em;
 }
 
-.tokenBuilder .token
-{
-	border-radius: 3px;
-	display: inline-block;
-	padding: 0 3px;
+.tokenBuilder .token {
+  border-radius: 3px;
+  display: inline-block;
+  padding: 0 3px;
 }
 
-.tokenBuilder .token.hover
-{
-	background: #5e5e5e;
-	box-shadow: 0 0 0 3px #5e5e5e;
-	color: #fff;
-	cursor: pointer;
+.tokenBuilder .token.hover {
+  background: #5e5e5e;
+  box-shadow: 0 0 0 3px #5e5e5e;
+  color: #fff;
+  cursor: pointer;
 }
 
-.tokenBuilder
-{
-	margin: 1em 0;
-	border-radius: 3px;
-	padding: 1em;
-	background: #eee;
+.tokenBuilder {
+  margin: 1em 0;
+  border-radius: 3px;
+  padding: 1em;
+  background: #eee;
 }
 
-.behavior
-{
-	padding: 1em;
+.behavior {
+  padding: 1em;
   margin-bottom: 1em;
-	border-bottom: 1px solid #999;
+  border-bottom: 1px solid #999;
 }
 
-.behavior h2
-{
-	font-size: 120%;
-	text-align: left;
+.behavior h2 {
+  font-size: 120%;
+  text-align: left;
 }
 
-.behaviorWrapper
-{
+.behaviorWrapper {
   height: calc(100% - 50px);
   overflow-y: auto;
 }
 
-#popupContent .bottom
-{
+#popupContent .bottom {
   padding: 1em 0;
 }
