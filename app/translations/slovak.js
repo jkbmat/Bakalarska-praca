@@ -25,24 +25,33 @@ module.exports = {
   CIRCLE_TOOL: "Nástroj kruh",
   RECTANGLE_TOOL: "Nástroj obdĺžnik",
 
+  NO_ENTITY_WITH_ID: "Neexistuje žiadny objekt s týmto ID.",
+
   SAVEUI: {
     TITLE: "Ukladanie scény",
     SAVE_BUTTON: "Uložiť",
     NAME: "Názov scény: ",
     SHARE_CODE: "Kód pre zdieľanie: ",
     GENERATE: "Vygenerovať",
+    SAVE_LOCAL: "Uložiť v tomto počítači",
+    SAVE_REMOTE: "Uložiť na internet",
+    SHARE_LINK: "Odkaz pre zdieľanie: ",
   },
 
   LOADUI: {
     TITLE: "Načítanie scény",
     LOAD_BUTTON: "Načítať",
     REMOVE_BUTTON: "Odstrániť",
-    SHARE_CODE: "Pomocou kódu pre zdieľanie: ",
+    SHARE_CODE: "Kód pre zdieľanie: ",
     INVALID_CODE: "Zadaný kód pre zdieľanie neexistuje.",
-    CONFIRM_DELETE: "Naozaj chcete odstrániť uložený stav "
+    CONFIRM_DELETE: "Naozaj chcete odstrániť uložený stav ",
+    LOAD_LOCAL: "Načítať z tohoto počítača",
+    LOAD_REMOTE: "Načítať z internetu",
+    NO_LOCAL: "Na tomto počítači nie sú uložené žiadne scény",
   },
 
   BEHAVIORS: {
+    TITLE: "Editor správania",
     CONDITION: "Keď platí nasledujúca podmienka:",
     INPUT_DIALOG: "Zadajte korektnú hodnotu pre ",
     ACTION: "Sprav toto:",
@@ -79,5 +88,17 @@ module.exports = {
       STATIC: "Statické",
       KINEMATIC: "Kinematické",
     },
+
+    GRAVITY_X: "Sila gravitácie v osi X:",
+    GRAVITY_Y: "Sila gravitácie v osi Y:",
+
+    CAMERA_STYLE: "Štýl kamery:",
+    CAMERA_STYLES: {
+      FIXED: "Zameraná na bod",
+      ENTITY: "Zameraná na objekt",
+    },
+    CAMERA_X: "Pozícia kamery na osi X",
+    CAMERA_Y: "Pozícia kamery na osi Y",
+    CAMERA_ENTITY: "ID objektu pre zameranie kamery:",
   }
 };

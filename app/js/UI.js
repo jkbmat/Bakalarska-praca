@@ -1,10 +1,12 @@
 var Tools = require("./tools.js");
 var BodyType = require("./bodyType.js");
+var CameraStyle = require("./cameraStyle.js");
 var UIBuilder = require("./UIBuilder.js");
 var Constants = require("./constants.js");
 var Translations = require("./translations.js");
 var UpdateEvent = require("./updateEvent.js");
 var Saver = require("./saver.js");
+var Type = require("./typing.js").Type;
 
 // Object for building the UI
 var UI = {
@@ -95,6 +97,7 @@ var UI = {
         text: el.img({src: "./img/undo.svg"}),
         onclick: function () {
           _engine.stateManager.undo();
+          UI.buildSidebarTopWorld(true);
         },
         onupdate: function (action, detail) {
           var elem = $("#" + this.id)[0];
@@ -117,6 +120,7 @@ var UI = {
         text: el.img({src: "./img/redo.svg"}),
         onclick: function () {
           _engine.stateManager.redo();
+          UI.buildSidebarTopWorld(true);
         },
         onupdate: function (action, detail) {
           var elem = $("#" + this.id)[0];
@@ -293,8 +297,6 @@ var UI = {
 
   createBehavior: function (entity) {
     var BehaviorBuilder = new (require("./behaviorBuilder.js"))(_engine.tokenManager);
-    var UIBuilder = require("./UIBuilder.js");
-    var Type = require("./typing.js").Type;
 
     var oneBehavior = function (behavior) {
       var wrapper = el("div.behavior");
@@ -302,7 +304,9 @@ var UI = {
       var results = el("div");
 
       var remover = UIBuilder.button({
-        text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_BEHAVIOR"), onclick: (function (wrapper) {
+        text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_BEHAVIOR"),
+        classList: ["removeButton"],
+        onclick: (function (wrapper) {
           return function () {
             // If the function isn't wrapped, only the last instance of behavior gets passed
 
@@ -310,7 +314,6 @@ var UI = {
           };
         })(wrapper)
       });
-      remover.style.float = "right";
 
       if (behavior === null) {
         BehaviorBuilder.initialize(Type.BOOLEAN, logic);
@@ -330,13 +333,18 @@ var UI = {
 
       results.appendChild(UIBuilder.button({
         text: Translations.getTranslatedWrapped("BEHAVIORS.NEW_ACTION"), onclick: function (e) {
-          this.parentNode.insertBefore(oneResult(null, Translations.getTranslatedWrapped("BEHAVIORS.ANOTHER_ACTION"), true), this);
+          var elem = document.getElementById(this.id);
+          elem.parentNode.insertBefore(
+            oneResult(null, Translations.getTranslatedWrapped("BEHAVIORS.ANOTHER_ACTION"), true),
+            elem
+          );
         }
       }));
 
-      wrapper.appendChild(el("h2", {}, [Translations.getTranslatedWrapped("BEHAVIORS.CONDITION"), remover]));
+      wrapper.appendChild(el("span.behaviorTitle", {}, [el("h2", {}, [Translations.getTranslatedWrapped("BEHAVIORS.CONDITION")]), remover]));
       wrapper.appendChild(logic);
       wrapper.appendChild(results);
+      wrapper.appendChild(el("hr"));
 
       return wrapper;
     };
@@ -346,7 +354,7 @@ var UI = {
       var resultElement = el("div.tokenBuilder", {}, [""]);
 
       var resultRemover = UIBuilder.button({
-        text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_BEHAVIOR"), onclick: (function (resultElement) {
+        text: Translations.getTranslatedWrapped("BEHAVIORS.REMOVE_ACTION"), onclick: (function (resultElement) {
           return function () {
             // If the function isn't wrapped, only the last instance of result gets passed
 
@@ -406,7 +414,7 @@ var UI = {
         }
       }),
     ]);
-    var wrapper = el("div", {}, [ret, buttons]);
+    var wrapper = el("div.behaviorOverlay", {}, [el("h1", {}, [Translations.getTranslatedWrapped("BEHAVIORS.TITLE")]), ret, buttons]);
 
     return wrapper;
   },
@@ -414,6 +422,40 @@ var UI = {
   createSave: function () {
     return UIBuilder.build([
       {type: "html", content: el("h1", {}, [Translations.getTranslatedWrapped("SAVEUI.TITLE")])},
+      {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("SAVEUI.SAVE_REMOTE")])},
+      {type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SAVEUI.SHARE_CODE")},
+      {
+        type: "button",
+        id: "generateButton",
+        text: Translations.getTranslatedWrapped("SAVEUI.GENERATE"),
+        onclick: function () {
+          $("#popupContent").addClass("loading");
+
+          Saver.saveRemote().then(function (id) {
+            $("#popupContent").removeClass("loading");
+
+            var link = location.href.replace(location.hash, "") + "#" + id;
+
+            $("#generateButton").replaceWith($("" +
+              "<input type='text' class='success' id='shareCode' value='" + id + "'>" +
+              "<p>" + Translations.getTranslated("SAVEUI.SHARE_LINK") +
+              "<a href='" + link + "'>" + link + "</a>"
+            ));
+
+            var shareCode = $("#shareCode");
+
+            shareCode.on("click", function () {
+              $(this).select();
+            });
+
+          });
+
+        }
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: el("hr")},
+      {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("SAVEUI.SAVE_LOCAL")])},
       {type: "html", content: el("p")},
       {type: "html", content: Translations.getTranslatedWrapped("SAVEUI.NAME")},
       {type: "inputText", id: "sceneName", value: (new Date()).toLocaleString()},
@@ -430,27 +472,6 @@ var UI = {
           $("#sceneName").replaceWith(el("span.success", {}, [name]));
         }
       },
-      {type: "html", content: el("p")},
-      {type: "html", content: el("hr")},
-      {type: "html", content: el("p")},
-      {type: "html", content: Translations.getTranslatedWrapped("SAVEUI.SHARE_CODE")},
-      {
-        type: "button",
-        id: "generateButton",
-        text: Translations.getTranslatedWrapped("SAVEUI.GENERATE"),
-        onclick: function () {
-          $("#popupContent").addClass("loading");
-
-          Saver.saveRemote().then(function (id) {
-            $("#popupContent").removeClass("loading");
-
-            $("#generateButton").replaceWith($("" +
-              "<span class='success'>" + id + "</span>" +
-              "<br>"));
-          });
-
-        }
-      },
 
     ]);
   },
@@ -461,6 +482,7 @@ var UI = {
 
     var loadClick = function () {
       Saver.load(this.toString());
+      UI.buildSidebarTopWorld(true);
       UIBuilder.closePopup();
     };
 
@@ -474,6 +496,10 @@ var UI = {
           if ($(this).attr("title") === title)
             $(this).remove();
         });
+
+        if ($(".one-save").length === 0) {
+          $("#noLocal").show();
+        }
       }
     };
 
@@ -504,9 +530,9 @@ var UI = {
       );
     }
 
-
     return UIBuilder.build([
       {type: "html", content: el("h1", {}, [Translations.getTranslatedWrapped("LOADUI.TITLE")])},
+      {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("LOADUI.LOAD_REMOTE")])},
       {type: "html", content: el("p")},
       {type: "html", content: Translations.getTranslatedWrapped("LOADUI.SHARE_CODE")},
       {
@@ -527,6 +553,7 @@ var UI = {
 
             if (success) {
               UIBuilder.closePopup();
+              UI.buildSidebarTopWorld(true);
             }
             else {
               $("#shareCode").addClass("invalid");
@@ -540,6 +567,12 @@ var UI = {
       {type: "html", content: el("p")},
       {type: "html", content: el("span#codeError")},
       {type: "html", content: el("hr")},
+      {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("LOADUI.LOAD_LOCAL")])},
+      {
+        type: "html", content: el("span#noLocal", {
+        style: "display: " + (Object.getOwnPropertyNames(storedSaves).length === 0 ? "inline;" : "none;")
+      }, [Translations.getTranslatedWrapped("LOADUI.NO_LOCAL")])
+      },
       {type: "html", content: saveElements},
 
     ]);
@@ -577,22 +610,141 @@ var UI = {
     }
   },
 
-  buildSidebar: function (entity) {
-    var sidebar = $(".sidebar.ui .content");
+  buildSidebarTopWorld: function (force) {
+    var sidebarTop = $(".sidebarTop");
 
-    sidebar.html("");
+    if (!force && sidebarTop[0].showing === "world")
+      return;
+
+    sidebarTop[0].showing = "world";
+    sidebarTop.html("");
+
+    var properties = [
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.GRAVITY_X")},
+      {
+        type: "inputNumber", value: _engine.getGravityX(), id: "gravity_x",
+        onchange: function (val) {
+          _engine.setGravityX(val * 1);
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.GRAVITY_CHANGE) {
+            $("#" + this.id).val(_engine.getGravityX());
+          }
+        }
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.GRAVITY_Y")},
+      {
+        type: "inputNumber", value: _engine.getGravityY(), id: "gravity_y",
+        onchange: function (val) {
+          _engine.setGravityY(val * 1);
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.GRAVITY_CHANGE) {
+            $("#" + this.id).val(_engine.getGravityY());
+          }
+        }
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.CAMERA_STYLE")},
+      {
+        type: "select", selected: _engine.viewport.getCameraStyle(), onchange: function (val) {
+        _engine.viewport.setCameraStyle(val);
+
+        if (val === CameraStyle.FIXED) {
+          $(".fixedCamera").show();
+          $(".entityCamera").hide();
+        }
+        if (val === CameraStyle.ENTITY) {
+          $(".fixedCamera").hide();
+          $(".entityCamera").show();
+        }
+      },
+        options: [
+          {text: Translations.getTranslatedWrapped("SIDEBAR.CAMERA_STYLES.FIXED"), value: CameraStyle.FIXED},
+          {text: Translations.getTranslatedWrapped("SIDEBAR.CAMERA_STYLES.ENTITY"), value: CameraStyle.ENTITY},
+        ],
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: el("span.fixedCamera", {}, [Translations.getTranslatedWrapped("SIDEBAR.CAMERA_X")])},
+      {
+        type: "inputNumber", value: _engine.viewport.x, id: "camera_x", classList: ["fixedCamera"],
+        onchange: function (val) {
+          _engine.viewport.x = val * 1;
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.CAMERA_MOVE) {
+            $("#" + this.id).val(_engine.viewport.x);
+          }
+        }
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: el("span.fixedCamera", {}, [Translations.getTranslatedWrapped("SIDEBAR.CAMERA_Y")])},
+      {
+        type: "inputNumber", value: _engine.viewport.y, id: "camera_y", classList: ["fixedCamera"],
+        onchange: function (val) {
+          _engine.viewport.y = val * 1;
+        },
+        onupdate: function (action, detail) {
+          if (action === UpdateEvent.CAMERA_MOVE) {
+            $("#" + this.id).val(_engine.viewport.y);
+          }
+        }
+      },
+      {type: "html", content: el("p")},
+      {
+        type: "html",
+        content: el("span.entityCamera", {}, [Translations.getTranslatedWrapped("SIDEBAR.CAMERA_ENTITY")])
+      },
+      {
+        type: "inputText",
+        value: _engine.viewport.getCameraEntityId(),
+        id: "camera_entity",
+        classList: ["entityCamera"],
+        onchange: function (val) {
+          if (!_engine.getEntityById(val)) {
+            $("#cameraError").html(el("span.failure", {}, [Translations.getTranslatedWrapped("NO_ENTITY_WITH_ID")]));
+          }
+          else
+            _engine.viewport.setCameraEntityId(val);
+        },
+        oninput: function () {
+          $("#cameraError").html("");
+        }
+      },
+      {type: "html", content: el("p")},
+      {type: "html", content: el("span#cameraError")},
+    ];
+
+    sidebarTop.html(UIBuilder.build(properties));
+
+    if (_engine.viewport.getCameraStyle() === CameraStyle.FIXED) {
+      $(".fixedCamera").show();
+      $(".entityCamera").hide();
+    }
+    if (_engine.viewport.getCameraStyle() === CameraStyle.ENTITY) {
+      $(".fixedCamera").hide();
+      $(".entityCamera").show();
+    }
+  },
+
+  buildSidebarTop: function (entity) {
+    var sidebar = $(".sidebar.ui .sidebarTop");
 
     if (entity === null) {
-      $(".sidebar.ui .content").html(this.buildEntityList());
+      this.buildSidebarTopWorld();
 
       return;
     }
+
+    sidebar.html("");
+    sidebar[0].showing = "entity";
 
     var properties = [
       // ID
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
       {
-        type: "inputText", value: entity.id, oninput: function (val) {
+        type: "inputText", value: entity.id, onchange: function (val) {
         entity.setId(val);
       }
       },
@@ -602,7 +754,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLLISION_GROUP")},
       {
         type: "range", value: entity.collisionGroup + 1, min: 1, max: Constants.COLLISION_GROUPS_NUMBER - 1,
-        oninput: function (val) {
+        onchange: function (val) {
           entity.setCollisionGroup(val * 1 - 1);
         }
       },
@@ -612,7 +764,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.LAYER")},
       {
         type: "range", value: entity.layer + 1, min: 1, max: Constants.LAYERS_NUMBER,
-        oninput: function (val) {
+        onchange: function (val) {
           _engine.setEntityLayer(entity, val * 1 - 1);
         }
       },
@@ -622,7 +774,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.X")},
       {
         type: "inputNumber", value: entity.getX(), id: "entity_x",
-        oninput: function (val) {
+        onchange: function (val) {
           entity.setX(val * 1);
         },
         onupdate: function (action, detail) {
@@ -637,7 +789,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.Y")},
       {
         type: "inputNumber", value: entity.getY(), id: "entity_y",
-        oninput: function (val) {
+        onchange: function (val) {
           entity.setY(val * 1);
         },
         onupdate: function (action, detail) {
@@ -652,7 +804,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.WIDTH")},
       {
         type: "inputNumber", value: entity.getWidth(), step: 0.1, id: "entity_width",
-        oninput: function (val) {
+        onchange: function (val) {
           entity.resize(val / 2, entity.getHeight() / 2);
         },
         onupdate: function (action, detail) {
@@ -666,7 +818,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.HEIGHT")},
       {
         type: "inputNumber", value: entity.getHeight(), step: 0.1, id: "entity_height",
-        oninput: function (val) {
+        onchange: function (val) {
           if (entity.type === "CIRCLE") {
             entity.resize(val / 2);
 
@@ -691,7 +843,7 @@ var UI = {
         step: 1,
         value: entity.getAngle(true),
         id: "entity_rotation",
-        oninput: function (val) {
+        onchange: function (val) {
           entity.setAngle(val * 1, true);
         },
         onupdate: function (action, detail) {
@@ -716,7 +868,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.RESTITUTION")},
       {
         type: "range", min: 0, max: 1, step: 0.1, value: entity.getRestitution(),
-        oninput: function (val) {
+        onchange: function (val) {
           entity.setRestitution(val * 1);
         }
       },
@@ -726,7 +878,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.FRICTION")},
       {
         type: "range", min: 0, max: 1, step: 0.1, value: entity.getFriction(),
-        oninput: function (val) {
+        onchange: function (val) {
           entity.setFriction(val * 1);
         }
       },
@@ -736,7 +888,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.DENSITY")},
       {
         type: "inputNumber", value: entity.getDensity(), min: 0,
-        oninput: function (val) {
+        onchange: function (val) {
           entity.setDensity(val * 1);
         }
       },
@@ -797,9 +949,15 @@ var UI = {
       for (var j = 0; j < _engine.layers[i].length; j++) {
         var entity = _engine.layers[i][j];
 
-        var entityElement = el("div.entity", {}, [el("span", {}, [
-          el("span.id", {}, [entity.id]), ": ", Translations.getTranslatedWrapped(entity.type)
-        ])]);
+        var entityElement = el("div.entity", {}, [
+          el("span", {}, [
+            el("span.id", {}, [entity.id]), ": ", Translations.getTranslatedWrapped(entity.type),
+          ]),
+          el("div.entity-color", {style: "background:" + entity.getColor()})
+        ]);
+
+        if (entity === _engine.selectedEntity)
+          entityElement.classList.add("selected");
 
         entityElement.onclick = (function (entity) {
           return function () {
@@ -813,8 +971,23 @@ var UI = {
       ret.appendChild(layerElement);
     }
 
-    return ret;
+    $(".sidebarBottom").html(ret);
   }
 };
+
+$(document).on("update", function (e) {
+  var action = e.detail.action;
+
+  if (
+    action === UpdateEvent.STATE_CHANGE ||
+    action === UpdateEvent.COLOR_CHANGE ||
+    action === UpdateEvent.ENTITY_ADD ||
+    action === UpdateEvent.ENTITY_DELETE ||
+    action === UpdateEvent.ID_CHANGE ||
+    action === UpdateEvent.SELECTION_CHANGE ||
+    action === UpdateEvent.LAYER_CHANGE
+  )
+    UI.buildEntityList();
+});
 
 module.exports = UI;

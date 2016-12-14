@@ -49,7 +49,7 @@ var Saver = {
   loadCurrent: function () {
     var data = LSManager.get("data", "currentState");
 
-    if(data) {
+    if (data) {
       this.load(data);
     }
     else {
@@ -58,7 +58,13 @@ var Saver = {
   },
 
   loadRemote: function (id) {
-    return Firebase.ref('/saved/' + id).once('value').then(function(snapshot) {
+    if (id === "" || /\.|\#|\$|\[|\]/.test(id)) {
+      return { then: function (fn) {
+        return fn(false);
+      }};
+    }
+
+    return Firebase.ref('/saved/' + id).once('value').then(function (snapshot) {
       var success = id !== "" && snapshot.val() !== null;
 
       if (success) {
@@ -99,7 +105,7 @@ var Saver = {
 };
 
 $(document).on("update", (function (e) {
-  if(e.detail.action === UpdateEvent.STATE_CHANGE)
+  if (e.detail.action === UpdateEvent.STATE_CHANGE)
     Saver.saveCurrent();
 }));
 

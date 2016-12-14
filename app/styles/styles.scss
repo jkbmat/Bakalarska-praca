@@ -155,6 +155,7 @@ hr {
   padding: 3em;
   padding-top: 1em;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 #tokenChoice {
@@ -207,22 +208,45 @@ hr {
   background: #eee;
 }
 
-.behavior {
-  padding: 1em;
-  margin-bottom: 1em;
-  border-bottom: 1px solid #999;
+#shareCode {
+  border: none;
+  outline: none;
 }
 
-.behavior h2 {
-  font-size: 120%;
-  text-align: left;
-}
+.behaviorOverlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 
-.behaviorWrapper {
-  height: calc(100% - 50px);
-  overflow-y: auto;
-}
+  .behaviorWrapper {
+    flex-grow: 1;
+    max-height: 70%;
+    overflow-y: auto;
 
+    .behavior {
+      padding: 1em;
+      margin-bottom: 1em;
+
+      h2 {
+        text-align: left;
+      }
+
+      .behaviorTitle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        h2 {
+          flex-grow: 1;
+        }
+
+        .removeButton {
+          margin-left: 2em;
+        }
+      }
+    }
+  }
+}
 #popupContent .bottom {
   padding: 1em 0;
 }

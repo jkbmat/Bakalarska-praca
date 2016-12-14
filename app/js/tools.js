@@ -4,9 +4,12 @@ var Constants = require("./constants.js");
 var UpdateEvent = require("./updateEvent.js");
 
 var Blank = {
-  onclick: function () {},
-  onrelease: function () {},
-  onmove: function () {}
+  onclick: function () {
+  },
+  onrelease: function () {
+  },
+  onmove: function () {
+  }
 };
 
 
@@ -17,7 +20,7 @@ var Selection = {
 
   onclick: function () {
 
-    if(_engine.selectedEntity) {
+    if (_engine.selectedEntity) {
       for (var i = _engine.selectedEntity.helpers.length - 1; i >= 0; i--) {
         if (_engine.selectedEntity.helpers[i].testPoint(_engine.input.mouse.x, _engine.input.mouse.y)) {
           _engine.selectedEntity.helpers[i].click();
@@ -26,7 +29,7 @@ var Selection = {
       }
     }
 
-    _engine.selectEntity(null);
+    _engine.selectEntity(null, true);
 
     for (var i = Constants.LAYERS_NUMBER - 1; i >= 0; i--) {
       for (var j = 0; j < _engine.layers[i].length; j++) {
@@ -66,6 +69,10 @@ var Selection = {
       _engine.selectedEntity.toggleHelpers(true);
     }
 
+    if (this.mode === "camera") {
+      UpdateEvent.fire(UpdateEvent.CAMERA_MOVE);
+    }
+
     this.origin = this.offset = this.mode = null;
     _engine.viewport.canvasElement.style.cursor = "default";
   },
@@ -79,8 +86,7 @@ var Selection = {
     }
 
     if (
-      this.mode === "reposition-start" &&
-      !this.origin.equalTo([_engine.input.mouse.x, _engine.input.mouse.y])
+      this.mode === "reposition-start" && !this.origin.equalTo([_engine.input.mouse.x, _engine.input.mouse.y])
     ) {
       this.mode = "reposition";
     }
@@ -115,12 +121,16 @@ var Rectangle = {
       this.w *= _engine.viewport.scale;
       this.h *= _engine.viewport.scale;
 
+      var x = Math.min(_engine.input.mouse.x, this.worldOrigin[0]);
+      var y = Math.min(_engine.input.mouse.y, this.worldOrigin[1]);
+
       _engine.addEntity(new Shape.Rectangle(
-        new b2Vec2(this.worldOrigin[0] + this.w / 2, this.worldOrigin[1] + this.h / 2),
+        new b2Vec2(x + this.w / 2, y + this.h / 2),
         new b2Vec2(this.w / 2, this.h / 2)), Type.DYNAMIC_BODY);
     }
 
-    this.onmove = function(){};
+    this.onmove = function () {
+    };
     this.origin = null;
     this.worldOrigin = null;
     this.w = this.h = 0;
@@ -131,8 +141,8 @@ var Rectangle = {
   },
 
   dragging: function (ctx) {
-    this.w = _engine.input.mouse.canvasX - this.origin[0];
-    this.h = _engine.input.mouse.canvasY - this.origin[1];
+    this.w = Math.abs(_engine.input.mouse.canvasX - this.origin[0]);
+    this.h = Math.abs(_engine.input.mouse.canvasY - this.origin[1]);
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
     if (
@@ -142,7 +152,12 @@ var Rectangle = {
       ctx.fillStyle = "rgba(255, 0, 0, 0.4)";
     }
     ctx.save();
-    ctx.fillRect(this.origin[0], this.origin[1], this.w, this.h);
+    ctx.fillRect(
+      Math.min(_engine.input.mouse.canvasX, this.origin[0]),
+      Math.min(_engine.input.mouse.canvasY, this.origin[1]),
+      this.w,
+      this.h
+    );
     ctx.restore();
   }
 };
@@ -163,12 +178,16 @@ var Circle = {
     if (this.radius >= _engine.viewport.fromScale(Constants.SHAPE_MIN_SIZE) / 2) {
       this.radius *= _engine.viewport.scale;
 
+      var x = Math.min(this.worldOrigin[0], _engine.input.mouse.x);
+      var y = Math.min(this.worldOrigin[1], _engine.input.mouse.y);
+
       _engine.addEntity(new Shape.Circle(
-        new b2Vec2(this.worldOrigin[0] + this.radius, this.worldOrigin[1] + this.radius),
+        new b2Vec2(x + this.radius, y + this.radius),
         this.radius), Type.DYNAMIC_BODY);
     }
 
-    this.onmove = function(){};
+    this.onmove = function () {
+    };
     this.origin = null;
     this.worldOrigin = null;
     this.radius = 0;
@@ -179,7 +198,10 @@ var Circle = {
   },
 
   dragging: function (ctx) {
-    this.radius = Math.min(_engine.input.mouse.canvasX - this.origin[0], _engine.input.mouse.canvasY - this.origin[1]) / 2;
+    this.radius = Math.min(
+        Math.abs(_engine.input.mouse.canvasX - this.origin[0]),
+        Math.abs(_engine.input.mouse.canvasY - this.origin[1])
+      ) / 2;
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
 
@@ -191,7 +213,10 @@ var Circle = {
 
     ctx.beginPath();
 
-    ctx.arc(this.origin[0] + this.radius, this.origin[1] + this.radius, this.radius, 0, 2 * Math.PI, false);
+    var x = Math.min(this.origin[0], _engine.input.mouse.canvasX);
+    var y = Math.min(this.origin[1], _engine.input.mouse.canvasY);
+
+    ctx.arc(x + this.radius, y + this.radius, this.radius, 0, 2 * Math.PI, false);
     ctx.fill();
 
     ctx.restore();

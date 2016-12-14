@@ -155,10 +155,13 @@ Entity.prototype.getColor = function () {
   return this.color;
 };
 
-Entity.prototype.setColor = function (color) {
+Entity.prototype.setColor = function (color, silent) {
   this.color = color;
 
-  UpdateEvent.fire(UpdateEvent.COLOR_CHANGE, {entities: [this]});
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.COLOR_CHANGE, {entities: [this]});
+
+  return this;
 };
 
 Entity.prototype.getBodyType = function () {
@@ -226,15 +229,6 @@ Entity.prototype.die = function () {
 
 Entity.prototype.draw = function () {
   throw "ERROR! Cannot draw Entity: Use derived classes.";
-};
-
-Entity.prototype.setColor = function (color, silent) {
-  this.color = color;
-
-  if(!silent)
-    UpdateEvent.fire(UpdateEvent.COLOR_CHANGE, {entities: [this]});
-
-  return this;
 };
 
 Entity.prototype.setId = function (id) {

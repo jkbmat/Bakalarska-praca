@@ -1,12 +1,16 @@
 var Translations = require("./translations.js");
+var Utils = require("./utils.js");
 
 var UIBuilder = {
-  element: function(elem, properties) {
+  element: function (elem, properties) {
     properties = $.extend({
       disabled: false,
-      onclick: function(){},
-      onupdate: function(){},
-      tooltip: ""
+      onclick: function () {
+      },
+      onupdate: function () {
+      },
+      tooltip: "",
+      classList: [],
     }, properties);
 
     elem.disable = function () {
@@ -20,7 +24,7 @@ var UIBuilder = {
     };
 
     elem.onclick = function (e) {
-      if($(this).hasClass("disabled")) {
+      if ($(this).hasClass("disabled")) {
         e.preventDefault();
         return;
       }
@@ -28,11 +32,14 @@ var UIBuilder = {
       properties.onclick();
     };
 
+    if (properties.classList.length)
+      elem.classList.add(properties.classList);
+
     if (properties.disabled) {
       elem.disable();
     }
 
-    document.addEventListener("update", function(e) {
+    document.addEventListener("update", function (e) {
       properties.onupdate(e.detail.action, e.detail);
     });
 
@@ -40,7 +47,7 @@ var UIBuilder = {
       var offset = [15, 20];
       elem.setAttribute("tooltip", properties.tooltip);
 
-      elem.addEventListener("mouseenter", function(e) {
+      elem.addEventListener("mouseenter", function (e) {
         $("#tooltip").remove();
         if (elem.disabled)
           return;
@@ -71,30 +78,29 @@ var UIBuilder = {
 
   radio: function (properties) {
     properties = $.extend({}, {
-      id: "radioGroup-" + $(".radioGroup").length,
+      id: "radioGroup-" + Utils.generateUUID(),
     }, properties);
 
     var ret = el("div.ui.radioGroup", {id: properties.id});
 
     ret.disable = function () {
-      $("label", this).each(function(){
+      $("label", this).each(function () {
         this.disable();
       });
     };
 
     ret.enable = function () {
-      $("label", this).each(function(){
+      $("label", this).each(function () {
         this.enable();
       });
     };
-    
-    var idCount = $("input[type=radio]").length;
 
-    properties.elements.forEach((function(element) {
+    properties.elements.forEach((function (element) {
       element = $.extend({}, {
-        id: "radio-" + idCount++,
+        id: "radio-" + Utils.generateUUID(),
         checked: false,
-        onclick: function(){}
+        onclick: function () {
+        }
       }, element);
 
       var input = el("input.ui", {type: "radio", id: element.id, name: properties.id});
@@ -110,28 +116,31 @@ var UIBuilder = {
 
     return ret;
   },
-  
+
   button: function (properties) {
     properties = $.extend({}, {
-      id: "button-" + $(".button").length,
-      onclick: function(){},
-      onupdate: function(){},
+      id: "button-" + Utils.generateUUID(),
+      onclick: function () {
+      },
+      onupdate: function () {
+      },
       disabled: false
     }, properties);
 
-    var ret = el("span.ui.button", { id: properties.id }, [properties.text]);
+    var ret = el("span.ui.button", {id: properties.id}, [properties.text]);
 
     return this.element(ret, properties);
   },
 
   select: function (properties) {
     properties = $.extend({}, {
-      id: "select-" + $("select").length,
+      id: "select-" + Utils.generateUUID(),
       selected: "",
-      onchange: function(){}
+      onchange: function () {
+      }
     }, properties);
 
-    var ret = el("select.ui", { id: properties.id });
+    var ret = el("select.ui", {id: properties.id});
 
     ret.onchange = function () {
       properties.onchange(this.value);
@@ -153,12 +162,22 @@ var UIBuilder = {
 
   inputText: function (properties) {
     properties = $.extend({}, {
-      id: "inputText-" + $("input[type=text]").length,
+      id: "inputText-" + Utils.generateUUID(),
       value: "",
-      oninput: function(){}
+      oninput: function () {
+      },
+      onchange: function () {
+      }
     }, properties);
 
-    var ret = el("input.ui", { type: "text", id: properties.id, value: properties.value });
+    var ret = el("input.ui", {type: "text", id: properties.id, value: properties.value});
+
+    $(ret).on("blur keyup", function (e) {
+      if (e.type === "keyup" && e.keyCode != 13)
+        return;
+
+      properties.onchange(this.value);
+    });
 
     ret.oninput = function () {
       properties.oninput(this.value);
@@ -169,18 +188,36 @@ var UIBuilder = {
 
   inputNumber: function (properties) {
     properties = $.extend({}, {
-      id: "inputNumber-" + $("input[type=number]").length,
+      id: "inputNumber-" + Utils.generateUUID(),
       value: 0,
       min: -Infinity,
       max: Infinity,
       step: 1,
-      oninput: function(){},
-      onupdate: function () {}
+      oninput: function () {
+      },
+      onchange: function () {
+      },
+      onupdate: function () {
+      }
     }, properties);
 
-    var ret = el("input.ui", { type: "number", id: properties.id, value: properties.value, min: properties.min, max: properties.max, step: properties.step });
+    var ret = el("input.ui", {
+      type: "number",
+      id: properties.id,
+      value: properties.value,
+      min: properties.min,
+      max: properties.max,
+      step: properties.step
+    });
 
-    ret.oninput = function (e) {
+    $(ret).on("blur keyup", function (e) {
+      if (e.type === "keyup" && e.keyCode != 13)
+        return;
+
+      properties.onchange(this.value);
+    });
+
+    ret.oninput = function () {
       properties.oninput(this.value);
     };
 
@@ -197,12 +234,13 @@ var UIBuilder = {
 
   inputColor: function (properties) {
     properties = $.extend({}, {
-      id: "inputColor-" + $("input[type=color]").length,
+      id: "inputColor-" + Utils.generateUUID(),
       value: "#000000",
-      oninput: function(){}
+      oninput: function () {
+      }
     }, properties);
 
-    var ret = el("input.ui.button", { type: "color", id: properties.id, value: properties.value });
+    var ret = el("input.ui.button", {type: "color", id: properties.id, value: properties.value});
 
     ret.oninput = function () {
       properties.oninput(this.value);
@@ -213,32 +251,51 @@ var UIBuilder = {
 
   range: function (properties) {
     properties = $.extend({}, {
-      id: "range-" + $("input[type=range]").length,
+      id: "range-" + Utils.generateUUID(),
       value: 0,
       min: 0,
       max: 10,
       step: 1,
       width: "100%",
       disableWrite: false,
-      oninput: function(){},
-      onupdate: function(){}
+      oninput: function () {
+      },
+      onchange: function () {
+      },
+      onupdate: function () {
+      }
     }, properties);
 
     var inputProperties = $.extend({}, properties);
     inputProperties.id += "-input";
 
-    var ret = this.element(el("div.ui.range", {style: "width:"+properties.width}), properties);
-    var slider = el("input.ui", { type: "range", min: properties.min, max: properties.max, step: properties.step, value: properties.value, id: properties.id });
+    var ret = this.element(el("div.ui.range", {style: "width:" + properties.width}), properties);
+    var slider = el("input.ui", {
+      type: "range",
+      min: properties.min,
+      max: properties.max,
+      step: properties.step,
+      value: properties.value,
+      id: properties.id
+    });
     var input = this.inputNumber(inputProperties);
 
-    input.oninput = function() {
+    input.oninput = function () {
       properties.oninput(input.value);
-      slider.value = input.value;
     };
 
+    $(input).on("blur keyup", function (e) {
+      if (e.type === "keyup" && e.keyCode != 13)
+        return;
+
+      slider.value = input.value;
+      properties.onchange(this.value);
+    });
+
     slider.oninput = function () {
-      properties.oninput(this.value);
       input.value = this.value;
+      properties.oninput(this.value);
+      properties.onchange(this.value);
     };
 
     ret.appendChild(slider);
@@ -250,14 +307,15 @@ var UIBuilder = {
 
   checkbox: function (properties) {
     properties = $.extend({}, {
-      id: "checkbox-" + $("input[type=checkbox]").length,
+      id: "checkbox-" + Utils.generateUUID(),
       checked: false,
-      onchange: function(){}
+      onchange: function () {
+      }
     }, properties);
 
     var ret = this.element(el("span"), properties);
-    var checkbox = el("input.ui", { type: "checkbox", id: properties.id });
-    var label = el("label.ui.button", { for: properties.id });
+    var checkbox = el("input.ui", {type: "checkbox", id: properties.id});
+    var label = el("label.ui.button", {for: properties.id});
 
     ret.appendChild(checkbox);
     ret.appendChild(label);
@@ -276,7 +334,7 @@ var UIBuilder = {
 
     properties.forEach(function (element) {
       var generated;
-      
+
       switch (element.type) {
         case "radio":
           generated = this.radio(element);
@@ -318,17 +376,20 @@ var UIBuilder = {
           generated = this.break();
           break;
       }
-      
+
       ret.appendChild(generated);
     }, this);
-    
+
     return ret;
   },
-  
-  buildLayout: function() {
+
+  buildLayout: function () {
     var content = el("div.ui.content.panel");
-    var sidebar = el("div.ui.sidebar.panel", {}, [ el("div.content") ]);
-    var resizer = el("div.ui.resizer");
+    var sidebarTop = el("div.ui.sidebarTop.panel");
+    var sidebarBottom = el("div.ui.sidebarBottom.panel");
+    var resizerH = el("div.ui.resizer-horizontal.resizer");
+    var resizerV = el("div.ui.resizer-vertical.resizer");
+    var sidebar = el("div.ui.sidebar.panel", {}, [sidebarTop, resizerV, sidebarBottom]);
     var toolbar = el("div.ui.toolbar");
 
     var w = $("body").outerWidth();
@@ -346,16 +407,38 @@ var UIBuilder = {
 
       sidebar.style.width = sidebarWidth + "px";
       content.style.width = contentWidth + "px";
+      resizerH.style.left = $(sidebar).offset().left + "px";
 
       window.onresize();
     };
 
+    var resizerVResizeEvent = function (e) {
+      e.preventDefault();
+
+      var sidebarHeight = $(sidebar).outerHeight();
+      var topHeight = Math.max(
+        sidebarHeight * 0.1,
+        Math.min(
+          sidebarHeight * 0.9,
+          _engine.input.mouse.realY - parseInt($(resizerV).css("border-top-width"))
+        )
+      );
+      console.log(_engine.input.mouse.realY, parseInt($(resizerV).css("border-top-width")));
+      var bottomHeight = sidebarHeight - topHeight - $(resizerV).outerHeight();
+
+      sidebarTop.style.height = topHeight + "px";
+      sidebarBottom.style.height = bottomHeight + "px";
+      resizerV.style.top = $(sidebar).offset().top + topHeight + "px";
+    };
+
     var mouseUpEvent = function (e) {
       sidebar.resizing = false;
+      resizerV.resizing = false;
 
       $(".resizer.ui").removeClass("resizing");
 
       window.removeEventListener("mousemove", sidebarResizeEvent);
+      window.removeEventListener("mousemove", resizerVResizeEvent);
       window.removeEventListener("mouseup", mouseUpEvent);
     };
 
@@ -371,7 +454,7 @@ var UIBuilder = {
       content.style.width = contentWidth + "px";
     };
 
-    resizer.onmousedown = function (e) {
+    resizerH.onmousedown = function (e) {
       sidebar.resizing = true;
 
       $(this).addClass("resizing");
@@ -380,18 +463,30 @@ var UIBuilder = {
       window.addEventListener("mouseup", mouseUpEvent);
     };
 
+    resizerV.onmousedown = function (e) {
+      this.resizing = true;
+
+      $(this).addClass("resizing");
+
+      window.addEventListener("mousemove", resizerVResizeEvent);
+      window.addEventListener("mouseup", mouseUpEvent);
+    };
+
+
     window.addEventListener("resize", windowResizeEvent);
 
     content.appendChild(toolbar);
-    sidebar.appendChild(resizer);
+    document.body.appendChild(resizerH);
     document.body.appendChild(content);
     document.body.appendChild(sidebar);
+
+    resizerH.style.left = $(sidebar).offset().left + "px";
   },
 
   // Creating a popup message
-  popup: function(data) {
+  popup: function (data) {
     var overlay = el("div#popupOverlay", [el("div#popupContent", [data])]);
-    overlay.onclick = function(e) {
+    overlay.onclick = function (e) {
       UIBuilder.closePopup(e);
     };
 
@@ -401,7 +496,7 @@ var UIBuilder = {
   },
 
   // Closing a popup message
-  closePopup: function(e) {
+  closePopup: function (e) {
     var overlay = document.getElementById("popupOverlay");
     var content = document.getElementById("popupContent");
 
@@ -412,7 +507,6 @@ var UIBuilder = {
     content.parentNode.removeChild(content);
     overlay.parentNode.removeChild(overlay);
   },
-
 
 
 };

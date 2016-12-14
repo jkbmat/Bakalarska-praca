@@ -40,6 +40,10 @@ var Input = function(viewport) {
   this.viewport.onselectstart = function () {
     return false;
   };
+
+  $(".ui.toolbar").on("selectstart", function () {
+    return false;
+  });
 };
 
 Input.prototype.cleanUp = function () {
@@ -81,8 +85,8 @@ Input.prototype.updateMouseButtonsUp = function (event) {
 Input.prototype.updateKeyboardButtonsDown = function (event) {
   this.keyboard.down.add(event.which);
 
-  if(event.which === 32)
-    event.preventDefault();
+  /*if(event.which === 32)
+    event.preventDefault();*/
 };
 
 Input.prototype.updateKeyboardButtonsUp = function (event) {

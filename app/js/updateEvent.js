@@ -4,7 +4,7 @@ var UpdateEvent = {
     data.action = type;
     var event = new CustomEvent("update", {detail: data});
     document.dispatchEvent(event);
-
+console.log(type)
     return event;
   },
 
@@ -25,6 +25,11 @@ var UpdateEvent = {
   ENTITY_DELETE: "entity_delete",
   STATE_CHANGE: "state_change",
   WORLD_CLEARED: "world_cleared",
+  GRAVITY_CHANGE: "gravity_change",
+  CAMERA_STYLE_CHANGE: "camera_style_change",
+  CAMERA_MOVE: "camera_move",
+  CAMERA_ENTITY_CHANGE: "camera_entity_change",
+  SELECTION_CHANGE: "selection_change",
 };
 
 module.exports = UpdateEvent;

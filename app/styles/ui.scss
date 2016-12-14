@@ -142,17 +142,21 @@ input[type=checkbox].ui {
 }
 
 .ui.sidebar {
-  float: left;
   background: $background-color;
   height: 100%;
   position: absolute;
   right: 0;
+  display: flex;
+  flex-direction: column;
 
-  .content {
-    box-sizing: content-box;
-    height: 100%;
-    position: relative;
+  .sidebarTop {
     padding: 1em;
+    height: 70%;
+    overflow-y: auto;
+  }
+  .sidebarBottom {
+    padding: 1em;
+    flex-grow: 1;
     overflow-y: auto;
   }
 }
@@ -170,7 +174,7 @@ input[type=checkbox].ui {
   }
 }
 
-.ui.resizer {
+.ui.resizer-horizontal {
   height: 100%;
   width: 7px;
   border-left: 3px solid $basic-color;
@@ -178,6 +182,7 @@ input[type=checkbox].ui {
   top: 0;
   left: 0;
   cursor: ew-resize;
+  z-index: 10;
 
   &:hover {
     border-left-color: darken($basic-color, 10%);
@@ -185,6 +190,24 @@ input[type=checkbox].ui {
 
   &.resizing {
     border-left-color: darken($basic-color, 25%);
+  }
+}
+
+.ui.resizer-vertical {
+  width: 100%;
+  height: 9px;
+  border-top: 3px solid white;
+  border-bottom: 3px solid white;
+  background: $basic-color;
+  cursor: ns-resize;
+  z-index: 9;
+
+  &:hover {
+    background: darken($basic-color, 10%);
+  }
+
+  &.resizing {
+    background: darken($basic-color, 25%);
   }
 }
 
@@ -253,11 +276,27 @@ input[type=checkbox].ui {
       margin-bottom: 3px;
       cursor: pointer;
       color: $highlight-color;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      //border: 1px solid transparent;
 
       .id {
         font-weight: bold;
         color: $text-color;
       }
+
+      .entity-color {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+      }
+
+      &.selected {
+        //border: 1px solid $highlight-color;
+        background: $basic-color;
+      }
     }
+
   }
 }

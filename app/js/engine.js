@@ -56,7 +56,7 @@ var Engine = function (viewport, gravity) {
   }).bind(this));
 
   $(document).on("update", (function (e) {
-    if(!e.detail.noState)
+    if (!e.detail.noState)
       this.stateManager.addState();
   }).bind(this));
 };
@@ -82,11 +82,28 @@ Engine.prototype.togglePause = function () {
   }
 };
 
-Engine.prototype.vec2 = function (x, y) {
-  this.bufferVec2.set_x(x);
-  this.bufferVec2.set_y(y);
+Engine.prototype.getGravityX = function () {
+  return this.world.GetGravity().get_x();
+};
 
-  return this.bufferVec2;
+Engine.prototype.getGravityY = function () {
+  return this.world.GetGravity().get_y();
+};
+
+Engine.prototype.setGravity = function (x, y, silent) {
+  this.world.SetGravity(new b2Vec2(x, y));
+
+  if (!silent) {
+    UpdateEvent.fire(UpdateEvent.GRAVITY_CHANGE);
+  }
+};
+
+Engine.prototype.setGravityX = function (val) {
+  this.setGravity(val, this.getGravityY());
+};
+
+Engine.prototype.setGravityY = function (val) {
+  this.setGravity(this.getGravityX(), val);
 };
 
 Engine.prototype.selectTool = function (tool) {
@@ -103,7 +120,7 @@ Engine.prototype.removeEntity = function (entity, silent) {
     UpdateEvent.fire(UpdateEvent.ENTITY_DELETE, {entities: [entity]});
 };
 
-Engine.prototype.setEntityLayer = function (entity, newLayer) {
+Engine.prototype.setEntityLayer = function (entity, newLayer, silent) {
   // Remove from old layer
   this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
 
@@ -111,7 +128,8 @@ Engine.prototype.setEntityLayer = function (entity, newLayer) {
   entity.layer = newLayer;
   this.layers[newLayer].push(entity);
 
-  UpdateEvent.fire(UpdateEvent.LAYER_CHANGE, {entities: [entity]});
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.LAYER_CHANGE, {entities: [entity]});
 };
 
 // Returns all entities in one array
@@ -192,12 +210,15 @@ Engine.prototype.setCollision = function (groupA, groupB, value) {
 };
 
 // Selects an entity and shows its properties in the sidebar
-Engine.prototype.selectEntity = function (entity) {
+Engine.prototype.selectEntity = function (entity, silent) {
   this.selectedEntity = entity;
-  UI.buildSidebar(this.selectedEntity);
+  UI.buildSidebarTop(this.selectedEntity);
 
   if (entity)
     entity.recalculateHelpers();
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.SELECTION_CHANGE, {noState: true, entities: [entity]});
 };
 
 // Updates collision masks for all entities, based on engine's collisionGroups table
@@ -239,6 +260,13 @@ Engine.prototype.step = function () {
     this.world.Step(1 / Constants.TIME_STEP, 10, 5);
 
     var entities = this.entities();
+
+    if (this.viewport.getCameraEntityId() !== "") {
+      var entity = this.getEntityById(this.viewport.getCameraEntityId());
+
+      this.viewport.x = entity.getX();
+      this.viewport.y = entity.getY();
+    }
 
     for (var i = 0; i < entities.length; i++) {
       for (var j = 0; j < entities[i].behaviors.length; j++) {

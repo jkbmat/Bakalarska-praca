@@ -25,24 +25,33 @@ module.exports = {
   CIRCLE_TOOL: "Circle tool",
   SELECTION_TOOL: "Selection tool",
 
+  NO_ENTITY_WITH_ID: "No object exists with this ID.",
+
   SAVEUI: {
     TITLE: "Scene saving",
     SAVE_BUTTON: "Save",
     NAME: "Name of the scene: ",
     SHARE_CODE: "Sharing code: ",
     GENERATE: "Generate",
+    SAVE_LOCAL: "Save to this computer",
+    SAVE_REMOTE: "Save to the internet",
+    SHARE_LINK: "Sharing link: ",
   },
 
   LOADUI: {
     TITLE: "Scene loading",
     LOAD_BUTTON: "Load",
     REMOVE_BUTTON: "Remove",
-    SHARE_CODE: "Using a sharing code: ",
+    SHARE_CODE: "Sharing code: ",
     INVALID_CODE: "This sharing code doesn't exist.",
-    CONFIRM_DELETE: "Are you sure you want to delete the saved state "
+    CONFIRM_DELETE: "Are you sure you want to delete the saved state ",
+    LOAD_LOCAL: "Load from this computer",
+    LOAD_REMOTE: "Load from the internet",
+    NO_LOCAL: "There are no scenes saved to this computer",
   },
 
   BEHAVIORS: {
+    TITLE: "Behavior editor",
     CONDITION: "When the following conditon is met:",
     INPUT_DIALOG: "Insert a correct value for ",
     ACTION: "Do this:",
@@ -79,5 +88,17 @@ module.exports = {
       STATIC: "Static",
       KINEMATIC: "Kinematic",
     },
+
+    GRAVITY_X: "X-axis gravity strength:",
+    GRAVITY_Y: "Y-axis gravity strength:",
+
+    CAMERA_STYLE: "Camera style:",
+    CAMERA_STYLES: {
+      FIXED: "Locked on point",
+      ENTITY: "Locked on entity",
+    },
+    CAMERA_X: "X-axis camera position",
+    CAMERA_Y: "Y-axis camera position",
+    CAMERA_ENTITY: "Object ID for camera lock:",
   }
 };

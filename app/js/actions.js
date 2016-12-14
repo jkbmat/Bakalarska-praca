@@ -12,7 +12,7 @@ var aSetColor = function(ef, color) {
 aSetColor.prototype = new Action();
 
 aSetColor.prototype.each = function(entity) {
-  entity.setColor(this.args[1].evaluate());
+  entity.setColor(this.args[1].evaluate(), true);
 };
 
 aSetColor.prototype.constructor = aSetColor;
@@ -87,20 +87,4 @@ aLinearImpulse.prototype.each = function(entity) {
 
 aLinearImpulse.prototype.constructor = aLinearImpulse;
 module.exports.push(aLinearImpulse);
-
-
-var aCenterCamera = function(ef) {
-  Action.call(this, "centerCameraOn", arguments, [Type.ENTITYFILTER]);
-
-  this.args.push(ef);
-};
-aCenterCamera.prototype = new Action();
-
-aCenterCamera.prototype.each = function(entity) {
-  _engine.viewport.x = entity.getX();
-  _engine.viewport.y = entity.getY();
-};
-
-aCenterCamera.prototype.constructor = aCenterCamera;
-module.exports.push(aCenterCamera);
 

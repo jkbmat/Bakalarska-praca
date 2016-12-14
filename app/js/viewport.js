@@ -1,11 +1,15 @@
 var Utils = require("./utils.js");
 var Constants = require("./constants.js");
+var CameraStyle = require("./cameraStyle.js");
+var UpdateEvent = require("./updateEvent.js");
 
 // VIEWPORT
 // This is basically camera + projector
 
 var Viewport = function (canvasElement, width, height, x, y) {
   this.scale = Constants.DEFAULT_SCALE;
+  this.cameraStyle = CameraStyle.FIXED;
+  this.cameraEntityId = "";
 
   // Canvas dimensions
   if (width != undefined && height != undefined) {
@@ -77,6 +81,33 @@ Viewport.prototype.zoom = function (val) {
 
 Viewport.prototype.getOffset = function () {
   return [this.x - this.width / 2, this.y - this.height / 2];
+};
+
+Viewport.prototype.getCameraEntityId = function() {
+  return this.cameraEntityId;
+};
+
+Viewport.prototype.setCameraEntityId = function(id, silent) {
+  this.cameraEntityId = id;
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.CAMERA_ENTITY_CHANGE);
+};
+
+Viewport.prototype.getCameraStyle = function() {
+  if (this.cameraStyle === CameraStyle.ENTITY && !_engine.getEntityById(this.getCameraEntityId())) {
+    this.cameraStyle = CameraStyle.FIXED;
+    this.cameraEntityId = "";
+  }
+
+  return this.cameraStyle;
+};
+
+Viewport.prototype.setCameraStyle = function(val, silent) {
+  this.cameraStyle = val;
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.CAMERA_STYLE_CHANGE);
 };
 
 Viewport.prototype.toScale = function (number) {
