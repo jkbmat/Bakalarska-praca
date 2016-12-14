@@ -536,8 +536,8 @@ var UI = {
       {type: "html", content: el("p")},
       {type: "html", content: Translations.getTranslatedWrapped("LOADUI.SHARE_CODE")},
       {
-        type: "inputText", id: "shareCode", oninput: function () {
-        $("#shareCode").removeClass("invalid");
+        type: "inputText", id: "shareCodeLoad", oninput: function () {
+        $("#shareCodeLoad").removeClass("invalid");
         $("#codeError").replaceWith(el("span#codeError"));
       }
       },
@@ -548,7 +548,7 @@ var UI = {
         onclick: function () {
           $("#popupContent").addClass("loading");
 
-          Saver.loadRemote($("#shareCode").val()).then(function (success) {
+          Saver.loadRemote($("#shareCodeLoad").val()).then(function (success) {
             $("#popupContent").removeClass("loading");
 
             if (success) {
@@ -556,7 +556,7 @@ var UI = {
               UI.buildSidebarTopWorld(true);
             }
             else {
-              $("#shareCode").addClass("invalid");
+              $("#shareCodeLoad").addClass("invalid");
               $("#codeError").replaceWith(
                 el("span.failure#codeError", {}, [Translations.getTranslatedWrapped("LOADUI.INVALID_CODE")])
               );

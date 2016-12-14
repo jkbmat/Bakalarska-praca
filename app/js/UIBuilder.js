@@ -452,6 +452,7 @@ var UIBuilder = {
 
       sidebar.style.width = sidebarWidth + "px";
       content.style.width = contentWidth + "px";
+      resizerH.style.left = $(sidebar).offset().left + "px";
     };
 
     resizerH.onmousedown = function (e) {
