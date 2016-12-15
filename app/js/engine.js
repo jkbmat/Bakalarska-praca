@@ -4,6 +4,7 @@ var TokenManager = require("./tokenManager.js");
 var Constants = require("./constants.js");
 var UpdateEvent = require("./updateEvent.js");
 var StateManager = require("./stateManager.js");
+var CameraStyle = require("./cameraStyle.js");
 
 // ENGINE
 
@@ -23,6 +24,8 @@ var Engine = function (viewport, gravity) {
     this.layers[i] = [];
   }
 
+  this.joints = [];
+
   this.collisionGroups = [];
   for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER - 1; i++) {
     this.collisionGroups.push({
@@ -36,6 +39,7 @@ var Engine = function (viewport, gravity) {
   });
 
   this.lifetimeEntities = 0;
+  this.lifetimeJoints = 0;
 
   this.world = new b2World(gravity, true);
   this.world.paused = true;
@@ -75,11 +79,16 @@ Engine.prototype.togglePause = function () {
     entities.forEach(function (entity) {
       entity.body.SetAwake(1);
     });
+
+    $(".sidebar").hide();
   }
 
   else {
+    $(".sidebar").show();
     this.stateManager.buildState(this.stateManager.stateStack[this.stateManager.currentState]);
   }
+
+
 };
 
 Engine.prototype.getGravityX = function () {
@@ -111,6 +120,30 @@ Engine.prototype.selectTool = function (tool) {
   this.selectEntity(null);
 };
 
+// Adding an entity to the world
+Engine.prototype.addEntity = function (entity, type, silent) {
+  // generate auto id
+  if (entity.id === undefined) {
+    entity.id = Constants.AUTO_ID_PREFIX + this.lifetimeEntities;
+  }
+
+  this.lifetimeEntities++;
+
+  entity.body.set_type(type);
+
+  entity.body = this.world.CreateBody(entity.body);
+  entity.fixture = entity.body.CreateFixture(entity.fixture);
+
+  this.layers[entity.layer].push(entity);
+
+  entity.addHelpers();
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.ENTITY_ADD, {entities: [entity]});
+
+  return entity;
+};
+
 Engine.prototype.removeEntity = function (entity, silent) {
   this.selectEntity(null);
   this.world.DestroyBody(entity.body);
@@ -118,6 +151,23 @@ Engine.prototype.removeEntity = function (entity, silent) {
 
   if (!silent)
     UpdateEvent.fire(UpdateEvent.ENTITY_DELETE, {entities: [entity]});
+};
+
+Engine.prototype.addJoint = function (joint, silent) {
+  joint.id = joint.id == undefined ? "Joint " + this.lifetimeJoints++ : joint.id;
+  joint.jointObject = this.world.CreateJoint(joint.getDefinition());
+  this.joints.push(joint);
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.JOINT_ADD);
+};
+
+Engine.prototype.removeJoint = function (joint) {
+  this.world.DestroyJoint(joint.jointObject);
+  this.joints.splice(this.joints.indexOf(joint), 1);
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.JOINT_REMOVE);
 };
 
 Engine.prototype.setEntityLayer = function (entity, newLayer, silent) {
@@ -136,7 +186,6 @@ Engine.prototype.setEntityLayer = function (entity, newLayer, silent) {
 Engine.prototype.entities = function () {
   return [].concat.apply([], this.layers);
 };
-
 
 // Returns the entity with id specified by argument
 Engine.prototype.getEntityById = function (id) {
@@ -161,30 +210,6 @@ Engine.prototype.getEntitiesByCollisionGroup = function (group) {
   }
 
   return ret;
-};
-
-// Adding an entity to the world
-Engine.prototype.addEntity = function (entity, type, silent) {
-  // generate auto id
-  if (entity.id === undefined) {
-    entity.id = Constants.AUTO_ID_PREFIX + this.lifetimeEntities;
-  }
-
-  this.lifetimeEntities++;
-
-  entity.body.set_type(type);
-
-  entity.body = this.world.CreateBody(entity.body);
-  entity.fixture = entity.body.CreateFixture(entity.fixture);
-
-  this.layers[entity.layer].push(entity);
-
-  entity.addHelpers();
-
-  if (!silent)
-    UpdateEvent.fire(UpdateEvent.ENTITY_ADD, {entities: [entity]});
-
-  return entity;
 };
 
 // Checks whether two groups should collide
@@ -261,7 +286,7 @@ Engine.prototype.step = function () {
 
     var entities = this.entities();
 
-    if (this.viewport.getCameraEntityId() !== "") {
+    if (this.viewport.getCameraStyle() === CameraStyle.ENTITY) {
       var entity = this.getEntityById(this.viewport.getCameraEntityId());
 
       this.viewport.x = entity.getX();

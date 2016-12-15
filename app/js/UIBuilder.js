@@ -389,7 +389,7 @@ var UIBuilder = {
     var sidebarBottom = el("div.ui.sidebarBottom.panel");
     var resizerH = el("div.ui.resizer-horizontal.resizer");
     var resizerV = el("div.ui.resizer-vertical.resizer");
-    var sidebar = el("div.ui.sidebar.panel", {}, [sidebarTop, resizerV, sidebarBottom]);
+    var sidebar = el("div.ui.sidebar.panel", {}, [resizerH, sidebarTop, resizerV, sidebarBottom]);
     var toolbar = el("div.ui.toolbar");
 
     var w = $("body").outerWidth();
@@ -407,7 +407,6 @@ var UIBuilder = {
 
       sidebar.style.width = sidebarWidth + "px";
       content.style.width = contentWidth + "px";
-      resizerH.style.left = $(sidebar).offset().left + "px";
 
       window.onresize();
     };
@@ -452,7 +451,6 @@ var UIBuilder = {
 
       sidebar.style.width = sidebarWidth + "px";
       content.style.width = contentWidth + "px";
-      resizerH.style.left = $(sidebar).offset().left + "px";
     };
 
     resizerH.onmousedown = function (e) {
@@ -477,16 +475,13 @@ var UIBuilder = {
     window.addEventListener("resize", windowResizeEvent);
 
     content.appendChild(toolbar);
-    document.body.appendChild(resizerH);
     document.body.appendChild(content);
     document.body.appendChild(sidebar);
-
-    resizerH.style.left = $(sidebar).offset().left + "px";
   },
 
   // Creating a popup message
   popup: function (data) {
-    var overlay = el("div#popupOverlay", [el("div#popupContent", [data])]);
+    var overlay = el("div#popupOverlay", [el("div#popupContent.ui", [data])]);
     overlay.onclick = function (e) {
       UIBuilder.closePopup(e);
     };

@@ -9,7 +9,8 @@ var gutil = require('gulp-util');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 
-var cssSource = 'app/styles/**/*.scss';
+var cssSource = 'app/styles/styles.scss';
+var allCssSource = 'app/styles/**/**.scss';
 var htmlSource = 'app/html/**/*.html';
 var imgSource = 'app/img/**/*.*';
 var jsSource = 'app/js/**/*.js';
@@ -20,7 +21,7 @@ var dist = "./dist";
 var dist_deploy = "../dist";
 
 gulp.task('default', ['img', 'sass', 'js-lib', 'js', 'html', 'browserSync'], function () {
-  gulp.watch(cssSource, ['sass']);
+  gulp.watch(allCssSource, ['sass']);
   gulp.watch(htmlSource, ['html']);
   gulp.watch(jsSource, ['js']);
   gulp.watch(translationsSource, ['js']);
@@ -57,7 +58,6 @@ gulp.task('sass', function () {
 
 gulp.task('sass-deploy', function () {
   return gulp.src(cssSource)
-    // .pipe(sass())
     .pipe(sass({outputStyle: 'compressed'}))
     .pipe(concat('styles.css'))
     .pipe(gulp.dest(dist_deploy + '/css'));

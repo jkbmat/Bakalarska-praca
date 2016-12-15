@@ -41,25 +41,20 @@ window._engine = new Engine(new Viewport($("#mainCanvas")[0]), new b2Vec2(0, 10)
  _engine.tokenManager.parser.parse("((getVelocityX( filterById( text( \"kruh\" ) ) )) < (number( 3 ))) AND (isButtonDown( number( 39 ) ))"),
  _engine.tokenManager.parser.parse("applyLinearImpulse( filterById( text( \"kruh\" ) ), number( 0.3 ), number( 0 ) )")
  )
- )
- .addBehavior(
- new Behavior(
- _engine.tokenManager.parser.parse("true()"),
- _engine.tokenManager.parser.parse("centerCameraOn( filterById( text( \"kruh\") ) )")
- )
  );
-
  _engine.addEntity(new Rectangle(new b2Vec2(0, 3), new b2Vec2(2, 0.25)), BodyType.KINEMATIC_BODY)
  .setId("platform")
- .setCollisionGroup(1);
- */
+ .setCollisionGroup(1);*/
+
 if (window.location.hash !== "") {
   $(document.body).addClass("loading");
   Saver.loadRemote(window.location.hash.substr(1)).then(function (result) {
     $(document.body).removeClass("loading");
 
-    if (!result)
+    if (!result) {
       alert(Translations.getTranslated("LOADUI.INVALID_CODE"));
+      Saver.loadCurrent();
+    }
   });
 }
 else {

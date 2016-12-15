@@ -596,6 +596,7 @@ var UI = {
             results.push(_engine.tokenManager.parser.parse(tokenBuilders[j].textContent));
           }
           catch (err) {
+            console.log(err);
           }
         }
 
@@ -605,6 +606,7 @@ var UI = {
         entity.behaviors.push(new Behavior(logic, results));
       }
       catch (err) {
+        console.log(err);
         // Ignore parsing errors (something left blank)
       }
     }

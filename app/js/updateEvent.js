@@ -30,6 +30,9 @@ console.log(type)
   CAMERA_MOVE: "camera_move",
   CAMERA_ENTITY_CHANGE: "camera_entity_change",
   SELECTION_CHANGE: "selection_change",
+  JOINT_ADD: "joint_add",
+  JOINT_REMOVE: "joint_remove",
+
 };
 
 module.exports = UpdateEvent;

@@ -1,53 +1,137 @@
 @charset "UTF-8";
+@import "variables";
+@import "ui";
+
+body, html {
+  font: $fontSize "Amiko", sans-serif;
+  overflow: hidden;
+  color: $textColor;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
 .ui.sidebar input, .ui.sidebar select {
   width: 100%;
 }
 
-input[type=color] {
-  padding: 0;
-}
-
-#collisionsbutton {
-  position: absolute;
-}
-
-.uiContainer, #popupContent {
-  z-index: 999;
-  position: relative;
-  padding: 7px;
-  background: white;
-  border: 2px solid black;
-  border-radius: 4px;
-}
-
-.collisionTable {
-  border-collapse: collapse;
-  margin: auto;
-  margin-top: 2em;
-}
-
-.collisionTable td {
-  border: 1px dashed #aaa;
-  white-space: nowrap;
-  text-align: center;
-}
-
-.collisionTable tr:first-child td > div {
-  transform: rotate(-45deg);
-  width: 20px;
-}
-
-.collisionTable tr td:first-child, .collisionTable tr:first-child td {
-  font-weight: bold;
+.entityList {
+  background: $lightColor;
+  border-radius: 3px;
   padding: 3px;
-  border: none;
-  width: 20px;
-  height: 20px;
+
+  .layer {
+    background: $backgroundColor;
+    border-radius: 3px;
+    padding: 3px;
+    margin-bottom: 3px;
+
+    .entity {
+      background: $lightColor;
+      border-radius: 3px;
+      padding: 3px;
+      margin-bottom: 3px;
+      cursor: pointer;
+      color: $highlightColor;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      //border: 1px solid transparent;
+
+      .id {
+        font-weight: bold;
+        color: $textColor;
+      }
+
+      .entity-color {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+      }
+
+      &.selected {
+        background: $basicColor;
+      }
+    }
+
+  }
 }
 
-td.highlight {
-  background: #aaa;
+#popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  #popupContent {
+    cursor: default;
+    z-index: 1001;
+    position: relative;
+    padding: $bigPadding;
+    background: white;
+    border: 2px solid black;
+    border-radius: $smallRadius;
+    max-height: 90%;
+    overflow-y: auto;
+    box-sizing: border-box;
+
+    .collisionTable {
+      border-collapse: collapse;
+
+      td {
+        border: 1px dashed $basicColor;
+        white-space: nowrap;
+        text-align: center;
+      }
+
+      tr:first-child td > div {
+        transform: rotate(-45deg);
+        width: 20px;
+      }
+
+      tr td:first-child, tr:first-child td {
+        font-weight: bold;
+        padding: $tinyPadding;
+        border: none;
+        width: 20px;
+        height: 20px;
+      }
+
+      .highlight {
+        background: $basicColor;
+      }
+    }
+
+    .one-save {
+      margin-bottom: $bigPadding;
+      padding: $smallPadding;
+      min-width: 500px;
+      background: $lightColor;
+      border-radius: $bigPadding;
+      display: flex;
+      justify-content: space-between;
+
+      img {
+        width: 150px;
+        height: 100px;
+        flex-shrink: 1;
+      }
+
+      .content {
+        flex-grow: 1;
+      }
+    }
+  }
 }
 
 @mixin result {
@@ -58,54 +142,34 @@ td.highlight {
   border-radius: 3px;
 }
 
+@keyframes fade-success-bg {
+  from {
+    background: rgba($validColor, 1)
+  }
+  to {
+    background: transparent
+  }
+}
+
+@keyframes fade-failure-bg {
+  from {
+    background: rgba($invalidColor, 1)
+  }
+  to {
+    background: transparent
+  }
+}
+
 .success {
   @include result;
 
   animation: fade-success-bg 5s;
 }
 
-@keyframes fade-success-bg {
-  from {
-    background: rgba(#a0ff90, 1)
-  }
-  to {
-    background: transparent
-  }
-}
-
 .failure {
   @include result;
-  //color: #ff5b60;
+
   animation: fade-failure-bg 5s;
-}
-
-@keyframes fade-failure-bg {
-  from {
-    background: rgba(#ff5b60, 1)
-  }
-  to {
-    background: transparent
-  }
-}
-
-.one-save {
-  margin-bottom: 1em;
-  padding: 0.5em;
-  min-width: 500px;
-  background: #eee;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-between;
-
-  img {
-    width: 150px;
-    height: 100px;
-    flex-shrink: 1;
-  }
-
-  .content {
-    flex-grow: 1;
-  }
 }
 
 .loading {
@@ -129,33 +193,27 @@ hr {
   height: 1px;
   background-color: black;
   border: none;
-  margin: 2em auto;
+  margin: 2*$bigPadding auto;
 }
 
-#popupOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  cursor: pointer;
-  background-color: rgba(0, 0, 0, 0.5);
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+.tokenBuilder {
+  margin: $bigPadding 0;
+  border-radius: $smallRadius;
+  padding: $bigPadding;
+  background: $lightColor;
 
-#popupContent {
-  z-index: 1001;
-  cursor: default;
-  position: relative;
-  max-height: 90%;
-  padding: 3em;
-  padding-top: 1em;
-  overflow-y: auto;
-  box-sizing: border-box;
+  .token {
+    border-radius: $smallRadius;
+    display: inline-block;
+    padding: 0 $smallPadding;
+
+    &.hover {
+      background: $highlightColor;
+      box-shadow: 0 0 0 3px $highlightColor;
+      color: white;
+      cursor: pointer;
+    }
+  }
 }
 
 #tokenChoice {
@@ -163,50 +221,31 @@ hr {
   position: absolute;
   background: white;
   border: 1px solid black;
-  border-radius: 3px;
-  padding: 0.5em;
+  border-radius: $smallRadius;
+  padding: $smallPadding;
   max-height: 400px;
   overflow-y: auto;
+
+  .token {
+    position: relative;
+    padding: $smallPadding;
+    cursor: pointer;
+
+    &:hover {
+      background: $lightColor;
+    }
+
+    .argument {
+      font-size: 90%;
+      color: $highlightColor;
+    }
+
+    .argument + .name, .name + .argument {
+      padding-left: $smallPadding;
+    }
+  }
 }
 
-#tokenChoice .token {
-  position: relative;
-  padding: 0.5em;
-  cursor: pointer;
-}
-
-#tokenChoice .token:hover {
-  background: #eee;
-}
-
-#tokenChoice .token .argument {
-  font-size: 90%;
-  color: grey;
-}
-
-#tokenChoice .token .argument + .name, #tokenChoice .token .name + .argument {
-  padding-left: 0.5em;
-}
-
-.tokenBuilder .token {
-  border-radius: 3px;
-  display: inline-block;
-  padding: 0 3px;
-}
-
-.tokenBuilder .token.hover {
-  background: #5e5e5e;
-  box-shadow: 0 0 0 3px #5e5e5e;
-  color: #fff;
-  cursor: pointer;
-}
-
-.tokenBuilder {
-  margin: 1em 0;
-  border-radius: 3px;
-  padding: 1em;
-  background: #eee;
-}
 
 #shareCode {
   border: none;

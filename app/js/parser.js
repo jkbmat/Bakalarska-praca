@@ -64,6 +64,9 @@ Parser.prototype.readName = function () {
 
     this.readChar();
   }
+  else if(ret === ""){
+    ret = false;
+  }
 
   this.readWhitespace();
 
@@ -98,6 +101,10 @@ Parser.prototype.parseToken = function () {
   this.readParentheses();
 
   var name = this.readName();
+
+  if (name === false)
+    return;
+
   var token = this.tokenManager.getTokenByName(name);
   token = token === undefined ? new Literal(name) : new token.constructor();
 

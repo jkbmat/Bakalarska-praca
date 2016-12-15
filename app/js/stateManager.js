@@ -2,6 +2,7 @@ var Constants = require("./constants.js");
 var Shapes = require("./shapes.js");
 var Behavior = require("./behavior.js");
 var UpdateEvent = require("./updateEvent.js");
+var Joints = require("./joints.js");
 
 var StateManager = function (engine) {
   this.engine = engine;
@@ -48,8 +49,8 @@ StateManager.prototype.createState = function () {
   for (var i = 0; i < Constants.LAYERS_NUMBER; i++) {
     state.layers.push([]);
 
-    for (var j = 0; j < _engine.layers[i].length; j++) {
-      var entity = _engine.layers[i][j];
+    for (var j = 0; j < this.engine.layers[i].length; j++) {
+      var entity = this.engine.layers[i][j];
 
       state.layers[i].push({
         x: entity.getX(),
@@ -75,7 +76,21 @@ StateManager.prototype.createState = function () {
           ];
         })
       });
+    }
 
+    state.joints = [];
+
+    for (var jointIndex = 0; jointIndex < this.engine.joints.length; jointIndex++) {
+      var joint = this.engine.joints[jointIndex];
+
+      state.joints.push({
+        type: joint.type,
+        entityA: joint.entityA.id,
+        entityB: joint.entityB.id,
+        localAnchorA: joint.localAnchorA,
+        localAnchorB: joint.localAnchorB,
+        collide: joint.collide
+      });
     }
   }
 
@@ -129,7 +144,7 @@ StateManager.prototype.buildState = function (state) {
       }
 
       this.engine.addEntity(newEntity, entity.bodyType, true);
-      _engine.setEntityLayer(newEntity, i, true);
+      this.engine.setEntityLayer(newEntity, i, true);
 
       newEntity.setColor(entity.color, true);
       newEntity.setAngle(entity.angle, false, true);
@@ -145,6 +160,22 @@ StateManager.prototype.buildState = function (state) {
         ));
       }
     }
+  }
+
+  for (var jointIndex = 0; jointIndex < state.joints.length; jointIndex++) {
+    var jointDef = state.joints[jointIndex];
+    var joint = null;
+    var entityA = this.engine.getEntityById(jointDef.entityA);
+    var entityB = this.engine.getEntityById(jointDef.entityB);
+    var localAnchorA = jointDef.localAnchorA;
+    var localAnchorB = jointDef.localAnchorB;
+    var collide = jointDef.collide;
+
+    if (jointDef.type === Joints.REVOLUTE) {
+      joint = new Joints.Revolute(entityA, entityB, localAnchorA, localAnchorB, collide);
+    }
+
+    this.engine.addJoint(joint, true);
   }
 
   this.engine.lifetimeEntities = state.world.lifetimeEntities;
@@ -179,7 +210,10 @@ StateManager.prototype.clearWorld = function (silent) {
     this.engine.removeEntity(entities[i], true);
   }
 
-  _engine.lifetimeEntities = 0;
+  // (Joints are destroyed automatically when a connected body is destroyed)
+
+  this.engine.lifetimeEntities = 0;
+  this.engine.lifetimeJoints = 0;
 
   if (!silent)
     UpdateEvent.fire(UpdateEvent.WORLD_CLEARED);

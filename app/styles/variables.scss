@@ -1,0 +1,24 @@
+$highlightColor: #999;
+$lightColor: #eee;
+$basicColor: #ddd;
+$backgroundColor: #fff;
+$textColor: #000;
+$invalidColor: #ff4f5c;
+$validColor: #a0ff90;
+
+$fontSize: 11px;
+
+$tinyPadding: 0.25em;
+$smallPadding: 0.5em;
+$bigPadding: 1em;
+
+$smallRadius: 3px;
+$bigRadius: 5px;
+
+$shortAnimation: 0.3s;
+$longAnimation: 5s;
+
+@keyframes fade-in {
+  from { opacity: 0 }
+  to { opacity: 1 }
+}
