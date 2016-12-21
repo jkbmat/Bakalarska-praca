@@ -8,7 +8,6 @@ var UpdateEvent = require("./updateEvent.js");
 var Circle = function (center, radius, fixture, id, collisionGroup) {
   center = center == undefined ? new b2Vec2(0, 0) : center;
   radius = radius == undefined ? 1 : radius;
-  fixture = fixture == undefined ? new b2FixtureDef() : fixture;
 
   var shape = new b2CircleShape();
   shape.set_m_radius(radius);
@@ -135,7 +134,6 @@ Circle.prototype.resize = function (radius, silent) {
 var Rectangle = function (center, extents, fixture, id, collisionGroup) {
   center = center == undefined ? new b2Vec2(0, 0) : center;
   extents = extents == undefined ? new b2Vec2(1, 1) : extents;
-  fixture = fixture == undefined ? new b2FixtureDef() : fixture;
 
   var shape = new b2PolygonShape();
   shape.SetAsBox(extents.get_x(), extents.get_y());
