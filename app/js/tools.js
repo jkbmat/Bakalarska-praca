@@ -20,10 +20,10 @@ var Selection = {
 
   onclick: function () {
 
-    if (_engine.selectedEntity) {
-      for (var i = _engine.selectedEntity.helpers.length - 1; i >= 0; i--) {
-        if (_engine.selectedEntity.helpers[i].testPoint(_engine.input.mouse.x, _engine.input.mouse.y)) {
-          _engine.selectedEntity.helpers[i].click();
+    if (_engine.selected.type === "entity") {
+      for (var i = _engine.selected.ptr.helpers.length - 1; i >= 0; i--) {
+        if (_engine.selected.ptr.helpers[i].testPoint(_engine.input.mouse.x, _engine.input.mouse.y)) {
+          _engine.selected.ptr.helpers[i].click();
           return;
         }
       }
@@ -36,21 +36,31 @@ var Selection = {
         if (_engine.layers[i][j].fixture.TestPoint(
             new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y))
         ) {
+          if (this.mode === "entity-pick") {
+            UpdateEvent.fire(UpdateEvent.ENTITY_PICKED, {noState: true, entityId: _engine.layers[i][j].id});
+            this.mode = "";
+            return;
+          }
+
           _engine.selectEntity(_engine.layers[i][j]);
 
           this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
           this.offset = [
-            _engine.selectedEntity.body.GetPosition().get_x() - this.origin[0],
-            _engine.selectedEntity.body.GetPosition().get_y() - this.origin[1]
+            _engine.selected.ptr.body.GetPosition().get_x() - this.origin[0],
+            _engine.selected.ptr.body.GetPosition().get_y() - this.origin[1]
           ];
 
           this.mode = "reposition-start";
           this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
-          _engine.selectedEntity.toggleHelpers(false);
+          _engine.selected.ptr.toggleHelpers(false);
 
           return;
         }
       }
+    }
+
+    if (this.mode === "entity-pick") {
+      return;
     }
 
     this.mode = "camera";
@@ -60,13 +70,17 @@ var Selection = {
     _engine.viewport.canvasElement.style.cursor = "url(img/grabbingcursor.png), move";
   },
   onrelease: function () {
+    if (this.mode === "entity-pick") {
+      return;
+    }
+
     if (this.mode === "reposition") {
-      _engine.selectedEntity.toggleHelpers(true);
-      UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [_engine.selectedEntity]});
+      _engine.selected.ptr.toggleHelpers(true);
+      UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [_engine.selected.ptr]});
     }
 
     if (this.mode === "reposition-start") {
-      _engine.selectedEntity.toggleHelpers(true);
+      _engine.selected.ptr.toggleHelpers(true);
     }
 
     if (this.mode === "camera") {
@@ -95,7 +109,7 @@ var Selection = {
       var x = Math.round((_engine.input.mouse.x + this.offset[0]) * 1000) / 1000;
       var y = Math.round((_engine.input.mouse.y + this.offset[1]) * 1000) / 1000;
 
-      _engine.selectedEntity.setPosition(x, y, true);
+      _engine.selected.ptr.setPosition(x, y, true);
     }
   }
 };

@@ -6,6 +6,10 @@ var UpdateEvent = require("./updateEvent.js");
 
 // Circle entity
 var Circle = function (center, radius, fixture, id, collisionGroup) {
+  center = center == undefined ? new b2Vec2(0, 0) : center;
+  radius = radius == undefined ? 1 : radius;
+  fixture = fixture == undefined ? new b2FixtureDef() : fixture;
+
   var shape = new b2CircleShape();
   shape.set_m_radius(radius);
 
@@ -22,6 +26,20 @@ var Circle = function (center, radius, fixture, id, collisionGroup) {
 };
 Circle.prototype = new Entity();
 Circle.prototype.constructor = Circle;
+
+Circle.import = function (obj) {
+  var ret = new Circle();
+
+  Entity.import.call(ret, obj);
+  ret.resize(obj.width / 2, true);
+
+  return ret;
+};
+
+Circle.prototype.export = function() {
+  return Entity.export.call(this);
+};
+
 
 Circle.prototype.getWidth = function () {
   return this.radius * 2;
@@ -43,6 +61,8 @@ Circle.prototype.draw = function (ctx) {
 
   ctx.arc(0, 0, _engine.viewport.fromScale(this.radius), 0, 2 * Math.PI, false);
 
+  ctx.closePath();
+
   ctx.fill();
 
   ctx.strokeStyle = "red";
@@ -51,8 +71,8 @@ Circle.prototype.draw = function (ctx) {
   ctx.beginPath();
   ctx.moveTo(0, 0);
   ctx.lineTo(0, _engine.viewport.fromScale(this.radius));
-  ctx.stroke();
   ctx.closePath();
+  ctx.stroke();
 };
 
 Circle.prototype.startResize = function () {
@@ -113,6 +133,10 @@ Circle.prototype.resize = function (radius, silent) {
 
 // Rectangle entity
 var Rectangle = function (center, extents, fixture, id, collisionGroup) {
+  center = center == undefined ? new b2Vec2(0, 0) : center;
+  extents = extents == undefined ? new b2Vec2(1, 1) : extents;
+  fixture = fixture == undefined ? new b2FixtureDef() : fixture;
+
   var shape = new b2PolygonShape();
   shape.SetAsBox(extents.get_x(), extents.get_y());
 
@@ -129,6 +153,20 @@ var Rectangle = function (center, extents, fixture, id, collisionGroup) {
 };
 Rectangle.prototype = new Entity();
 Rectangle.prototype.constructor = Rectangle;
+
+Rectangle.import = function (obj) {
+  var ret = new Rectangle();
+
+  Entity.import.call(ret, obj);
+  ret.resize(obj.width / 2, obj.height / 2, true);
+
+  return ret;
+};
+
+Rectangle.prototype.export = function() {
+  return Entity.export.call(this);
+};
+
 
 Rectangle.prototype.getWidth = function () {
   return this.extents.get_x() * 2;
@@ -261,11 +299,11 @@ Rectangle.prototype.resize = function (halfWidth, halfHeight, silent) {
 };
 
 function endResizeRotate() {
-  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [_engine.selectedEntity], noState: true});
-  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [_engine.selectedEntity], noState: true});
-  UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [_engine.selectedEntity]});
+  UpdateEvent.fire(UpdateEvent.RESIZE, {entities: [_engine.selected.ptr], noState: true});
+  UpdateEvent.fire(UpdateEvent.ROTATE, {entities: [_engine.selected.ptr], noState: true});
+  UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [_engine.selected.ptr]});
 
-  _engine.selectedEntity.toggleHelpers(false);
+  _engine.selected.ptr.toggleHelpers(false);
 }
 
 module.exports.Circle = Circle;

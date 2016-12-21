@@ -4,7 +4,7 @@ var UpdateEvent = {
     data.action = type;
     var event = new CustomEvent("update", {detail: data});
     document.dispatchEvent(event);
-console.log(type)
+console.log(type, data.noState == undefined ? true : null)
     return event;
   },
 
@@ -32,6 +32,7 @@ console.log(type)
   SELECTION_CHANGE: "selection_change",
   JOINT_ADD: "joint_add",
   JOINT_REMOVE: "joint_remove",
+  ENTITY_PICKED: "entity_picked",
 
 };
 

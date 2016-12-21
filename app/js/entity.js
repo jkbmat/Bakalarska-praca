@@ -3,6 +3,7 @@ var Utils = require("./utils.js");
 var Constants = require("./constants.js");
 var Geometry = require("./geometry.js");
 var UpdateEvent = require("./updateEvent.js");
+var Behavior = require("./behavior.js");
 
 var AUTO_COLOR_RANGE = [0, 230];
 
@@ -56,6 +57,59 @@ var Entity = function (shape, fixture, body, id, collisionGroup) {
   b = b.length == 1 ? "0" + b : b;
   this.color = "#" + r + g + b;
 };
+
+Entity.export = function () {
+  return {
+    x: this.getX(),
+    y: this.getY(),
+    width: this.getWidth(),
+    height: this.getHeight(),
+    angle: this.getAngle(),
+    fixedRotation: this.fixedRotation,
+    type: this.type,
+    color: this.getColor(),
+    restitution: this.getRestitution(),
+    friction: this.getFriction(),
+    density: this.getDensity(),
+    bodyType: this.getBodyType(),
+    id: this.id,
+    collisionGroup: this.collisionGroup,
+    behaviors: _.map(this.behaviors, function (behavior) {
+      return [
+        behavior.logic.toString(),
+        _.map(behavior.results, function (result) {
+          return result.toString();
+        })
+      ];
+    })
+  };
+};
+
+Entity.import = function (obj) {
+  _engine.addEntity(this, obj.bodyType, true);
+
+  this.setPosition(obj.x, obj.y, true);
+  this.setAngle(obj.angle, false, true);
+  this.disableRotation(obj.fixedRotation, true);
+  this.setId(obj.id, true);
+  this.setCollisionGroup(obj.collisionGroup, true);
+  this.setColor(obj.color, true);
+
+  _.each(obj.behaviors, function(behavior) {
+    this.addBehavior(new Behavior(
+      _engine.tokenManager.parser.parse(behavior[0]),
+
+      _.map(behavior[1], function (result) {
+        return _engine.tokenManager.parser.parse(result);
+      })
+    ));
+  }.bind(this));
+
+  this.fixture.SetDensity(obj.density);
+  this.fixture.SetFriction(obj.friction);
+  this.fixture.SetRestitution(obj.restitution);
+};
+
 
 Entity.prototype.getPosition = function () {
   return this.body.GetPosition();
@@ -168,10 +222,11 @@ Entity.prototype.getBodyType = function () {
   return this.body.GetType();
 };
 
-Entity.prototype.setBodyType = function (type) {
+Entity.prototype.setBodyType = function (type, silent) {
   this.body.SetType(type);
 
-  UpdateEvent.fire(UpdateEvent.BODY_TYPE_CHANGE, {entities: [this]});
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.BODY_TYPE_CHANGE, {entities: [this]});
 };
 
 Entity.prototype.addHelpers = function () {
@@ -179,7 +234,7 @@ Entity.prototype.addHelpers = function () {
 };
 
 Entity.prototype.toggleHelpers = function (val) {
-  _engine.selectedEntity.showHelpers = val ? val : !_engine.selectedEntity.showHelpers;
+  _engine.selected.ptr.showHelpers = val ? val : !_engine.selected.ptr.showHelpers;
 };
 
 Entity.prototype.recalculateHelpers = function () {
@@ -231,18 +286,20 @@ Entity.prototype.draw = function () {
   throw "ERROR! Cannot draw Entity: Use derived classes.";
 };
 
-Entity.prototype.setId = function (id) {
+Entity.prototype.setId = function (id, silent) {
   this.id = id;
-  UpdateEvent.fire(UpdateEvent.ID_CHANGE, {entities: [this]});
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.ID_CHANGE, {entities: [this]});
 
   return this;
 };
 
 
-Entity.prototype.setCollisionGroup = function (group) {
+Entity.prototype.setCollisionGroup = function (group, silent) {
   this.collisionGroup = group;
 
-  _engine.updateCollision(this);
+  _engine.updateCollision(this, silent);
 
   return this;
 };

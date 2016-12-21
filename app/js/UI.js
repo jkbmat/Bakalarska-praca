@@ -23,6 +23,7 @@ var UI = {
 
         id: "play",
         tooltip: "START_TOOLTIP",
+        classList: ["important"],
         text: Translations.getTranslatedWrapped("START"),
         onclick: function () {
           _engine.togglePause();
@@ -97,7 +98,7 @@ var UI = {
         text: el.img({src: "./img/undo.svg"}),
         onclick: function () {
           _engine.stateManager.undo();
-          UI.buildSidebarTopWorld(true);
+          UI.buildSidebarWorld(true);
         },
         onupdate: function (action, detail) {
           var elem = $("#" + this.id)[0];
@@ -120,7 +121,7 @@ var UI = {
         text: el.img({src: "./img/redo.svg"}),
         onclick: function () {
           _engine.stateManager.redo();
-          UI.buildSidebarTopWorld(true);
+          UI.buildSidebarWorld(true);
         },
         onupdate: function (action, detail) {
           var elem = $("#" + this.id)[0];
@@ -482,7 +483,7 @@ var UI = {
 
     var loadClick = function () {
       Saver.load(this.toString());
-      UI.buildSidebarTopWorld(true);
+      UI.buildSidebarWorld(true);
       UIBuilder.closePopup();
     };
 
@@ -553,7 +554,7 @@ var UI = {
 
             if (success) {
               UIBuilder.closePopup();
-              UI.buildSidebarTopWorld(true);
+              UI.buildSidebarWorld(true);
             }
             else {
               $("#shareCodeLoad").addClass("invalid");
@@ -612,7 +613,7 @@ var UI = {
     }
   },
 
-  buildSidebarTopWorld: function (force) {
+  buildSidebarWorld: function (force) {
     var sidebarTop = $(".sidebarTop");
 
     if (!force && sidebarTop[0].showing === "world")
@@ -699,23 +700,14 @@ var UI = {
         content: el("span.entityCamera", {}, [Translations.getTranslatedWrapped("SIDEBAR.CAMERA_ENTITY")])
       },
       {
-        type: "inputText",
+        type: "inputEntity",
         value: _engine.viewport.getCameraEntityId(),
         id: "camera_entity",
         classList: ["entityCamera"],
         onchange: function (val) {
-          if (!_engine.getEntityById(val)) {
-            $("#cameraError").html(el("span.failure", {}, [Translations.getTranslatedWrapped("NO_ENTITY_WITH_ID")]));
-          }
-          else
-            _engine.viewport.setCameraEntityId(val);
-        },
-        oninput: function () {
-          $("#cameraError").html("");
+          _engine.viewport.setCameraEntityId(val);
         }
-      },
-      {type: "html", content: el("p")},
-      {type: "html", content: el("span#cameraError")},
+      }
     ];
 
     sidebarTop.html(UIBuilder.build(properties));
@@ -730,14 +722,39 @@ var UI = {
     }
   },
 
-  buildSidebarTop: function (entity) {
-    var sidebar = $(".sidebar.ui .sidebarTop");
+  buildSidebarTop: function(selected) {
+    switch (selected.type) {
+      case "entity":
+        this.buildSidebarEntity(selected.ptr);
+        break;
 
-    if (entity === null) {
-      this.buildSidebarTopWorld();
+      case "joint":
+        this.buildSidebarJoint(selected.ptr);
+        break;
 
-      return;
+      default:
+        this.buildSidebarWorld(true);
     }
+  },
+
+  buildSidebarJoint: function(joint) {
+    var isNew = joint.jointObject == undefined;
+
+    var properties = [
+      // ID
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
+      {
+        type: "inputText", value: joint.id, onchange: function (val) {
+        joint.setId(val);
+      }
+      },
+      {type: "html", content: el("p")},
+
+    ];
+  },
+
+  buildSidebarEntity: function (entity) {
+    var sidebar = $(".sidebar.ui .sidebarTop");
 
     sidebar.html("");
     sidebar[0].showing = "entity";
@@ -939,6 +956,12 @@ var UI = {
     sidebar[0].appendChild(UIBuilder.build(properties));
   },
 
+  toggleSidebar: function () {
+    $(".sidebar.ui").toggleClass("inactive");
+    $(".ui.content").css("width", $("body").outerWidth() - parseInt($(".sidebar.ui")[0].style.width))
+    window.onresize();
+  },
+
   buildEntityList: function () {
     var ret = el("div.entityList");
 
@@ -958,7 +981,7 @@ var UI = {
           el("div.entity-color", {style: "background:" + entity.getColor()})
         ]);
 
-        if (entity === _engine.selectedEntity)
+        if (entity === _engine.selected.ptr)
           entityElement.classList.add("selected");
 
         entityElement.onclick = (function (entity) {

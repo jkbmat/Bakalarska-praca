@@ -5,7 +5,7 @@ var Utils = {
   },
 
   getBrowserHeight: function () {
-    return $(".ui.content").outerHeight() - $(".ui.toolbar").outerHeight();
+    return $(".ui.content").outerHeight();
   },
 
   randomRange: function (min, max) {

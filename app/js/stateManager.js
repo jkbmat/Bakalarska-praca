@@ -50,49 +50,13 @@ StateManager.prototype.createState = function () {
     state.layers.push([]);
 
     for (var j = 0; j < this.engine.layers[i].length; j++) {
-      var entity = this.engine.layers[i][j];
-
-      state.layers[i].push({
-        x: entity.getX(),
-        y: entity.getY(),
-        width: entity.getWidth(),
-        height: entity.getHeight(),
-        angle: entity.getAngle(),
-        fixedRotation: entity.fixedRotation,
-        type: entity.type,
-        color: entity.getColor(),
-        restitution: entity.getRestitution(),
-        friction: entity.getFriction(),
-        density: entity.getDensity(),
-        bodyType: entity.getBodyType(),
-        id: entity.id,
-        collisionGroup: entity.collisionGroup,
-        behaviors: _.map(entity.behaviors, function (behavior) {
-          return [
-            behavior.logic.toString(),
-            _.map(behavior.results, function (result) {
-              return result.toString();
-            })
-          ];
-        })
-      });
-    }
-
-    state.joints = [];
-
-    for (var jointIndex = 0; jointIndex < this.engine.joints.length; jointIndex++) {
-      var joint = this.engine.joints[jointIndex];
-
-      state.joints.push({
-        type: joint.type,
-        entityA: joint.entityA.id,
-        entityB: joint.entityB.id,
-        localAnchorA: joint.localAnchorA,
-        localAnchorB: joint.localAnchorB,
-        collide: joint.collide
-      });
+      state.layers[i].push(this.engine.layers[i][j].export());
     }
   }
+
+  state.joints = _.map(this.engine.joints, function (joint) {
+    return joint.export();
+  });
 
   return state;
 };
@@ -110,72 +74,34 @@ StateManager.prototype.buildState = function (state) {
   for (var i = 0; i < state.layers.length; i++) {
     for (var j = 0; j < state.layers[i].length; j++) {
       var entity = state.layers[i][j];
-
-      var newFixture = new b2FixtureDef();
-      newFixture.set_density(entity.density);
-      newFixture.set_friction(entity.friction);
-      newFixture.set_restitution(entity.restitution);
-
       var newEntity;
 
       switch (entity.type) {
         case "CIRCLE":
-          newEntity = new Shapes.Circle(
-            new b2Vec2(entity.x, entity.y),
-            entity.width / 2,
-            newFixture,
-            entity.id,
-            entity.collisionGroup
-          );
+          newEntity = Shapes.Circle.import(entity);
           break;
 
         case "RECTANGLE":
-          newEntity = new Shapes.Rectangle(
-            new b2Vec2(entity.x, entity.y),
-            new b2Vec2(entity.width / 2, entity.height / 2),
-            newFixture,
-            entity.id,
-            entity.collisionGroup
-          );
+          newEntity = Shapes.Rectangle.import(entity);
           break;
-
-        default:
-          throw "Error! Couldn't build a state: unknown entity type " + entity.type;
       }
 
-      this.engine.addEntity(newEntity, entity.bodyType, true);
       this.engine.setEntityLayer(newEntity, i, true);
-
-      newEntity.setColor(entity.color, true);
-      newEntity.setAngle(entity.angle, false, true);
-      newEntity.disableRotation(entity.fixedRotation, true);
-      for (var behaviorIndex = 0; behaviorIndex < entity.behaviors.length; behaviorIndex++) {
-        var results = _.map(entity.behaviors[behaviorIndex][1], (function (result) {
-          return this.engine.tokenManager.parser.parse(result);
-        }).bind(this));
-
-        newEntity.addBehavior(new Behavior(
-          this.engine.tokenManager.parser.parse(entity.behaviors[behaviorIndex][0]),
-          results
-        ));
-      }
     }
   }
 
   for (var jointIndex = 0; jointIndex < state.joints.length; jointIndex++) {
-    var jointDef = state.joints[jointIndex];
-    var joint = null;
-    var entityA = this.engine.getEntityById(jointDef.entityA);
-    var entityB = this.engine.getEntityById(jointDef.entityB);
-    var localAnchorA = jointDef.localAnchorA;
-    var localAnchorB = jointDef.localAnchorB;
-    var collide = jointDef.collide;
+    var joint = state.joints[jointIndex];
 
-    if (jointDef.type === Joints.REVOLUTE) {
-      joint = new Joints.Revolute(entityA, entityB, localAnchorA, localAnchorB, collide);
+    switch (joint.type) {
+      case Joints.REVOLUTE:
+        Joints.Revolute.import(joint);
+        break;
+
+      case Joints.ROPE:
+        Joints.Rope.import(joint);
+        break;
     }
-
-    this.engine.addJoint(joint, true);
   }
 
   this.engine.lifetimeEntities = state.world.lifetimeEntities;
@@ -210,7 +136,8 @@ StateManager.prototype.clearWorld = function (silent) {
     this.engine.removeEntity(entities[i], true);
   }
 
-  // (Joints are destroyed automatically when a connected body is destroyed)
+  // Joints are destroyed automatically when a connected body is destroyed, just clear the list
+  _engine.joints = [];
 
   this.engine.lifetimeEntities = 0;
   this.engine.lifetimeJoints = 0;

@@ -1,5 +1,7 @@
 var Translations = require("./translations.js");
 var Utils = require("./utils.js");
+var UpdateEvent = require("./updateEvent.js");
+var Tools = require("./tools.js");
 
 var UIBuilder = {
   element: function (elem, properties) {
@@ -224,6 +226,79 @@ var UIBuilder = {
     return this.element(ret, properties);
   },
 
+  inputEntity: function (properties) {
+    properties = $.extend({}, {
+      id: "inputEntity-" + Utils.generateUUID(),
+      value: "",
+      oninput: function () {
+      },
+      onchange: function () {
+      }
+    }, properties);
+
+    var input = el("input.ui", {type: "text", id: properties.id, value: properties.value});
+    var button = UIBuilder.button({
+      id: properties.id + "-button",
+      text: el.img({src: "./img/selectEntity.svg"}),
+      onclick: function () {
+        var elem = $(button);
+        elem.toggleClass("active");
+        $("#" + properties.id + "-error").html("");
+
+        _engine.selectTool(Tools.Selection);
+
+        if (elem.hasClass("active")) {
+          _engine.selectedTool.mode = "entity-pick";
+        }
+        else {
+          _engine.selectedTool.mode = "";
+        }
+      }
+    });
+
+    $(input).on("blur keyup", function (e) {
+      if (e.type === "keyup" && e.keyCode != 13)
+        return;
+
+      if (!_engine.getEntityById(this.value)) {
+        $("#" + this.id + "-error").html(el("span.failure", {}, [Translations.getTranslatedWrapped("NO_ENTITY_WITH_ID")]));
+      }
+      else {
+        $(input).addClass("success");
+        properties.onchange(this.value);
+      }
+    });
+
+    input.oninput = function () {
+      $(input).removeClass("success");
+      $("#" + this.id + "-error").html("");
+      properties.oninput(this.value);
+    };
+
+    properties.onupdate = function (action, details) {
+      if (action === UpdateEvent.ENTITY_PICKED && $(button).hasClass("active")) {
+        $(input).val(details.entityId);
+        $(button).removeClass("active");
+        $(input).removeClass("success");
+        void $(input)[0].offsetWidth;
+        $(input).addClass("success");
+
+        properties.onchange($(input).val());
+      }
+    };
+
+    var ret = el.div({}, [
+      el("div.ui.entitySelect", {}, [this.element(input, properties), button]),
+      el("p"), el("span#" + properties.id + "-error")
+    ]);
+
+    if (properties.classList.length)
+      ret.classList.add(properties.classList);
+
+    return ret;
+
+  },
+
   html: function (properties) {
     properties = $.extend({}, {
       content: ""
@@ -352,6 +427,10 @@ var UIBuilder = {
           generated = this.inputText(element);
           break;
 
+        case "inputEntity":
+          generated = this.inputEntity(element);
+          break;
+
         case "inputNumber":
           generated = this.inputNumber(element);
           break;
@@ -391,22 +470,16 @@ var UIBuilder = {
     var resizerV = el("div.ui.resizer-vertical.resizer");
     var sidebar = el("div.ui.sidebar.panel", {}, [resizerH, sidebarTop, resizerV, sidebarBottom]);
     var toolbar = el("div.ui.toolbar");
-
-    var w = $("body").outerWidth();
-    var sidebarWidth = 250;
-
-    content.style.width = w - 250 + "px";
-    sidebar.style.width = sidebarWidth + "px";
+    var main = el("div.ui.main.panel", {}, [content, sidebar]);
 
     var sidebarResizeEvent = function (e) {
       e.preventDefault();
 
       var windowWidth = $("body").outerWidth();
-      var sidebarWidth = Math.max(30, Math.min(windowWidth * 0.6, windowWidth - e.clientX));
-      var contentWidth = windowWidth - sidebarWidth;
+      var sidebarWidth = Math.max(150, Math.min(windowWidth * 0.6, windowWidth - e.clientX));
 
       sidebar.style.width = sidebarWidth + "px";
-      content.style.width = contentWidth + "px";
+      content.style.width = windowWidth - sidebarWidth + "px";
 
       window.onresize();
     };
@@ -419,7 +492,7 @@ var UIBuilder = {
         sidebarHeight * 0.1,
         Math.min(
           sidebarHeight * 0.9,
-          _engine.input.mouse.realY - parseInt($(resizerV).css("border-top-width"))
+          _engine.input.mouse.realY - $(sidebar).offset().top - parseInt($(resizerV).css("border-top-width"))
         )
       );
       console.log(_engine.input.mouse.realY, parseInt($(resizerV).css("border-top-width")));
@@ -463,20 +536,18 @@ var UIBuilder = {
     };
 
     resizerV.onmousedown = function (e) {
-      this.resizing = true;
-
       $(this).addClass("resizing");
 
       window.addEventListener("mousemove", resizerVResizeEvent);
       window.addEventListener("mouseup", mouseUpEvent);
     };
 
-
     window.addEventListener("resize", windowResizeEvent);
 
-    content.appendChild(toolbar);
-    document.body.appendChild(content);
-    document.body.appendChild(sidebar);
+    document.body.appendChild(toolbar);
+    document.body.appendChild(main);
+
+    sidebar.style.width = $(".ui.sidebar").css("width");
   },
 
   // Creating a popup message

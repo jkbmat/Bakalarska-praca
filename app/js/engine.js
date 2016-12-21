@@ -5,6 +5,7 @@ var Constants = require("./constants.js");
 var UpdateEvent = require("./updateEvent.js");
 var StateManager = require("./stateManager.js");
 var CameraStyle = require("./cameraStyle.js");
+var Geometry = require("./geometry.js");
 
 // ENGINE
 
@@ -12,7 +13,7 @@ var CameraStyle = require("./cameraStyle.js");
 
 var Engine = function (viewport, gravity) {
   this.viewport = viewport;
-  this.selectedEntity = null;
+  this.selected = {type: null, ptr: null};
   this.selectedTool = Tools.Selection;
 
   this.helpers = [];
@@ -80,11 +81,11 @@ Engine.prototype.togglePause = function () {
       entity.body.SetAwake(1);
     });
 
-    $(".sidebar").hide();
+    UI.toggleSidebar();
   }
 
   else {
-    $(".sidebar").show();
+    UI.toggleSidebar();
     this.stateManager.buildState(this.stateManager.stateStack[this.stateManager.currentState]);
   }
 
@@ -145,7 +146,7 @@ Engine.prototype.addEntity = function (entity, type, silent) {
 };
 
 Engine.prototype.removeEntity = function (entity, silent) {
-  this.selectEntity(null);
+  this.selectEntity(null, silent);
   this.world.DestroyBody(entity.body);
   this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
 
@@ -236,8 +237,8 @@ Engine.prototype.setCollision = function (groupA, groupB, value) {
 
 // Selects an entity and shows its properties in the sidebar
 Engine.prototype.selectEntity = function (entity, silent) {
-  this.selectedEntity = entity;
-  UI.buildSidebarTop(this.selectedEntity);
+  this.selected = {type: entity == undefined ? null : "entity", ptr: entity};
+  UI.buildSidebarTop(this.selected);
 
   if (entity)
     entity.recalculateHelpers();
@@ -258,12 +259,13 @@ Engine.prototype.updateCollisions = function () {
 };
 
 // Updates collision mask for an entity, based on engine's collisionGroups table
-Engine.prototype.updateCollision = function (entity) {
+Engine.prototype.updateCollision = function (entity, silent) {
   var filterData = entity.fixture.GetFilterData();
   filterData.set_maskBits(this.collisionGroups[entity.collisionGroup].mask);
   entity.fixture.SetFilterData(filterData);
 
-  UpdateEvent.fire(UpdateEvent.COL_GROUP_CHANGE, {entities: [entity]});
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.COL_GROUP_CHANGE, {entities: [entity]});
 
   return this;
 };
@@ -313,11 +315,15 @@ Engine.prototype.step = function () {
     }
   }
 
-  if (this.selectedEntity) {
+  for (var joint = 0; joint < this.joints.length; joint++) {
+    this.drawJoint(this.joints[joint], ctx);
+  }
+
+  if (this.selected.type === "entity") {
     this.drawBoundary(ctx);
 
-    if (this.selectedEntity.showHelpers)
-      this.drawHelpers(this.selectedEntity, ctx);
+    if (this.selected.ptr.showHelpers)
+      this.drawHelpers(this.selected.ptr, ctx);
   }
 
   // Released keys are only to be processed once
@@ -332,10 +338,10 @@ Engine.prototype.step = function () {
 };
 
 Engine.prototype.drawBoundary = function (ctx) {
-  var halfWidth = this.selectedEntity.getWidth() / 2;
-  var halfHeight = this.selectedEntity.getHeight() / 2;
-  var x = this.selectedEntity.getX();
-  var y = this.selectedEntity.getY();
+  var halfWidth = this.selected.ptr.getWidth() / 2;
+  var halfHeight = this.selected.ptr.getHeight() / 2;
+  var x = this.selected.ptr.getX();
+  var y = this.selected.ptr.getY();
 
   ctx.save();
 
@@ -343,7 +349,7 @@ Engine.prototype.drawBoundary = function (ctx) {
     this.viewport.fromScale(-this.viewport.x + x) + this.viewport.width / 2,
     this.viewport.fromScale(-this.viewport.y + y) + this.viewport.height / 2);
 
-  ctx.rotate(this.selectedEntity.getAngle());
+  ctx.rotate(this.selected.ptr.getAngle());
 
   ctx.globalCompositeOperation = "xor";
   ctx.strokeRect(
@@ -388,7 +394,7 @@ Engine.prototype.drawEntity = function (entity, ctx) {
 
   ctx.rotate(entity.getAngle());
 
-  if (entity === this.selectedEntity)
+  if (entity === this.selected.ptr)
     ctx.globalAlpha = 1;
 
   ctx.fillStyle = entity.color;
@@ -397,6 +403,51 @@ Engine.prototype.drawEntity = function (entity, ctx) {
   ctx.restore();
 };
 
+Engine.prototype.drawJoint = function (joint, ctx) {
+  ctx.save();
+
+  var A = Geometry.pointRotate(
+    joint.entityA.getPosition(),
+    new b2Vec2(joint.entityA.getX() + joint.localAnchorA[0], joint.entityA.getY() + joint.localAnchorA[1]),
+    joint.entityA.getAngle()
+  );
+  var B = Geometry.pointRotate(
+    joint.entityB.getPosition(),
+    new b2Vec2(joint.entityB.getX() + joint.localAnchorB[0], joint.entityB.getY() + joint.localAnchorB[1]),
+    joint.entityB.getAngle()
+  );
+
+  ctx.translate(
+    this.viewport.fromScale(-this.viewport.x) + this.viewport.width / 2,
+    this.viewport.fromScale(-this.viewport.y) + this.viewport.height / 2);
+
+  ctx.strokeStyle = joint.color;
+  ctx.lineWidth = 2;
+
+  ctx.beginPath();
+  ctx.moveTo(this.viewport.fromScale(A.get_x()), this.viewport.fromScale(A.get_y()));
+  ctx.lineTo(this.viewport.fromScale(B.get_x()), this.viewport.fromScale(B.get_y()));
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.fillStyle = joint.entityA.getColor();
+
+  ctx.beginPath();
+  ctx.arc(this.viewport.fromScale(A.get_x()), this.viewport.fromScale(A.get_y()), 4, 0, 2 * Math.PI, false);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = joint.entityB.getColor();
+
+  ctx.beginPath();
+  ctx.arc(this.viewport.fromScale(B.get_x()), this.viewport.fromScale(B.get_y()), 4, 0, 2 * Math.PI, false);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+};
 
 module.exports = Engine;
 

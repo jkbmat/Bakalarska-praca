@@ -61,7 +61,7 @@ else {
   Saver.loadCurrent();
 }
 
-UI.buildSidebarTopWorld();
+UI.buildSidebarWorld();
 
 window.requestAnimationFrame(function () {
   _engine.step();
