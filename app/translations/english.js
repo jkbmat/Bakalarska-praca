@@ -2,12 +2,12 @@ module.exports = {
   LANGUAGE_NAME: "English",
   LANGUAGE_TOOLTIP: "Changes the language",
   COLLISION_GROUPS: "Collision groups",
-  COLLISION_GROUPS_TOOLTIP: "Sets which object groups should collide with each other",
+  COLLISION_GROUPS_TOOLTIP: "Sets which entity groups should collide with each other",
   START: "Start",
   STOP: "Stop",
   START_TOOLTIP: "Starts the simulation",
   STOP_TOOLTIP: "Stops the simulation",
-  CLEAR_WORLD_TOOLTIP: "Removes all objects from the scene",
+  CLEAR_WORLD_TOOLTIP: "Removes all entities from the scene",
   SAVE: "Save",
   LOAD: "Load",
   SAVE_TOOLTIP: "Saves the scene and provides a sharing code",
@@ -27,6 +27,8 @@ module.exports = {
 
   CREATE_JOINT: "Joint:",
   JOINT: {
+    NEW: "New ",
+    REMOVE: "Remove",
     REVOLUTE: "Revolute joint",
     ROPE: "Rope joint",
     WELD: "Weld joint"
@@ -39,7 +41,7 @@ module.exports = {
   CIRCLE_TOOL: "Circle tool",
   SELECTION_TOOL: "Selection tool",
 
-  NO_ENTITY_WITH_ID: "No object exists with this ID.",
+  NO_ENTITY_WITH_ID: "No entity exists with this ID.",
 
   SAVEUI: {
     TITLE: "Scene saving",
@@ -92,8 +94,8 @@ module.exports = {
     DENSITY: "Density:",
     COLOR: "Color:",
     LAYER: "Layer:",
-    DELETE_BUTTON: "Delete object",
-    DELETE_CONFIRM: "Are you sure you want to delete this object?",
+    DELETE_BUTTON: "Delete entity",
+    DELETE_CONFIRM: "Are you sure you want to delete this entity?",
     SET_BEHAVIORS: "Set behavior",
 
     BODY_TYPE: "Body type:",
@@ -117,6 +119,7 @@ module.exports = {
 
     ADD: "Create",
     COLLIDE_CONNECTED: "Connected entities should collide:",
+    MAX_LENGTH: "Maximum rope length: ",
     ENTITY_A: "ID of entity A:",
     ENTITY_B: "ID of entity B:",
     X_A: "X-axis position relative to entity A:",

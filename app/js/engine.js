@@ -8,6 +8,7 @@ var CameraStyle = require("./cameraStyle.js");
 var Geometry = require("./geometry.js");
 var Joints = require("./joints.js");
 var EntityManager = require("./entityManager");
+var JointManager = require("./jointManager");
 var Input = require("./input");
 var $ = require("jquery");
 
@@ -21,10 +22,7 @@ var Engine = function (viewport, gravity) {
   this.selectedTool = Tools.Selection;
 
   this.entityManager = new EntityManager(this);
-  this.joints = [];
-  this.newJoint = null;
-
-  this.lifetimeJoints = 0;
+  this.jointManager = new JointManager(this);
 
   this.world = new b2World(gravity, true);
   this.world.paused = true;
@@ -64,7 +62,7 @@ Engine.prototype.togglePause = function () {
       entity.body.SetAwake(1);
     });
 
-    this.joints.forEach(function (joint) {
+    this.jointManager.joints.forEach(function (joint) {
       if (joint.type === Joints.WELD) {
         joint.updateObject();
       }
@@ -82,8 +80,11 @@ Engine.prototype.togglePause = function () {
 };
 
 Engine.prototype.createJoint = function (joint) {
-  this.newJoint = new joint();
-  this.select("joint", this.newJoint);
+  var newJoint = new joint();
+  if(this.selected.type === "entity")
+    newJoint.setEntityA(this.selected.ptr, true);
+
+  this.select("joint", newJoint);
 };
 
 Engine.prototype.getGravityX = function () {
@@ -117,23 +118,6 @@ Engine.prototype.selectTool = function (tool) {
   this.selectedTool = tool;
 };
 
-Engine.prototype.addJoint = function (joint, silent) {
-  joint.id = joint.id == undefined ? "Joint " + this.lifetimeJoints++ : joint.id;
-  joint.jointObject = this.world.CreateJoint(joint.getDefinition());
-  this.joints.push(joint);
-
-  if (!silent)
-    UpdateEvent.fire(UpdateEvent.JOINT_ADD);
-};
-
-Engine.prototype.removeJoint = function (joint, silent) {
-  this.world.DestroyJoint(joint.jointObject);
-  this.joints.splice(this.joints.indexOf(joint), 1);
-
-  if (!silent)
-    UpdateEvent.fire(UpdateEvent.JOINT_REMOVE);
-};
-
 // Checks whether two groups should collide
 Engine.prototype.getCollision = function (groupA, groupB) {
   return (this.collisionGroups[groupA].mask >> groupB) & 1;
@@ -161,10 +145,6 @@ Engine.prototype.select = function (type, ptr, silent) {
 
   if (type === "entity") {
     ptr.recalculateHelpers();
-  }
-
-  if (type === "joint") {
-
   }
 
   if (!silent)
@@ -215,8 +195,8 @@ Engine.prototype.step = function () {
     this.drawEntity(entities[index], ctx);
   }
 
-  for (var joint = 0; joint < this.joints.length; joint++) {
-    this.drawJoint(this.joints[joint], ctx);
+  for (var joint = 0; joint < this.jointManager.joints.length; joint++) {
+    this.drawJoint(this.jointManager.joints[joint], ctx);
   }
 
   if (this.selected.type === "entity") {

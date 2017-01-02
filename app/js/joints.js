@@ -7,7 +7,7 @@ module.exports.ROPE = "ROPE";
 module.exports.WELD = "WELD";
 
 var Joint = function (type, entityA, entityB, localAnchorA, localAnchorB, collide, id) {
-  this.id = id == undefined ? (typeof _engine === "undefined" ? "" : Constants.AUTO_ID_PREFIX_JOINT + _engine.lifetimeJoints) : id;
+  this.id = id;
   this.type = type == undefined ? "" : type;
   this.entityA = entityA == undefined ?  null : entityA;
   this.entityB = entityB == undefined ?  null : entityB;
@@ -50,7 +50,7 @@ Joint.import = function (obj) {
   this.collide = obj.collide;
   this.id = obj.id;
 
-  _engine.addJoint(this, true);
+  _engine.jointManager.addJoint(this, true);
 };
 
 Joint.prototype.setId = function (id) {
@@ -173,8 +173,8 @@ Joint.prototype.updateObject = function () {
   if (this.jointObject == undefined)
     return;
 
-  _engine.removeJoint(this, true);
-  _engine.addJoint(this, true);
+  _engine.jointManager.removeJoint(this, true);
+  _engine.jointManager.addJoint(this, true);
 };
 
 
@@ -255,6 +255,15 @@ Rope.prototype.getDefinition = function () {
   return def;
 };
 
+Rope.prototype.setMaxLength = function (val, silent) {
+  this.maxLength = val;
+
+  this.updateObject();
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.JOINT_PROPERTY_CHANGE);
+}
+
 module.exports.Rope = Rope;
 
 
@@ -295,4 +304,3 @@ Weld.prototype.getDefinition = function () {
 };
 
 module.exports.Weld = Weld;
-

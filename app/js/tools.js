@@ -31,8 +31,8 @@ var Selection = {
       }
     }
 
-    for (var i = 0; i < _engine.joints.length; i++) {
-      var joint = _engine.joints[i];
+    for (var i = 0; i < _engine.jointManager.joints.length; i++) {
+      var joint = _engine.jointManager.joints[i];
 
       var clickA = Geometry.pointPointDistance(joint.getWorldPosA(), new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y)) <=
         _engine.viewport.toScale(Constants.JOINT_HEAD_RADIUS);

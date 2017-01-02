@@ -236,6 +236,7 @@ var UIBuilder = {
     properties = $.extend({}, {
       id: "inputEntity-" + Utils.generateUUID(),
       value: "",
+      classList: [],
       oninput: function () {
       },
       onchange: function () {
@@ -246,6 +247,7 @@ var UIBuilder = {
     var button = UIBuilder.button({
       id: properties.id + "-button",
       text: el.img({src: "./img/selectEntity.svg"}),
+      classList: properties.classList,
       onclick: function () {
         var elem = $(button);
         elem.toggleClass("active");
@@ -307,7 +309,7 @@ var UIBuilder = {
       content: ""
     }, properties);
 
-    return properties.content;
+    return this.element(properties.content, properties);
   },
 
   inputColor: function (properties) {

@@ -75,7 +75,7 @@ Viewport.prototype.zoom = function (val) {
   var a = 1.5;
   this.scale = (Constants.DEFAULT_SCALE / Math.pow(a, 6)) * Math.pow(a, 12 - val);
 
-  if(_engine.selected.ptr)
+  if(_engine.selected.type === "entity")
     _engine.selected.ptr.recalculateHelpers();
 };
 

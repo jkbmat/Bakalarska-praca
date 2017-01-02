@@ -761,7 +761,10 @@ var UI = {
         break;
 
       case "joint":
-        this.buildSidebarJoint(selected.ptr);
+        if (selected.ptr.jointObject)
+          this.buildSidebarJoint(selected.ptr);
+        else
+          this.buildSidebarJointNew(selected.ptr);
         break;
 
       default:
@@ -769,11 +772,79 @@ var UI = {
     }
   },
 
+  buildSidebarJointNew: function (joint) {
+    var properties = [
+      {
+        type: "html", content: el("h2", {}, [
+        Translations.getTranslatedWrapped("JOINT.NEW"),
+        Translations.getTranslatedWrapped("JOINT." + joint.type)
+      ])
+      },
+
+      // Entity A
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ENTITY_A")},
+      {
+        type: "inputEntity", value: joint.getIDA(), onchange: function (val) {
+        joint.setEntityA(_engine.entityManager.getEntityById(val));
+      }
+      },
+      {type: "html", content: el("p")},
+
+      // Entity B
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ENTITY_B")},
+      {
+        type: "inputEntity", value: joint.getIDB(), onchange: function (val) {
+        joint.setEntityB(_engine.entityManager.getEntityById(val));
+      }
+      },
+
+      {type: "html", content: el("p")},
+
+      {
+        type: "button", classList: ["joint-addButton"], text: Translations.getTranslatedWrapped("SIDEBAR.ADD"),
+        disabled: true,
+        onupdate: function (action, details) {
+          if (joint.isCorrect())
+            $("#" + this.id)[0].enable();
+          else
+            $("#" + this.id)[0].disable();
+        },
+        onclick: function () {
+          _engine.jointManager.addJoint(joint);
+          _engine.select("joint", joint);
+        }
+      }
+    ];
+
+    $(".sidebar.ui .sidebarTop").html(UIBuilder.build(properties));
+
+  },
+
   buildSidebarJoint: function (joint) {
-    var isNew = joint.jointObject == undefined;
+    var specific = el("span");
+
+    if (joint.type === Joints.ROPE) {
+      specific = UIBuilder.build([
+        {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.MAX_LENGTH")},
+        {
+          type: "inputNumber", value: joint.maxLength, onchange: function (val) {
+          joint.setMaxLength(val * 1);
+        }
+        },
+        {type: "html", content: el("p")},
+      ]);
+    }
 
     var properties = [
       {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("JOINT." + joint.type)])},
+
+      {
+        type: "button", text: Translations.getTranslatedWrapped("JOINT.REMOVE"), onclick: function () {
+        _engine.jointManager.removeJoint(joint);
+        _engine.select(null, null);
+      }
+      },
+      {type: "html", content: el("p")},
 
       // ID
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
@@ -865,22 +936,9 @@ var UI = {
           }
         }
       },
-      {type: "html", content: el("p")},
+      {type: "html", content: el("hr")},
+      {type: "html", content: specific},
 
-      {
-        type: "button", classList: ["joint-addButton"], text: Translations.getTranslatedWrapped("SIDEBAR.ADD"),
-        disabled: true,
-        onupdate: function (action, details) {
-          if (joint.isCorrect())
-            $("#" + this.id)[0].enable();
-          else
-            $("#" + this.id)[0].disable();
-        },
-        onclick: function () {
-          _engine.addJoint(joint);
-          _engine.select("joint", joint);
-        }
-      }
     ];
 
     $(".sidebar.ui .sidebarTop").html(UIBuilder.build(properties));
@@ -894,6 +952,25 @@ var UI = {
 
     var properties = [
       {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("SHAPE." + entity.type)])},
+
+      {
+        type: "html", content: UIBuilder.build(
+        [
+          {
+            type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.DELETE_BUTTON"), onclick: function () {
+            if (confirm(Translations.getTranslated("SIDEBAR.DELETE_CONFIRM")))
+              _engine.entityManager.removeEntity(entity);
+          }
+          },
+
+          {
+            type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.SET_BEHAVIORS"), onclick: function () {
+            UIBuilder.popup(UI.createBehavior(entity));
+          }
+          }
+        ])
+      },
+      {type: "html", content: el("hr")},
 
       // ID
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
@@ -1071,21 +1148,6 @@ var UI = {
           {text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.KINEMATIC"), value: BodyType.KINEMATIC_BODY},
           {text: Translations.getTranslatedWrapped("SIDEBAR.BODY_TYPES.STATIC"), value: BodyType.STATIC_BODY},
         ]
-      },
-      {type: "html", content: el("p")},
-
-      {
-        type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.DELETE_BUTTON"), onclick: function () {
-        if (confirm(Translations.getTranslated("SIDEBAR.DELETE_CONFIRM")))
-          _engine.entityManager.removeEntity(entity);
-      }
-      },
-      {type: "html", content: el("p")},
-
-      {
-        type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.SET_BEHAVIORS"), onclick: function () {
-        UIBuilder.popup(UI.createBehavior(entity));
-      }
       },
       {type: "html", content: el("p")},
 

@@ -40,7 +40,8 @@ StateManager.prototype.createState = function () {
     gravity: [this.engine.world.GetGravity().get_x(), this.engine.world.GetGravity().get_y()],
     collisionGroups: JSON.parse(JSON.stringify(this.engine.collisionGroups)), // Deep copy trick
     camera: [this.engine.viewport.x, this.engine.viewport.y],
-    lifetimeEntities: this.engine.lifetimeEntities,
+    lifetimeEntities: this.engine.entityManager.lifetimeEntities,
+    lifetimeJoints: this.engine.jointManager.lifetimeJoints,
     cameraStyle: this.engine.viewport.getCameraStyle(),
     cameraEntityId: this.engine.viewport.getCameraEntityId(),
   };
@@ -55,7 +56,7 @@ StateManager.prototype.createState = function () {
     }
   }
 
-  state.joints = _.map(this.engine.joints, function (joint) {
+  state.joints = _.map(this.engine.jointManager.joints, function (joint) {
     return joint.export();
   });
 
@@ -109,7 +110,8 @@ StateManager.prototype.buildState = function (state) {
     }
   }
 
-  this.engine.lifetimeEntities = state.world.lifetimeEntities;
+  this.engine.entityManager.lifetimeEntities = state.world.lifetimeEntities;
+  this.engine.jointManager.lifetimeJoints = state.world.lifetimeJoints;
 
   UpdateEvent.fire(UpdateEvent.STATE_CHANGE, {
     noState: true,
@@ -142,10 +144,10 @@ StateManager.prototype.clearWorld = function (silent) {
   }
 
   // Joints are destroyed automatically when a connected body is destroyed, just clear the list
-  _engine.joints = [];
+  _engine.jointManager.joints = [];
 
   this.engine.entityManager.lifetimeEntities = 0;
-  this.engine.lifetimeJoints = 0;
+  this.engine.jointManager.lifetimeJoints = 0;
 
   if (!silent)
     UpdateEvent.fire(UpdateEvent.WORLD_CLEARED);

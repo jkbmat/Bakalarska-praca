@@ -7,7 +7,7 @@ module.exports = {
   STOP: "Stop",
   START_TOOLTIP: "Spustí simuláciu",
   STOP_TOOLTIP: "Ukončí simuláciu",
-  CLEAR_WORLD_TOOLTIP: "Odstráni všetky objekty zo scény",
+  CLEAR_WORLD_TOOLTIP: "Odstráni všetky entity zo scény",
   SAVE: "Uložiť",
   LOAD: "Načítať",
   SAVE_TOOLTIP: "Uloží scénu a poskytne kód pre zdieľanie",
@@ -25,21 +25,23 @@ module.exports = {
     CIRCLE: "Kruh",
   },
 
-  CREATE_JOINT: "Kĺb:",
+  CREATE_JOINT: "Spoj:",
   JOINT: {
-    REVOLUTE: "Rotačný kĺb",
-    ROPE: "Kĺb lano",
-    WELD: "Zvarený kĺb",
+    NEW: "Nový ",
+    REMOVE: "Odstrániť",
+    REVOLUTE: "Rotačný spoj",
+    ROPE: "Lanový spoj",
+    WELD: "Zvarený spoj",
   },
-  REVOLUTE_TOOLTIP: "Rotačný kĺb<br><br>Spojené entity sa otáčajú okolo spoločného bodu",
-  ROPE_TOOLTIP: "Kĺb lano<br><br>Obmedzuje maximálnu vzdialenosť dvoch bodov entít",
-  WELD_TOOLTIP: "Zvarený kĺb<br><br>Spojené entity si udržiavajú pevnú vzájomnú rotáciu a polohu",
+  REVOLUTE_TOOLTIP: "Rotačný spoj<br><br>Spojené entity sa otáčajú okolo spoločného bodu",
+  ROPE_TOOLTIP: "Lanový spoj<br><br>Obmedzuje maximálnu vzdialenosť dvoch bodov entít",
+  WELD_TOOLTIP: "Zvarený spoj<br><br>Spojené entity si udržiavajú pevnú vzájomnú rotáciu a polohu",
 
   SELECTION_TOOL: "Nástroj výberu",
   CIRCLE_TOOL: "Nástroj kruh",
   RECTANGLE_TOOL: "Nástroj obdĺžnik",
 
-  NO_ENTITY_WITH_ID: "Neexistuje žiadny objekt s týmto ID.",
+  NO_ENTITY_WITH_ID: "Neexistuje žiadna entita s týmto ID.",
 
   SAVEUI: {
     TITLE: "Ukladanie scény",
@@ -92,8 +94,8 @@ module.exports = {
     DENSITY: "Hustota:",
     COLOR: "Farba:",
     LAYER: "Vrstva:",
-    DELETE_BUTTON: "Odstrániť objekt",
-    DELETE_CONFIRM: "Naozaj chcete odstrániť tento objekt?",
+    DELETE_BUTTON: "Odstrániť entitu",
+    DELETE_CONFIRM: "Naozaj chcete odstrániť túto entitu?",
     SET_BEHAVIORS: "Nastaviť správanie",
 
     BODY_TYPE: "Druh telesa:",
@@ -109,7 +111,7 @@ module.exports = {
     CAMERA_STYLE: "Štýl kamery:",
     CAMERA_STYLES: {
       FIXED: "Zameraná na bod",
-      ENTITY: "Zameraná na objekt",
+      ENTITY: "Zameraná na entitu",
     },
     CAMERA_X: "Pozícia kamery na osi X",
     CAMERA_Y: "Pozícia kamery na osi Y",
@@ -117,6 +119,7 @@ module.exports = {
 
     ADD: "Vytvoriť",
     COLLIDE_CONNECTED: "Registrovať kolízie spojených entít:",
+    MAX_LENGTH: "Maximálna dĺžka lana: ",
     ENTITY_A: "ID entity A:",
     ENTITY_B: "ID entity B:",
     X_A: "Relatívna pozícia k entite A na osi X:",
