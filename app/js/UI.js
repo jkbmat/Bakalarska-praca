@@ -5,8 +5,10 @@ var UIBuilder = require("./UIBuilder.js");
 var Constants = require("./constants.js");
 var Translations = require("./translations.js");
 var UpdateEvent = require("./updateEvent.js");
+var Joints = require("./joints.js");
 var Saver = require("./saver.js");
 var Type = require("./typing.js").Type;
+var $ = require("jquery");
 
 // Object for building the UI
 var UI = {
@@ -79,7 +81,7 @@ var UI = {
           _engine.stateManager.clearWorld();
         },
         onupdate: function (action, details) {
-          if (typeof(_engine) !== "undefined" && (_engine.entities().length === 0 || !_engine.world.paused)) {
+          if (typeof(_engine) !== "undefined" && (_engine.entityManager.entities().length === 0 || !_engine.world.paused)) {
             $("#" + this.id)[0].disable();
           }
           else {
@@ -174,6 +176,34 @@ var UI = {
         ]
       },
       {type: "break"},
+
+      {type: "html", content: Translations.getTranslatedWrapped("CREATE_JOINT")},
+      {
+        type: "button",
+        text: el("img", {src: "./img/weld.svg"}),
+        tooltip: "WELD_TOOLTIP",
+        onclick: function () {
+          _engine.createJoint(Joints.Weld);
+        }
+      },
+      {
+        type: "button",
+        text: el("img", {src: "./img/revolute.svg"}),
+        tooltip: "REVOLUTE_TOOLTIP",
+        onclick: function () {
+          _engine.createJoint(Joints.Revolute);
+        }
+      },
+      {
+        type: "button",
+        text: el("img", {src: "./img/rope.svg"}),
+        tooltip: "ROPE_TOOLTIP",
+        onclick: function () {
+          _engine.createJoint(Joints.Rope);
+        }
+      },
+      {type: "break"},
+
       {type: "html", content: Translations.getTranslatedWrapped("ZOOM")},
       {
         type: "range",
@@ -602,7 +632,7 @@ var UI = {
         }
 
         if (results.length === 0)
-          throw "All results blank";
+          throw new Error("All results blank");
 
         entity.behaviors.push(new Behavior(logic, results));
       }
@@ -623,6 +653,8 @@ var UI = {
     sidebarTop.html("");
 
     var properties = [
+      {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("WORLD")])},
+
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.GRAVITY_X")},
       {
         type: "inputNumber", value: _engine.getGravityX(), id: "gravity_x",
@@ -722,7 +754,7 @@ var UI = {
     }
   },
 
-  buildSidebarTop: function(selected) {
+  buildSidebarTop: function (selected) {
     switch (selected.type) {
       case "entity":
         this.buildSidebarEntity(selected.ptr);
@@ -737,10 +769,12 @@ var UI = {
     }
   },
 
-  buildSidebarJoint: function(joint) {
+  buildSidebarJoint: function (joint) {
     var isNew = joint.jointObject == undefined;
 
     var properties = [
+      {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("JOINT." + joint.type)])},
+
       // ID
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
       {
@@ -750,7 +784,106 @@ var UI = {
       },
       {type: "html", content: el("p")},
 
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.COLLIDE_CONNECTED")},
+      {
+        type: "checkbox", checked: joint.collide, onchange: function (val) {
+        joint.setCollide(val);
+      }
+      },
+
+      {type: "html", content: el("hr")},
+
+      // Entity A
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ENTITY_A")},
+      {
+        type: "inputEntity", value: joint.getIDA(), onchange: function (val) {
+        joint.setEntityA(_engine.entityManager.getEntityById(val));
+      }
+      },
+      {type: "html", content: el("p")},
+
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.X_A")},
+      {
+        type: "inputNumber", value: joint.getXA(),
+        onchange: function (val) {
+          joint.setXA(val * 1);
+        },
+        onupdate: function (action, details) {
+          if (action === UpdateEvent.JOINT_REPOSITION) {
+            $("#" + this.id).val(joint.localAnchorA[0]);
+          }
+        }
+      },
+      {type: "html", content: el("p")},
+
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.Y_A")},
+      {
+        type: "inputNumber", value: joint.localAnchorA[1],
+        onchange: function (val) {
+          joint.setYA(val * 1);
+        },
+        onupdate: function (action, details) {
+          if (action === UpdateEvent.JOINT_REPOSITION) {
+            $("#" + this.id).val(joint.localAnchorA[1]);
+          }
+        }
+      },
+      {type: "html", content: el("hr")},
+
+      // Entity B
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ENTITY_B")},
+      {
+        type: "inputEntity", value: joint.getIDB(), onchange: function (val) {
+        joint.setEntityB(_engine.entityManager.getEntityById(val));
+      }
+      },
+      {type: "html", content: el("p")},
+
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.X_B")},
+      {
+        type: "inputNumber", value: joint.localAnchorB[0],
+        onchange: function (val) {
+          joint.setXB(val * 1);
+        },
+        onupdate: function (action, details) {
+          if (action === UpdateEvent.JOINT_REPOSITION) {
+            $("#" + this.id).val(joint.localAnchorB[0]);
+          }
+        }
+      },
+      {type: "html", content: el("p")},
+
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.Y_B")},
+      {
+        type: "inputNumber", value: joint.localAnchorB[1],
+        onchange: function (val) {
+          joint.setYB(val * 1);
+        },
+        onupdate: function (action, details) {
+          if (action === UpdateEvent.JOINT_REPOSITION) {
+            $("#" + this.id).val(joint.localAnchorB[1]);
+          }
+        }
+      },
+      {type: "html", content: el("p")},
+
+      {
+        type: "button", classList: ["joint-addButton"], text: Translations.getTranslatedWrapped("SIDEBAR.ADD"),
+        disabled: true,
+        onupdate: function (action, details) {
+          if (joint.isCorrect())
+            $("#" + this.id)[0].enable();
+          else
+            $("#" + this.id)[0].disable();
+        },
+        onclick: function () {
+          _engine.addJoint(joint);
+          _engine.select("joint", joint);
+        }
+      }
     ];
+
+    $(".sidebar.ui .sidebarTop").html(UIBuilder.build(properties));
   },
 
   buildSidebarEntity: function (entity) {
@@ -760,6 +893,8 @@ var UI = {
     sidebar[0].showing = "entity";
 
     var properties = [
+      {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("SHAPE." + entity.type)])},
+
       // ID
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
       {
@@ -784,7 +919,7 @@ var UI = {
       {
         type: "range", value: entity.layer + 1, min: 1, max: Constants.LAYERS_NUMBER,
         onchange: function (val) {
-          _engine.setEntityLayer(entity, val * 1 - 1);
+          _engine.entityManager.setEntityLayer(entity, val * 1 - 1);
         }
       },
       {type: "html", content: el("p")},
@@ -865,6 +1000,9 @@ var UI = {
         onchange: function (val) {
           entity.setAngle(val * 1, true);
         },
+        oninput: function (val) {
+          entity.setAngle(val * 1, true, true);
+        },
         onupdate: function (action, detail) {
           if (action === UpdateEvent.ROTATE) {
             $("#" + this.id).val(entity.getAngle(true));
@@ -939,7 +1077,7 @@ var UI = {
       {
         type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.DELETE_BUTTON"), onclick: function () {
         if (confirm(Translations.getTranslated("SIDEBAR.DELETE_CONFIRM")))
-          _engine.removeEntity(entity);
+          _engine.entityManager.removeEntity(entity);
       }
       },
       {type: "html", content: el("p")},
@@ -966,17 +1104,17 @@ var UI = {
     var ret = el("div.entityList");
 
     for (var i = 0; i < Constants.LAYERS_NUMBER; i++) {
-      if (_engine.layers[i].length === 0)
+      if (_engine.entityManager.layer(i).length === 0)
         continue;
 
       var layerElement = el("div.layer", {}, [Translations.getTranslatedWrapped("LAYER"), " " + (i + 1) + ":"]);
 
-      for (var j = 0; j < _engine.layers[i].length; j++) {
-        var entity = _engine.layers[i][j];
+      for (var j = 0; j < _engine.entityManager.layer(i).length; j++) {
+        var entity = _engine.entityManager.layer(i)[j];
 
         var entityElement = el("div.entity", {}, [
           el("span", {}, [
-            el("span.id", {}, [entity.id]), ": ", Translations.getTranslatedWrapped(entity.type),
+            el("span.id", {}, [entity.id]), ": ", Translations.getTranslatedWrapped("SHAPE." + entity.type),
           ]),
           el("div.entity-color", {style: "background:" + entity.getColor()})
         ]);
@@ -986,7 +1124,7 @@ var UI = {
 
         entityElement.onclick = (function (entity) {
           return function () {
-            _engine.selectEntity(entity);
+            _engine.select("entity", entity);
           };
         })(entity);
 
@@ -1013,6 +1151,9 @@ $(document).on("update", function (e) {
     action === UpdateEvent.LAYER_CHANGE
   )
     UI.buildEntityList();
+
+  if (action === UpdateEvent.SELECTION_CHANGE)
+    UI.buildSidebarTop(_engine.selected);
 });
 
 module.exports = UI;

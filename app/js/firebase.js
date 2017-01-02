@@ -5,13 +5,17 @@ var config = {
   storageBucket: "bakalarska-praca-8c17f.appspot.com",
   messagingSenderId: "18153410974"
 };
-firebase.initializeApp(config);
 
-firebase.auth().signInAnonymously();
-firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
-    window.user = user;
-  }
-});
+if(typeof firebase !== "undefined") {
+  firebase.initializeApp(config);
 
-module.exports = firebase.database();
+
+  firebase.auth().signInAnonymously();
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      window.user = user;
+    }
+  });
+
+  module.exports = firebase.database();
+}

@@ -4,8 +4,7 @@ var Constants = require("./constants.js");
 var Geometry = require("./geometry.js");
 var UpdateEvent = require("./updateEvent.js");
 var Behavior = require("./behavior.js");
-
-var AUTO_COLOR_RANGE = [0, 230];
+var _ = require("lodash");
 
 var Entity = function (shape, fixture, body, id, collisionGroup) {
   this.id = id;
@@ -49,11 +48,11 @@ var Entity = function (shape, fixture, body, id, collisionGroup) {
     this.body.set_fixedRotation(false);
 
   // Auto generate color
-  var r = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16);
+  var r = Utils.randomRange(Constants.AUTO_COLOR_RANGE[0], Constants.AUTO_COLOR_RANGE[1]).toString(16);
   r = r.length == 1 ? "0" + r : r;
-  var g = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16);
+  var g = Utils.randomRange(Constants.AUTO_COLOR_RANGE[0], Constants.AUTO_COLOR_RANGE[1]).toString(16);
   g = g.length == 1 ? "0" + g : g;
-  var b = Utils.randomRange(AUTO_COLOR_RANGE[0], AUTO_COLOR_RANGE[1]).toString(16);
+  var b = Utils.randomRange(Constants.AUTO_COLOR_RANGE[0], Constants.AUTO_COLOR_RANGE[1]).toString(16);
   b = b.length == 1 ? "0" + b : b;
   this.color = "#" + r + g + b;
 };
@@ -86,7 +85,7 @@ Entity.export = function () {
 };
 
 Entity.import = function (obj) {
-  _engine.addEntity(this, obj.bodyType, true);
+  _engine.entityManager.addEntity(this, obj.bodyType, true);
 
   this.setPosition(obj.x, obj.y, true);
   this.setAngle(obj.angle, false, true);
@@ -159,11 +158,11 @@ Entity.prototype.setY = function (val) {
 };
 
 Entity.prototype.getWidth = function () {
-  throw "ERROR! Cannot get width: Use derived class.";
+  throw new Error("ERROR! Cannot get width: Use derived class.");
 };
 
 Entity.prototype.getHeight = function () {
-  throw "ERROR! Cannot get height: Use derived class.";
+  throw new Error("ERROR! Cannot get height: Use derived class.");
 };
 
 Entity.prototype.getRestitution = function () {
@@ -230,7 +229,7 @@ Entity.prototype.setBodyType = function (type, silent) {
 };
 
 Entity.prototype.addHelpers = function () {
-  throw "ERROR! Cannot add helpers: Use derived class.";
+  throw new Error("ERROR! Cannot add helpers: Use derived class.");
 };
 
 Entity.prototype.toggleHelpers = function (val) {
@@ -260,22 +259,6 @@ Entity.prototype.moveRotate = function () {
   );
 };
 
-Entity.prototype.getSide = function (position) {
-  var centerX = this.getX();
-  var centerY = this.getY();
-  var center = new b2Vec2(centerX, centerY);
-  var width = this.getWidth();
-  var height = this.getHeight();
-
-  var rotation = Constants.sideOrder.equalIndexOf(position) * (Math.PI / 2);
-  var topA = new b2Vec2(centerX - (width / 2), centerY - (height / 2));
-  var topB = new b2Vec2(centerX + (width / 2), centerY - (height / 2));
-  var a = Geometry.pointRotate(center, topA, rotation);
-  var b = Geometry.pointRotate(center, topB, rotation);
-
-  return [a, b];
-};
-
 Entity.prototype.die = function () {
   this.dead = true;
 
@@ -283,7 +266,7 @@ Entity.prototype.die = function () {
 };
 
 Entity.prototype.draw = function () {
-  throw "ERROR! Cannot draw Entity: Use derived classes.";
+  throw new Error("ERROR! Cannot draw Entity: Use derived classes.");
 };
 
 Entity.prototype.setId = function (id, silent) {
@@ -299,7 +282,7 @@ Entity.prototype.setId = function (id, silent) {
 Entity.prototype.setCollisionGroup = function (group, silent) {
   this.collisionGroup = group;
 
-  _engine.updateCollision(this, silent);
+  _engine.entityManager.updateCollision(this, silent);
 
   return this;
 };

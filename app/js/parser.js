@@ -11,7 +11,7 @@ var Parser = function (tokenManager) {
 };
 
 Parser.prototype.fail = function (message) {
-  throw message + "\nRemaining input: " + this.parserInput;
+  throw new Error(message + "\nRemaining input: " + this.parserInput);
 };
 
 Parser.prototype.currentChar = function() {

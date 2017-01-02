@@ -1,3 +1,5 @@
+var $ = require("jquery");
+
 var UpdateEvent = {
   fire: function(type, data) {
     data = $.extend({}, data);
@@ -33,7 +35,9 @@ console.log(type, data.noState == undefined ? true : null)
   JOINT_ADD: "joint_add",
   JOINT_REMOVE: "joint_remove",
   ENTITY_PICKED: "entity_picked",
-
+  JOINT_REPOSITION: "joint_reposition",
+  JOINT_ENTITY_CHANGE: "joint_entity_change",
+  JOINT_PROPERTY_CHANGE: "joint_property_change",
 };
 
 module.exports = UpdateEvent;

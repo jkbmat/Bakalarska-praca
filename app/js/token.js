@@ -88,7 +88,7 @@ EntityFilter.prototype.decide = function(entity) { // Use derived class
 
 EntityFilter.prototype.filter = function() {
   var ret = [];
-  var entities = _engine.entities();
+  var entities = _engine.entityManager.entities();
   
   for (var i = 0; i < entities.length; i++) {
     if (this.decide(entities[i]))

@@ -1,4 +1,5 @@
 // INPUT CAPTURING
+var $ = require("jquery");
 
 var Input = function(viewport) {
   "use strict";

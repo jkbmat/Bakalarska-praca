@@ -2,6 +2,7 @@ var Translations = require("./translations.js");
 var Utils = require("./utils.js");
 var UpdateEvent = require("./updateEvent.js");
 var Tools = require("./tools.js");
+var $ = require("jquery");
 
 var UIBuilder = {
   element: function (elem, properties) {
@@ -41,7 +42,12 @@ var UIBuilder = {
       elem.disable();
     }
 
-    document.addEventListener("update", function (e) {
+    document.addEventListener("update", function updateFn(e) {
+      if ($("#" + properties.id).length === 0) {
+        document.removeEventListener("update", updateFn);
+        return;
+      }
+
       properties.onupdate(e.detail.action, e.detail);
     });
 
@@ -260,7 +266,7 @@ var UIBuilder = {
       if (e.type === "keyup" && e.keyCode != 13)
         return;
 
-      if (!_engine.getEntityById(this.value)) {
+      if (!_engine.entityManager.getEntityById(this.value)) {
         $("#" + this.id + "-error").html(el("span.failure", {}, [Translations.getTranslatedWrapped("NO_ENTITY_WITH_ID")]));
       }
       else {
@@ -291,9 +297,6 @@ var UIBuilder = {
       el("div.ui.entitySelect", {}, [this.element(input, properties), button]),
       el("p"), el("span#" + properties.id + "-error")
     ]);
-
-    if (properties.classList.length)
-      ret.classList.add(properties.classList);
 
     return ret;
 
@@ -370,6 +373,9 @@ var UIBuilder = {
     slider.oninput = function () {
       input.value = this.value;
       properties.oninput(this.value);
+    };
+
+    slider.onmouseup = function () {
       properties.onchange(this.value);
     };
 

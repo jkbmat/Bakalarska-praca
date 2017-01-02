@@ -8,6 +8,10 @@ module.exports = {
       language = this.currentLanguage;
     }
 
+    if (typeof language !== "number" || language < 0 || language >= this.strings.length) {
+      throw new Error("ERROR! Undefined language: " + language);
+    }
+
     var translation = this.strings[language];
 
     var steps = route.split('.');
@@ -17,9 +21,14 @@ module.exports = {
         translation = translation[step];
       }
       else {
-        throw "ERROR! No translation for " + route;
+        throw new Error("ERROR! No translation for " + route);
       }
     }
+
+    if (typeof translation !== "string") {
+      throw new Error("ERROR! Uncomplete translation route: " + route);
+    }
+
     return translation;
   },
 

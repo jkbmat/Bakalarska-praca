@@ -17,9 +17,23 @@ module.exports = {
   LAYER: "Layer ",
   ZOOM: "Zoom: ",
 
+  WORLD: "World",
+
   TOOL: "Tool: ",
-  RECTANGLE: "Rectangle",
-  CIRCLE: "Circle",
+  SHAPE: {
+    RECTANGLE: "Rectangle",
+    CIRCLE: "Circle",
+  },
+
+  CREATE_JOINT: "Joint:",
+  JOINT: {
+    REVOLUTE: "Revolute joint",
+    ROPE: "Rope joint",
+    WELD: "Weld joint"
+  },
+  REVOLUTE_TOOLTIP: "Revolute joint<br><br>Connected entities rotate around a common point",
+  ROPE_TOOLTIP: "Rope joint<br><br>Constrains maximal distance between two entities",
+  WELD_TOOLTIP: "Weld joint<br><br>Connected entities maintain constant distance and angle to each other.",
 
   RECTANGLE_TOOL: "Rectangle tool",
   CIRCLE_TOOL: "Circle tool",
@@ -99,6 +113,16 @@ module.exports = {
     },
     CAMERA_X: "X-axis camera position",
     CAMERA_Y: "Y-axis camera position",
-    CAMERA_ENTITY: "Object ID for camera lock:",
+    CAMERA_ENTITY: "Entity ID for camera lock:",
+
+    ADD: "Create",
+    COLLIDE_CONNECTED: "Connected entities should collide:",
+    ENTITY_A: "ID of entity A:",
+    ENTITY_B: "ID of entity B:",
+    X_A: "X-axis position relative to entity A:",
+    Y_A: "Y-axis position relative to entity A:",
+    X_B: "X-axis position relative to entity B:",
+    Y_B: "Y-axis position relative to entity B:",
+
   }
 };

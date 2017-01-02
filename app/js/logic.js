@@ -3,6 +3,7 @@ var Translations = require("./translations.js");
 var Literal = require("./token.js").Literal;
 var Type = require("./typing.js").Type;
 var FixType = require("./typing.js").FixType;
+var $ = require("jquery");
 
 module.exports = [];
 

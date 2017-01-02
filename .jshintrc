@@ -1,7 +1,5 @@
 {
   "globals": {
-    "$": false,
-    "_engine": false,
     "el": false
   }
 }

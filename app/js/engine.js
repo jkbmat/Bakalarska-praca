@@ -6,6 +6,10 @@ var UpdateEvent = require("./updateEvent.js");
 var StateManager = require("./stateManager.js");
 var CameraStyle = require("./cameraStyle.js");
 var Geometry = require("./geometry.js");
+var Joints = require("./joints.js");
+var EntityManager = require("./entityManager");
+var Input = require("./input");
+var $ = require("jquery");
 
 // ENGINE
 
@@ -16,30 +20,10 @@ var Engine = function (viewport, gravity) {
   this.selected = {type: null, ptr: null};
   this.selectedTool = Tools.Selection;
 
-  this.helpers = [];
-
-  this.bufferVec2 = new b2Vec2(0, 0);
-
-  this.layers = new Array(Constants.LAYERS_NUMBER);
-  for (var i = 0; i < Constants.LAYERS_NUMBER; i++) {
-    this.layers[i] = [];
-  }
-
+  this.entityManager = new EntityManager(this);
   this.joints = [];
+  this.newJoint = null;
 
-  this.collisionGroups = [];
-  for (var i = 0; i < Constants.COLLISION_GROUPS_NUMBER - 1; i++) {
-    this.collisionGroups.push({
-      "name": i + 1,
-      "mask": parseInt("0" + Array(Constants.COLLISION_GROUPS_NUMBER).join("1"), 2)
-    });
-  }
-  this.collisionGroups.push({
-    "name": "Helpers",
-    "mask": parseInt(Array(Constants.COLLISION_GROUPS_NUMBER + 1).join("0"), 2)
-  });
-
-  this.lifetimeEntities = 0;
   this.lifetimeJoints = 0;
 
   this.world = new b2World(gravity, true);
@@ -47,7 +31,6 @@ var Engine = function (viewport, gravity) {
 
   this.tokenManager = new TokenManager();
 
-  var Input = require('./input.js');
   this.input = new Input(viewport);
 
   this.stateManager = new StateManager(this);
@@ -69,16 +52,22 @@ var Engine = function (viewport, gravity) {
 // Changes running state of the simulation
 Engine.prototype.togglePause = function () {
   this.world.paused = !this.world.paused;
-  this.selectEntity(null);
+  this.select(null, null);
 
   this.selectTool(this.world.paused ? Tools.Selection : Tools.Blank);
   $("#selectionTool")[0].checked = true;
 
   if (!this.world.paused) {
-    var entities = this.entities();
+    var entities = this.entityManager.entities();
 
     entities.forEach(function (entity) {
       entity.body.SetAwake(1);
+    });
+
+    this.joints.forEach(function (joint) {
+      if (joint.type === Joints.WELD) {
+        joint.updateObject();
+      }
     });
 
     UI.toggleSidebar();
@@ -90,6 +79,11 @@ Engine.prototype.togglePause = function () {
   }
 
 
+};
+
+Engine.prototype.createJoint = function (joint) {
+  this.newJoint = new joint();
+  this.select("joint", this.newJoint);
 };
 
 Engine.prototype.getGravityX = function () {
@@ -117,41 +111,10 @@ Engine.prototype.setGravityY = function (val) {
 };
 
 Engine.prototype.selectTool = function (tool) {
+  if (this.selectedTool !== tool)
+    this.select(null, null);
+
   this.selectedTool = tool;
-  this.selectEntity(null);
-};
-
-// Adding an entity to the world
-Engine.prototype.addEntity = function (entity, type, silent) {
-  // generate auto id
-  if (entity.id === undefined) {
-    entity.id = Constants.AUTO_ID_PREFIX + this.lifetimeEntities;
-  }
-
-  this.lifetimeEntities++;
-
-  entity.body.set_type(type);
-
-  entity.body = this.world.CreateBody(entity.body);
-  entity.fixture = entity.body.CreateFixture(entity.fixture);
-
-  this.layers[entity.layer].push(entity);
-
-  entity.addHelpers();
-
-  if (!silent)
-    UpdateEvent.fire(UpdateEvent.ENTITY_ADD, {entities: [entity]});
-
-  return entity;
-};
-
-Engine.prototype.removeEntity = function (entity, silent) {
-  this.selectEntity(null, silent);
-  this.world.DestroyBody(entity.body);
-  this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
-
-  if (!silent)
-    UpdateEvent.fire(UpdateEvent.ENTITY_DELETE, {entities: [entity]});
 };
 
 Engine.prototype.addJoint = function (joint, silent) {
@@ -163,54 +126,12 @@ Engine.prototype.addJoint = function (joint, silent) {
     UpdateEvent.fire(UpdateEvent.JOINT_ADD);
 };
 
-Engine.prototype.removeJoint = function (joint) {
+Engine.prototype.removeJoint = function (joint, silent) {
   this.world.DestroyJoint(joint.jointObject);
   this.joints.splice(this.joints.indexOf(joint), 1);
 
   if (!silent)
     UpdateEvent.fire(UpdateEvent.JOINT_REMOVE);
-};
-
-Engine.prototype.setEntityLayer = function (entity, newLayer, silent) {
-  // Remove from old layer
-  this.layers[entity.layer].splice(this.layers[entity.layer].indexOf(entity), 1);
-
-  // Set new layer
-  entity.layer = newLayer;
-  this.layers[newLayer].push(entity);
-
-  if (!silent)
-    UpdateEvent.fire(UpdateEvent.LAYER_CHANGE, {entities: [entity]});
-};
-
-// Returns all entities in one array
-Engine.prototype.entities = function () {
-  return [].concat.apply([], this.layers);
-};
-
-// Returns the entity with id specified by argument
-Engine.prototype.getEntityById = function (id) {
-  var entities = this.entities();
-
-  for (var i = 0; i < entities.length; i++) {
-    if (entities[i].id === id)
-      return entities[i];
-  }
-
-  return null;
-};
-
-// Returns an array of entities with specified collisionGroup
-Engine.prototype.getEntitiesByCollisionGroup = function (group) {
-  var ret = [];
-  var entities = this.entities();
-
-  for (var i = 0; i < entities.length; i++) {
-    if (entities[i].collisionGroup === group)
-      ret.push(entities[i]);
-  }
-
-  return ret;
 };
 
 // Checks whether two groups should collide
@@ -230,44 +151,24 @@ Engine.prototype.setCollision = function (groupA, groupB, value) {
     this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask & ~maskA;
     this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask & ~maskB;
   }
-  this.updateCollisions();
+  this.entityManager.updateCollisions();
 
   return this;
 };
 
-// Selects an entity and shows its properties in the sidebar
-Engine.prototype.selectEntity = function (entity, silent) {
-  this.selected = {type: entity == undefined ? null : "entity", ptr: entity};
-  UI.buildSidebarTop(this.selected);
+Engine.prototype.select = function (type, ptr, silent) {
+  this.selected = {type: type, ptr: ptr};
 
-  if (entity)
-    entity.recalculateHelpers();
-
-  if (!silent)
-    UpdateEvent.fire(UpdateEvent.SELECTION_CHANGE, {noState: true, entities: [entity]});
-};
-
-// Updates collision masks for all entities, based on engine's collisionGroups table
-Engine.prototype.updateCollisions = function () {
-  var entities = this.entities();
-
-  for (var i = 0; i < entities.length; i++) {
-    this.updateCollision(entities[i]);
+  if (type === "entity") {
+    ptr.recalculateHelpers();
   }
 
-  return this;
-};
+  if (type === "joint") {
 
-// Updates collision mask for an entity, based on engine's collisionGroups table
-Engine.prototype.updateCollision = function (entity, silent) {
-  var filterData = entity.fixture.GetFilterData();
-  filterData.set_maskBits(this.collisionGroups[entity.collisionGroup].mask);
-  entity.fixture.SetFilterData(filterData);
+  }
 
   if (!silent)
-    UpdateEvent.fire(UpdateEvent.COL_GROUP_CHANGE, {entities: [entity]});
-
-  return this;
+    UpdateEvent.fire(UpdateEvent.SELECTION_CHANGE, {noState: true});
 };
 
 // One simulation step. Simulation logic happens here.
@@ -275,25 +176,19 @@ Engine.prototype.step = function () {
   // FPS timer
   var start = Date.now();
 
-  ctx = this.viewport.context;
+  var ctx = this.viewport.context;
 
   // clear screen
   ctx.clearRect(0, 0, this.viewport.width, this.viewport.height);
 
   ctx.save();
 
+  var entities = this.entityManager.entities();
+
   if (!this.world.paused) {
     // box2d simulation step
     this.world.Step(1 / Constants.TIME_STEP, 10, 5);
 
-    var entities = this.entities();
-
-    if (this.viewport.getCameraStyle() === CameraStyle.ENTITY) {
-      var entity = this.getEntityById(this.viewport.getCameraEntityId());
-
-      this.viewport.x = entity.getX();
-      this.viewport.y = entity.getY();
-    }
 
     for (var i = 0; i < entities.length; i++) {
       for (var j = 0; j < entities[i].behaviors.length; j++) {
@@ -303,16 +198,21 @@ Engine.prototype.step = function () {
           behavior.result();
       }
     }
+
+    if (this.viewport.getCameraStyle() === CameraStyle.ENTITY) {
+      var entity = this.entityManager.getEntityById(this.viewport.getCameraEntityId());
+
+      this.viewport.x = entity.getX();
+      this.viewport.y = entity.getY();
+    }
   }
   else {
     this.selectedTool.onmove(ctx);
   }
 
   // draw all entities
-  for (var layer = 0; layer < Constants.LAYERS_NUMBER; layer++) {
-    for (var entity = this.layers[layer].length - 1; entity >= 0; entity--) {
-      this.drawEntity(this.layers[layer][entity], ctx);
-    }
+  for (var index = 0; index < entities.length; index++) {
+    this.drawEntity(entities[index], ctx);
   }
 
   for (var joint = 0; joint < this.joints.length; joint++) {
@@ -406,16 +306,8 @@ Engine.prototype.drawEntity = function (entity, ctx) {
 Engine.prototype.drawJoint = function (joint, ctx) {
   ctx.save();
 
-  var A = Geometry.pointRotate(
-    joint.entityA.getPosition(),
-    new b2Vec2(joint.entityA.getX() + joint.localAnchorA[0], joint.entityA.getY() + joint.localAnchorA[1]),
-    joint.entityA.getAngle()
-  );
-  var B = Geometry.pointRotate(
-    joint.entityB.getPosition(),
-    new b2Vec2(joint.entityB.getX() + joint.localAnchorB[0], joint.entityB.getY() + joint.localAnchorB[1]),
-    joint.entityB.getAngle()
-  );
+  var A = joint.getWorldPosA();
+  var B = joint.getWorldPosB();
 
   ctx.translate(
     this.viewport.fromScale(-this.viewport.x) + this.viewport.width / 2,
@@ -424,16 +316,26 @@ Engine.prototype.drawJoint = function (joint, ctx) {
   ctx.strokeStyle = joint.color;
   ctx.lineWidth = 2;
 
+  if (this.selected.type === "joint" && this.selected.ptr === joint) {
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 5;
+    ctx.strokeStyle = "white";
+  }
+
+  ctx.globalAlpha = 0.3;
+
   ctx.beginPath();
   ctx.moveTo(this.viewport.fromScale(A.get_x()), this.viewport.fromScale(A.get_y()));
   ctx.lineTo(this.viewport.fromScale(B.get_x()), this.viewport.fromScale(B.get_y()));
   ctx.closePath();
   ctx.stroke();
 
+  ctx.globalAlpha = 1;
+
   ctx.fillStyle = joint.entityA.getColor();
 
   ctx.beginPath();
-  ctx.arc(this.viewport.fromScale(A.get_x()), this.viewport.fromScale(A.get_y()), 4, 0, 2 * Math.PI, false);
+  ctx.arc(this.viewport.fromScale(A.get_x()), this.viewport.fromScale(A.get_y()), Constants.JOINT_HEAD_RADIUS, 0, 2 * Math.PI, false);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -441,7 +343,7 @@ Engine.prototype.drawJoint = function (joint, ctx) {
   ctx.fillStyle = joint.entityB.getColor();
 
   ctx.beginPath();
-  ctx.arc(this.viewport.fromScale(B.get_x()), this.viewport.fromScale(B.get_y()), 4, 0, 2 * Math.PI, false);
+  ctx.arc(this.viewport.fromScale(B.get_x()), this.viewport.fromScale(B.get_y()), Constants.JOINT_HEAD_RADIUS, 0, 2 * Math.PI, false);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -450,5 +352,4 @@ Engine.prototype.drawJoint = function (joint, ctx) {
 };
 
 module.exports = Engine;
-
 

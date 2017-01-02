@@ -2,6 +2,7 @@ var Shape = require("./shapes.js");
 var Type = require("./bodyType.js");
 var Constants = require("./constants.js");
 var UpdateEvent = require("./updateEvent.js");
+var Geometry = require("./geometry");
 
 var Blank = {
   onclick: function () {
@@ -16,6 +17,7 @@ var Blank = {
 var Selection = {
   origin: null,
   offset: null,
+  jointEnd: null,
   mode: null,
 
   onclick: function () {
@@ -29,33 +31,61 @@ var Selection = {
       }
     }
 
-    _engine.selectEntity(null, true);
+    for (var i = 0; i < _engine.joints.length; i++) {
+      var joint = _engine.joints[i];
 
-    for (var i = Constants.LAYERS_NUMBER - 1; i >= 0; i--) {
-      for (var j = 0; j < _engine.layers[i].length; j++) {
-        if (_engine.layers[i][j].fixture.TestPoint(
-            new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y))
-        ) {
-          if (this.mode === "entity-pick") {
-            UpdateEvent.fire(UpdateEvent.ENTITY_PICKED, {noState: true, entityId: _engine.layers[i][j].id});
-            this.mode = "";
-            return;
-          }
+      var clickA = Geometry.pointPointDistance(joint.getWorldPosA(), new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y)) <=
+        _engine.viewport.toScale(Constants.JOINT_HEAD_RADIUS);
+      var clickB = Geometry.pointPointDistance(joint.getWorldPosB(), new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y)) <=
+        _engine.viewport.toScale(Constants.JOINT_HEAD_RADIUS);
 
-          _engine.selectEntity(_engine.layers[i][j]);
+      if (clickA || clickB) {
+        _engine.select("joint", joint);
+        this.mode = "reposition-start-joint";
+        this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
 
-          this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
-          this.offset = [
-            _engine.selected.ptr.body.GetPosition().get_x() - this.origin[0],
-            _engine.selected.ptr.body.GetPosition().get_y() - this.origin[1]
-          ];
+        if (clickA) {
+          this.offset = [_engine.input.mouse.x - joint.getWorldPosA().get_x(), _engine.input.mouse.y - joint.getWorldPosA().get_y()];
+          this.jointEnd = "A";
+        }
+        else {
+          this.offset = [_engine.input.mouse.x - joint.getWorldPosB().get_x(), _engine.input.mouse.y - joint.getWorldPosB().get_y()];
+          this.jointEnd = "B";
+        }
+        return;
+      }
+    }
 
-          this.mode = "reposition-start";
-          this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
-          _engine.selected.ptr.toggleHelpers(false);
+    if (this.mode !== "entity-pick")
+      _engine.select(null, null);
 
+    var entities = _engine.entityManager.entities();
+
+    for (var i = entities.length - 1; i >= 0; i--) {
+      var entity = entities[i];
+
+      if (entity.fixture.TestPoint(
+          new b2Vec2(_engine.input.mouse.x, _engine.input.mouse.y))
+      ) {
+        if (this.mode === "entity-pick") {
+          UpdateEvent.fire(UpdateEvent.ENTITY_PICKED, {noState: true, entityId: entity.id});
+          this.mode = "";
           return;
         }
+
+        _engine.select("entity", entity);
+
+        this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
+        this.offset = [
+          _engine.selected.ptr.body.GetPosition().get_x() - this.origin[0],
+          _engine.selected.ptr.body.GetPosition().get_y() - this.origin[1]
+        ];
+
+        this.mode = "reposition-start";
+        this.origin = [_engine.input.mouse.x, _engine.input.mouse.y];
+        _engine.selected.ptr.toggleHelpers(false);
+
+        return;
       }
     }
 
@@ -79,6 +109,10 @@ var Selection = {
       UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [_engine.selected.ptr]});
     }
 
+    if (this.mode === "reposition-joint") {
+      UpdateEvent.fire(UpdateEvent.JOINT_REPOSITION);
+    }
+
     if (this.mode === "reposition-start") {
       _engine.selected.ptr.toggleHelpers(true);
     }
@@ -87,7 +121,7 @@ var Selection = {
       UpdateEvent.fire(UpdateEvent.CAMERA_MOVE);
     }
 
-    this.origin = this.offset = this.mode = null;
+    this.origin = this.offset = this.mode = this.jointEnd = null;
     _engine.viewport.canvasElement.style.cursor = "default";
   },
   onmove: function () {
@@ -105,11 +139,29 @@ var Selection = {
       this.mode = "reposition";
     }
 
+    if (
+      this.mode === "reposition-start-joint" && !this.origin.equalTo([_engine.input.mouse.x, _engine.input.mouse.y])
+    ) {
+      this.mode = "reposition-joint";
+    }
+
     if (this.mode === "reposition") {
       var x = Math.round((_engine.input.mouse.x + this.offset[0]) * 1000) / 1000;
       var y = Math.round((_engine.input.mouse.y + this.offset[1]) * 1000) / 1000;
 
       _engine.selected.ptr.setPosition(x, y, true);
+    }
+
+    if (this.mode === "reposition-joint") {
+      var x = Math.round((_engine.input.mouse.x + this.offset[0]) * 1000) / 1000;
+      var y = Math.round((_engine.input.mouse.y + this.offset[1]) * 1000) / 1000;
+
+      if (this.jointEnd === "A")
+        _engine.selected.ptr.setWorldPosA(x, y, true);
+      if (this.jointEnd === "B")
+        _engine.selected.ptr.setWorldPosB(x, y, true);
+
+      UpdateEvent.fire(UpdateEvent.JOINT_REPOSITION, {noState: true});
     }
   }
 };
@@ -138,7 +190,7 @@ var Rectangle = {
       var x = Math.min(_engine.input.mouse.x, this.worldOrigin[0]);
       var y = Math.min(_engine.input.mouse.y, this.worldOrigin[1]);
 
-      _engine.addEntity(new Shape.Rectangle(
+      _engine.entityManager.addEntity(new Shape.Rectangle(
         new b2Vec2(x + this.w / 2, y + this.h / 2),
         new b2Vec2(this.w / 2, this.h / 2)), Type.DYNAMIC_BODY);
     }
@@ -195,7 +247,7 @@ var Circle = {
       var x = Math.min(this.worldOrigin[0], _engine.input.mouse.x);
       var y = Math.min(this.worldOrigin[1], _engine.input.mouse.y);
 
-      _engine.addEntity(new Shape.Circle(
+      _engine.entityManager.addEntity(new Shape.Circle(
         new b2Vec2(x + this.radius, y + this.radius),
         this.radius), Type.DYNAMIC_BODY);
     }

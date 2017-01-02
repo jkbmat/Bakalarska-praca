@@ -3,6 +3,7 @@ var Shapes = require("./shapes.js");
 var Behavior = require("./behavior.js");
 var UpdateEvent = require("./updateEvent.js");
 var Joints = require("./joints.js");
+var _ = require("lodash");
 
 var StateManager = function (engine) {
   this.engine = engine;
@@ -49,8 +50,8 @@ StateManager.prototype.createState = function () {
   for (var i = 0; i < Constants.LAYERS_NUMBER; i++) {
     state.layers.push([]);
 
-    for (var j = 0; j < this.engine.layers[i].length; j++) {
-      state.layers[i].push(this.engine.layers[i][j].export());
+    for (var j = 0; j < this.engine.entityManager.layers[i].length; j++) {
+      state.layers[i].push(this.engine.entityManager.layers[i][j].export());
     }
   }
 
@@ -86,7 +87,7 @@ StateManager.prototype.buildState = function (state) {
           break;
       }
 
-      this.engine.setEntityLayer(newEntity, i, true);
+      this.engine.entityManager.setEntityLayer(newEntity, i, true);
     }
   }
 
@@ -96,6 +97,10 @@ StateManager.prototype.buildState = function (state) {
     switch (joint.type) {
       case Joints.REVOLUTE:
         Joints.Revolute.import(joint);
+        break;
+
+      case Joints.WELD:
+        Joints.Weld.import(joint);
         break;
 
       case Joints.ROPE:
@@ -130,16 +135,16 @@ StateManager.prototype.redo = function () {
 };
 
 StateManager.prototype.clearWorld = function (silent) {
-  var entities = this.engine.entities();
+  var entities = this.engine.entityManager.entities();
 
   for (var i = 0; i < entities.length; i++) {
-    this.engine.removeEntity(entities[i], true);
+    this.engine.entityManager.removeEntity(entities[i], true);
   }
 
   // Joints are destroyed automatically when a connected body is destroyed, just clear the list
   _engine.joints = [];
 
-  this.engine.lifetimeEntities = 0;
+  this.engine.entityManager.lifetimeEntities = 0;
   this.engine.lifetimeJoints = 0;
 
   if (!silent)

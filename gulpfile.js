@@ -28,8 +28,10 @@ gulp.task('default', ['img', 'sass', 'js-lib', 'js', 'html', 'browserSync'], fun
   gulp.watch(imgSource, ['img']);
 });
 
-gulp.task('deploy', ['img-deploy', 'sass-deploy', 'js-lib-deploy', 'js-deploy', 'html-deploy'], function () {});
-gulp.task('deploy-no-lib', ['img-deploy', 'sass-deploy', 'js-deploy', 'html-deploy'], function () {});
+gulp.task('deploy', ['img-deploy', 'sass-deploy', 'js-lib-deploy', 'js-deploy', 'html-deploy'], function () {
+});
+gulp.task('deploy-no-lib', ['img-deploy', 'sass-deploy', 'js-deploy', 'html-deploy'], function () {
+});
 
 
 gulp.task('img', function () {
@@ -48,8 +50,8 @@ gulp.task('img-deploy', function () {
 
 gulp.task('sass', function () {
   return gulp.src(cssSource)
-    .pipe(sass())
     .pipe(concat('styles.css'))
+    .pipe(sass())
     .pipe(gulp.dest(dist + '/css'))
     .pipe(browserSync.reload({
       stream: true
@@ -58,8 +60,8 @@ gulp.task('sass', function () {
 
 gulp.task('sass-deploy', function () {
   return gulp.src(cssSource)
-    .pipe(sass({outputStyle: 'compressed'}))
     .pipe(concat('styles.css'))
+    .pipe(sass({outputStyle: 'compressed'}))
     .pipe(gulp.dest(dist_deploy + '/css'));
 });
 
@@ -70,14 +72,14 @@ gulp.task('js-lib', function () {
     .pipe(concat('lib.js'))
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(dist + '/js'))
+    .pipe(gulp.dest(dist + '/js'));
 });
 
 gulp.task('js-lib-deploy', function () {
   return gulp.src(jsLibSource)
     .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(uglify())
     .pipe(concat('lib.js'))
+    .pipe(uglify())
     .on('error', gutil.log)
     .pipe(gulp.dest(dist_deploy + '/js'));
 });
@@ -93,7 +95,6 @@ gulp.task('js', function () {
     .pipe(source('app.js'))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
-    // .pipe(uglify())
     .on('error', gutil.log)
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(dist + '/js'))

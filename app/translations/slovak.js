@@ -2,7 +2,7 @@ module.exports = {
   LANGUAGE_NAME: "Slovensky",
   LANGUAGE_TOOLTIP: "Zmena jazyku",
   COLLISION_GROUPS: "Skupiny pre kolízie",
-  COLLISION_GROUPS_TOOLTIP: "Nastaví, ktoré skupiny objektov majú navzájom kolidovať",
+  COLLISION_GROUPS_TOOLTIP: "Nastaví, ktoré skupiny entít majú navzájom kolidovať",
   START: "Štart",
   STOP: "Stop",
   START_TOOLTIP: "Spustí simuláciu",
@@ -17,9 +17,23 @@ module.exports = {
   LAYER: "Vrstva ",
   ZOOM: "Priblíženie: ",
 
+  WORLD: "Svet",
+
   TOOL: "Nástroj: ",
-  RECTANGLE: "Obdĺžnik",
-  CIRCLE: "Kruh",
+  SHAPE: {
+    RECTANGLE: "Obdĺžnik",
+    CIRCLE: "Kruh",
+  },
+
+  CREATE_JOINT: "Kĺb:",
+  JOINT: {
+    REVOLUTE: "Rotačný kĺb",
+    ROPE: "Kĺb lano",
+    WELD: "Zvarený kĺb",
+  },
+  REVOLUTE_TOOLTIP: "Rotačný kĺb<br><br>Spojené entity sa otáčajú okolo spoločného bodu",
+  ROPE_TOOLTIP: "Kĺb lano<br><br>Obmedzuje maximálnu vzdialenosť dvoch bodov entít",
+  WELD_TOOLTIP: "Zvarený kĺb<br><br>Spojené entity si udržiavajú pevnú vzájomnú rotáciu a polohu",
 
   SELECTION_TOOL: "Nástroj výberu",
   CIRCLE_TOOL: "Nástroj kruh",
@@ -99,6 +113,15 @@ module.exports = {
     },
     CAMERA_X: "Pozícia kamery na osi X",
     CAMERA_Y: "Pozícia kamery na osi Y",
-    CAMERA_ENTITY: "ID objektu pre zameranie kamery:",
+    CAMERA_ENTITY: "ID entity pre zameranie kamery:",
+
+    ADD: "Vytvoriť",
+    COLLIDE_CONNECTED: "Registrovať kolízie spojených entít:",
+    ENTITY_A: "ID entity A:",
+    ENTITY_B: "ID entity B:",
+    X_A: "Relatívna pozícia k entite A na osi X:",
+    Y_A: "Relatívna pozícia k entite A na osi Y:",
+    X_B: "Relatívna pozícia k entite B na osi X:",
+    Y_B: "Relatívna pozícia k entite B na osi Y:",
   }
 };

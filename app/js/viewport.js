@@ -95,7 +95,7 @@ Viewport.prototype.setCameraEntityId = function(id, silent) {
 };
 
 Viewport.prototype.getCameraStyle = function() {
-  if (this.cameraStyle === CameraStyle.ENTITY && !_engine.getEntityById(this.getCameraEntityId())) {
+  if (this.cameraStyle === CameraStyle.ENTITY && !_engine.entityManager.getEntityById(this.getCameraEntityId())) {
     this.cameraStyle = CameraStyle.FIXED;
     this.cameraEntityId = "";
   }

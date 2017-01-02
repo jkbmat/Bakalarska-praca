@@ -1,5 +1,5 @@
 var Constants = require("./constants.js");
-
+var $ = require("jquery");
 
 var ClickableHelper = function (entity, width, height, position, image, move, click, release) {
   this.width = width;
