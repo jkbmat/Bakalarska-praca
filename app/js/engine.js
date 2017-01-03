@@ -32,6 +32,7 @@ var Engine = function (viewport, gravity) {
   this.world.SetContactListener(this.contactManager);
 
   this.tokenManager = new TokenManager();
+  this.behaviorCurrentEntity = null; // Ugly hack for this() entityFilter :(
 
   this.input = new Input(viewport);
 
@@ -154,9 +155,13 @@ Engine.prototype.step = function () {
 
     for (var i = 0; i < entities.length; i++) {
       for (var j = 0; j < entities[i].behaviors.length; j++) {
+        if (entities[i].dead)
+          break;
+
         var behavior = entities[i].behaviors[j];
 
-        if (behavior.check(entities[i]))
+        this.behaviorCurrentEntity = entities[i]; // Ugly hack to get this() entityFilter :(
+        if (behavior.check())
           behavior.result();
       }
     }

@@ -53,6 +53,23 @@ aAngularImpulse.prototype.constructor = aAngularImpulse;
 module.exports.push(aAngularImpulse);
 
 
+var aAngularVelocity = function(ef, strength) {
+  Action.call(this, "setAngularVelocity", arguments, [Type.ENTITYFILTER, Type.NUMBER]);
+
+  this.args.push(ef);
+  this.args.push(strength);
+};
+aAngularVelocity.prototype = new Action();
+
+aAngularVelocity.prototype.each = function(entity) {
+  entity.body.SetAwake(1);
+  entity.body.SetAngularVelocity(entity.getMass() * this.args[1].evaluate());
+};
+
+aAngularVelocity.prototype.constructor = aAngularVelocity;
+module.exports.push(aAngularVelocity);
+
+
 var aLinearVelocity = function(ef, x, y) {
   Action.call(this, "setLinearVelocity", arguments, [Type.ENTITYFILTER, Type.NUMBER, Type.NUMBER]);
 
@@ -116,10 +133,25 @@ var aSetPosition = function(ef, x, y) {
 };
 aSetPosition.prototype = new Action();
 
-aSetPosition.prototype.each = function(entity) {console.log(entity.id, _engine.world.IsLocked())
+aSetPosition.prototype.each = function(entity) {
   entity.setPosition(this.args[1].evaluate(), this.args[2].evaluate(), true);
 };
 
 aSetPosition.prototype.constructor = aSetPosition;
 module.exports.push(aSetPosition);
+
+
+var aRemove = function(ef) {
+  Action.call(this, "remove", arguments, [Type.ENTITYFILTER]);
+
+  this.args.push(ef);
+};
+aRemove.prototype = new Action();
+
+aRemove.prototype.each = function(entity) {
+  _engine.entityManager.removeEntity(entity, true);
+};
+
+aRemove.prototype.constructor = aRemove;
+module.exports.push(aRemove);
 

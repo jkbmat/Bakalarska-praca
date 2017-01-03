@@ -336,14 +336,33 @@ lTouching.prototype.evaluate = function () {
   return _engine.contactManager.anyContact(this.args[0].filter(), this.args[1].filter());
 };
 
+
+var lEqual = function (a, b) {
+  Logic.call(this, "=", Type.BOOLEAN, arguments, [Type.NUMBER, Type.NUMBER]);
+
+  this.args.push(a);
+  this.args.push(b);
+
+  this.fixType = FixType.INFIX;
+};
+lEqual.prototype = new Logic();
+
+lEqual.prototype.evaluate = function () {
+  return this.args[0].evaluate() === this.args[1].evaluate();
+};
+
+lEqual.prototype.constructor = lEqual;
+module.exports.push(lEqual);
+
+
 lTouching.prototype.constructor = lTouching;
 module.exports.push(lTouching);
 
 
-var lGetX = function (a, b) {
+var lGetX = function (entity) {
   Logic.call(this, "getX", Type.NUMBER, arguments, [Type.ENTITYFILTER]);
 
-  this.args.push(a);
+  this.args.push(entity);
 
   this.fixType = FixType.PREFIX;
 };
@@ -357,10 +376,10 @@ lGetX.prototype.constructor = lGetX;
 module.exports.push(lGetX);
 
 
-var lGetY = function (a, b) {
+var lGetY = function (entity) {
   Logic.call(this, "getY", Type.NUMBER, arguments, [Type.ENTITYFILTER]);
 
-  this.args.push(a);
+  this.args.push(entity);
 
   this.fixType = FixType.PREFIX;
 };
@@ -372,5 +391,22 @@ lGetY.prototype.evaluate = function () {
 
 lGetY.prototype.constructor = lGetY;
 module.exports.push(lGetY);
+
+
+var lCountEntities = function (ef) {
+  Logic.call(this, "countEntities", Type.NUMBER, arguments, [Type.ENTITYFILTER]);
+
+  this.args.push(ef);
+
+  this.fixType = FixType.PREFIX;
+};
+lCountEntities.prototype = new Logic();
+
+lCountEntities.prototype.evaluate = function () {
+  return this.args[0].filter().length;
+};
+
+lCountEntities.prototype.constructor = lCountEntities;
+module.exports.push(lCountEntities);
 
 

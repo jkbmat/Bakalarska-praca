@@ -11,9 +11,9 @@ Behavior.prototype.toString = function() {
   return "Behavior(" + this.logic.toString() + ", " + this.results.toString() + ")";
 };
 
-Behavior.prototype.result = function() {
+Behavior.prototype.result = function(entity) {
   for (var i = 0; i < this.results.length; i++) {
-    this.results[i].execute();
+    this.results[i].execute(entity);
   }
 };
 

@@ -51,6 +51,8 @@ EntityManager.prototype.addEntity = function (entity, type, silent) {
 };
 
 EntityManager.prototype.removeEntity = function (entity, silent) {
+  entity.dead = true;
+
   this.engine.jointManager.getJointsByEntity(entity).forEach(function (joint) {
     this.engine.jointManager.removeJoint(joint, true);
   }.bind(this));
