@@ -1,6 +1,7 @@
 var Logic = require("./token.js").Logic;
 var Translations = require("./translations.js");
 var Literal = require("./token.js").Literal;
+var Utils = require("./utils.js");
 var Type = require("./typing.js").Type;
 var FixType = require("./typing.js").FixType;
 var $ = require("jquery");
@@ -172,7 +173,7 @@ var lRandom = function (min, max) {
 lRandom.prototype = new Logic();
 
 lRandom.prototype.evaluate = function () {
-  return Utils.randomRange(this.args[0].evaluate() && this.args[1].evaluate());
+  return Utils.randomRange(this.args[0].evaluate(), this.args[1].evaluate());
 };
 
 lRandom.prototype.constructor = lRandom;
@@ -337,5 +338,39 @@ lTouching.prototype.evaluate = function () {
 
 lTouching.prototype.constructor = lTouching;
 module.exports.push(lTouching);
+
+
+var lGetX = function (a, b) {
+  Logic.call(this, "getX", Type.NUMBER, arguments, [Type.ENTITYFILTER]);
+
+  this.args.push(a);
+
+  this.fixType = FixType.PREFIX;
+};
+lGetX.prototype = new Logic();
+
+lGetX.prototype.evaluate = function () {
+  return this.args[0].filter()[0].getX();
+};
+
+lGetX.prototype.constructor = lGetX;
+module.exports.push(lGetX);
+
+
+var lGetY = function (a, b) {
+  Logic.call(this, "getY", Type.NUMBER, arguments, [Type.ENTITYFILTER]);
+
+  this.args.push(a);
+
+  this.fixType = FixType.PREFIX;
+};
+lGetY.prototype = new Logic();
+
+lGetY.prototype.evaluate = function () {
+  return this.args[0].filter()[0].getY();
+};
+
+lGetY.prototype.constructor = lGetY;
+module.exports.push(lGetY);
 
 

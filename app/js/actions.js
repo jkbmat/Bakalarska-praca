@@ -88,3 +88,38 @@ aLinearImpulse.prototype.each = function(entity) {
 aLinearImpulse.prototype.constructor = aLinearImpulse;
 module.exports.push(aLinearImpulse);
 
+
+var aLinearForce = function(ef, x, y) {
+  Action.call(this, "applyLinearForce", arguments, [Type.ENTITYFILTER, Type.NUMBER, Type.NUMBER]);
+
+  this.args.push(ef);
+  this.args.push(x);
+  this.args.push(y);
+};
+aLinearForce.prototype = new Action();
+
+aLinearForce.prototype.each = function(entity) {
+  entity.body.SetAwake(1);
+  entity.body.ApplyForceToCenter(new b2Vec2(entity.getMass() * this.args[1].evaluate(), entity.getMass() * this.args[2].evaluate()));
+};
+
+aLinearForce.prototype.constructor = aLinearForce;
+module.exports.push(aLinearForce);
+
+
+var aSetPosition = function(ef, x, y) {
+  Action.call(this, "setPosition", arguments, [Type.ENTITYFILTER, Type.NUMBER, Type.NUMBER]);
+
+  this.args.push(ef);
+  this.args.push(x);
+  this.args.push(y);
+};
+aSetPosition.prototype = new Action();
+
+aSetPosition.prototype.each = function(entity) {console.log(entity.id, _engine.world.IsLocked())
+  entity.setPosition(this.args[1].evaluate(), this.args[2].evaluate(), true);
+};
+
+aSetPosition.prototype.constructor = aSetPosition;
+module.exports.push(aSetPosition);
+
