@@ -39,7 +39,7 @@ var Entity = function (shape, fixture, body, id, collisionGroup) {
 
   // Constructor is called when inheriting, so we need to check for _engine availability
   if (typeof _engine !== 'undefined')
-    filterData.set_maskBits(_engine.collisionGroups[this.collisionGroup].mask);
+    filterData.set_maskBits(_engine.entityManager.collisionGroups[this.collisionGroup].mask);
 
   this.fixture.set_filter(filterData);
 

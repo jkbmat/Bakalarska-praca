@@ -63,7 +63,7 @@ ClickableHelper.prototype.recalculatePosition = function () {
 
   var filterData = this.fixture.get_filter();
   filterData.set_categoryBits(1 << this.collisionGroup);
-  filterData.set_maskBits(_engine.collisionGroups[this.collisionGroup].mask);
+  filterData.set_maskBits(_engine.entityManager.collisionGroups[this.collisionGroup].mask);
   this.fixture.set_filter(filterData);
 
   this.fixture = this.entity.body.CreateFixture(this.fixture);

@@ -38,7 +38,7 @@ StateManager.prototype.createState = function () {
 
   state.world = {
     gravity: [this.engine.world.GetGravity().get_x(), this.engine.world.GetGravity().get_y()],
-    collisionGroups: JSON.parse(JSON.stringify(this.engine.collisionGroups)), // Deep copy trick
+    collisionGroups: JSON.parse(JSON.stringify(this.engine.entityManager.collisionGroups)), // Deep copy trick
     camera: [this.engine.viewport.x, this.engine.viewport.y],
     lifetimeEntities: this.engine.entityManager.lifetimeEntities,
     lifetimeJoints: this.engine.jointManager.lifetimeJoints,
@@ -67,7 +67,7 @@ StateManager.prototype.buildState = function (state) {
   this.clearWorld(true);
 
   this.engine.setGravity(state.world.gravity[0], state.world.gravity[1], true);
-  this.engine.collisionGroups = state.world.collisionGroups;
+  this.engine.entityManager.collisionGroups = state.world.collisionGroups;
   this.engine.viewport.x = state.world.camera[0];
   this.engine.viewport.y = state.world.camera[1];
   this.engine.viewport.setCameraStyle(state.world.cameraStyle, true);

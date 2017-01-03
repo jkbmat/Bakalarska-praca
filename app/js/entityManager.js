@@ -63,12 +63,38 @@ EntityManager.prototype.removeEntity = function (entity, silent) {
     UpdateEvent.fire(UpdateEvent.ENTITY_DELETE, {entities: [entity]});
 };
 
+// Checks whether two groups should collide
+EntityManager.prototype.getCollision = function (groupA, groupB) {
+  return (this.collisionGroups[groupA].mask >> groupB) & 1;
+};
+
+// Sets two groups up to collide
+EntityManager.prototype.setCollision = function (groupA, groupB, value, silent) {
+  var maskA = (1 << groupB);
+  var maskB = (1 << groupA);
+
+  if (value) {
+    this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask | maskA;
+    this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask | maskB;
+  } else {
+    this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask & ~maskA;
+    this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask & ~maskB;
+  }
+  this.updateCollisions();
+
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.COL_GROUP_CHANGE);
+
+  return this;
+};
+
+
 // Updates collision masks for all entities, based on engine's collisionGroups table
 EntityManager.prototype.updateCollisions = function () {
   var entities = this.entities();
 
   for (var i = 0; i < entities.length; i++) {
-    this.updateCollision(entities[i]);
+    this.updateCollision(entities[i], true);
   }
 
   return this;
@@ -78,6 +104,7 @@ EntityManager.prototype.updateCollisions = function () {
 EntityManager.prototype.updateCollision = function (entity, silent) {
   var filterData = entity.fixture.GetFilterData();
   filterData.set_maskBits(this.collisionGroups[entity.collisionGroup].mask);
+  filterData.set_categoryBits(1 << entity.collisionGroup);
   entity.fixture.SetFilterData(filterData);
 
   if (!silent)
@@ -113,6 +140,18 @@ EntityManager.prototype.getEntityById = function (id) {
 
   for (var i = 0; i < entities.length; i++) {
     if (entities[i].id === id)
+      return entities[i];
+  }
+
+  return null;
+};
+
+// Returns the entity with a fixture specified by argument
+EntityManager.prototype.getEntityByFixture = function (fixture) {
+  var entities = this.entities();
+
+  for (var i = 0; i < entities.length; i++) {
+    if (entities[i].fixture === fixture)
       return entities[i];
   }
 

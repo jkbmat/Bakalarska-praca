@@ -249,12 +249,12 @@ var UI = {
 
         // first row
         if (i === 0 && j > 0) {
-          td.innerHTML = "<div><span>" + _engine.collisionGroups[j - 1].name + "</span></div>";
+          td.innerHTML = "<div><span>" + _engine.entityManager.collisionGroups[j - 1].name + "</span></div>";
         }
 
         // first column
         else if (j === 0 && i !== 0)
-          td.innerHTML = _engine.collisionGroups[i - 1].name;
+          td.innerHTML = _engine.entityManager.collisionGroups[i - 1].name;
 
         // relevant triangle
         else if (i <= j && j !== 0 && i !== 0) {
@@ -288,12 +288,12 @@ var UI = {
           // checkbox for collision toggling
           var checkbox = el("input", {type: "checkbox"});
 
-          if (_engine.getCollision(i - 1, j - 1))
+          if (_engine.entityManager.getCollision(i - 1, j - 1))
             checkbox.setAttribute("checked", "checked");
 
           checkbox.onchange = function (i, j, checkbox) {
             return function () {
-              _engine.setCollision(i - 1, j - 1, checkbox.checked ? 1 : 0);
+              _engine.entityManager.setCollision(i - 1, j - 1, checkbox.checked ? 1 : 0);
             };
           }(i, j, checkbox);
 

@@ -9,6 +9,7 @@ var Geometry = require("./geometry.js");
 var Joints = require("./joints.js");
 var EntityManager = require("./entityManager");
 var JointManager = require("./jointManager");
+var ContactManager = require("./contactManager");
 var Input = require("./input");
 var $ = require("jquery");
 
@@ -24,8 +25,11 @@ var Engine = function (viewport, gravity) {
   this.entityManager = new EntityManager(this);
   this.jointManager = new JointManager(this);
 
+  this.contactManager = new ContactManager(this);
+
   this.world = new b2World(gravity, true);
   this.world.paused = true;
+  this.world.SetContactListener(this.contactManager);
 
   this.tokenManager = new TokenManager();
 
@@ -116,28 +120,6 @@ Engine.prototype.selectTool = function (tool) {
     this.select(null, null);
 
   this.selectedTool = tool;
-};
-
-// Checks whether two groups should collide
-Engine.prototype.getCollision = function (groupA, groupB) {
-  return (this.collisionGroups[groupA].mask >> groupB) & 1;
-};
-
-// Sets two groups up to collide
-Engine.prototype.setCollision = function (groupA, groupB, value) {
-  var maskA = (1 << groupB);
-  var maskB = (1 << groupA);
-
-  if (value) {
-    this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask | maskA;
-    this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask | maskB;
-  } else {
-    this.collisionGroups[groupA].mask = this.collisionGroups[groupA].mask & ~maskA;
-    this.collisionGroups[groupB].mask = this.collisionGroups[groupB].mask & ~maskB;
-  }
-  this.entityManager.updateCollisions();
-
-  return this;
 };
 
 Engine.prototype.select = function (type, ptr, silent) {
@@ -329,6 +311,9 @@ Engine.prototype.drawJoint = function (joint, ctx) {
   ctx.stroke();
 
   ctx.restore();
+
+  destroy(A);
+  destroy(B);
 };
 
 module.exports = Engine;

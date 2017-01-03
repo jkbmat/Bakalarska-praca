@@ -321,3 +321,21 @@ lLesser.prototype.constructor = lLesser;
 module.exports.push(lLesser);
 
 
+var lTouching = function (a, b) {
+  Logic.call(this, "isTouching", Type.BOOLEAN, arguments, [Type.ENTITYFILTER, Type.ENTITYFILTER]);
+
+  this.args.push(a);
+  this.args.push(b);
+
+  this.fixType = FixType.INFIX;
+};
+lTouching.prototype = new Logic();
+
+lTouching.prototype.evaluate = function () {
+  return _engine.contactManager.anyContact(this.args[0].filter(), this.args[1].filter());
+};
+
+lTouching.prototype.constructor = lTouching;
+module.exports.push(lTouching);
+
+

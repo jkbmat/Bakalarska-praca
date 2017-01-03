@@ -196,6 +196,10 @@ hr {
   margin: 2*$bigPadding auto;
 }
 
+.token .name {
+  font-weight: bold;
+}
+
 .tokenBuilder {
   margin: $bigPadding 0;
   border-radius: $smallRadius;
