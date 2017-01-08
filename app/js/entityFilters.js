@@ -31,15 +31,14 @@ module.exports.push(efAll);
 
 
 var efById = function(ef, id) {
-  EntityFilter.call(this, "filterById", arguments, [Type.ENTITYFILTER, Type.STRING]);
+  EntityFilter.call(this, "filterById", arguments, [Type.STRING]);
 
-  this.args.push(ef);
   this.args.push(id);
 };
 efById.prototype = new EntityFilter();
 
-efById.prototype.decide = function(entity) {
-  return entity.id === this.args[1].evaluate();
+efById.prototype.filter = function() {
+  return [_engine.entityManager.getEntityById(this.args[0].evaluate())];
 };
 
 efById.prototype.constructor = efById;

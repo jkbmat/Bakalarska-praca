@@ -2,7 +2,6 @@ var Translations = require("./translations.js");
 var Utils = require("./utils.js");
 var UpdateEvent = require("./updateEvent.js");
 var Tools = require("./tools.js");
-var $ = require("jquery");
 
 var UIBuilder = {
   element: function (elem, properties) {
@@ -503,7 +502,7 @@ var UIBuilder = {
           _engine.input.mouse.realY - $(sidebar).offset().top - parseInt($(resizerV).css("border-top-width"))
         )
       );
-      console.log(_engine.input.mouse.realY, parseInt($(resizerV).css("border-top-width")));
+
       var bottomHeight = sidebarHeight - topHeight - $(resizerV).outerHeight();
 
       sidebarTop.style.height = topHeight + "px";

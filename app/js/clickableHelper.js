@@ -1,5 +1,4 @@
 var Constants = require("./constants.js");
-var $ = require("jquery");
 
 var ClickableHelper = function (entity, width, height, position, image, move, click, release) {
   this.width = width;
@@ -71,7 +70,11 @@ ClickableHelper.prototype.recalculatePosition = function () {
 };
 
 ClickableHelper.prototype.testPoint = function (x, y) {
-  return this.fixture.TestPoint(new b2Vec2(x, y));
+  var point = new b2Vec2(x, y);
+  var ret = this.fixture.TestPoint(point);
+
+  destroy(point);
+  return ret;
 };
 
 ClickableHelper.prototype.draw = function (ctx) {

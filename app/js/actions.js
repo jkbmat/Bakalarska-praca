@@ -155,3 +155,19 @@ aRemove.prototype.each = function(entity) {
 aRemove.prototype.constructor = aRemove;
 module.exports.push(aRemove);
 
+
+var aSetGravity = function(x, y) {
+  Action.call(this, "setGravity", arguments, [Type.NUMBER, Type.NUMBER]);
+
+  this.args.push(x);
+  this.args.push(y);
+};
+aSetGravity.prototype = new Action();
+
+aSetGravity.prototype.execute = function() {
+  _engine.setGravity(this.args[0].evaluate(), this.args[1].evaluate(), true);
+};
+
+aSetGravity.prototype.constructor = aSetGravity;
+module.exports.push(aSetGravity);
+

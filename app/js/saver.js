@@ -2,7 +2,6 @@ var Utils = require("./utils.js");
 var Firebase = require("./firebase.js");
 var UpdateEvent = require("./updateEvent.js");
 var LSManager = require("./LSManager.js");
-var $ = require("jquery");
 
 var Saver = {
   saveCurrent: function () {

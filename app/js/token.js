@@ -102,5 +102,3 @@ module.exports.Literal = Literal;
 module.exports.Action = Action;
 module.exports.Logic = Logic;
 module.exports.EntityFilter = EntityFilter;
-
-// TODO: linear action, porovnavanie, uhly, plus, minus , deleno, krat, x na n

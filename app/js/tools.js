@@ -4,7 +4,14 @@ var Constants = require("./constants.js");
 var UpdateEvent = require("./updateEvent.js");
 var Geometry = require("./geometry");
 
+module.exports.BLANK = "blank";
+module.exports.SELECTION = "selection";
+module.exports.RECTANGLE = "rectangle";
+module.exports.CIRCLE = "circle";
+
 var Blank = {
+  type: module.exports.BLANK,
+
   onclick: function () {
   },
   onrelease: function () {
@@ -15,6 +22,8 @@ var Blank = {
 
 
 var Selection = {
+  type: module.exports.SELECTION,
+
   origin: null,
   offset: null,
   jointEnd: null,
@@ -56,9 +65,6 @@ var Selection = {
       }
     }
 
-    if (this.mode !== "entity-pick")
-      _engine.select(null, null);
-
     var entities = _engine.entityManager.entities();
 
     for (var i = entities.length - 1; i >= 0; i--) {
@@ -92,6 +98,9 @@ var Selection = {
     if (this.mode === "entity-pick") {
       return;
     }
+    else {
+      _engine.select(null, null);
+    }
 
     this.mode = "camera";
 
@@ -117,8 +126,8 @@ var Selection = {
       _engine.selected.ptr.toggleHelpers(true);
     }
 
-    if (this.mode === "camera") {
-      UpdateEvent.fire(UpdateEvent.CAMERA_MOVE);
+    if (this.mode === "camera" && ((_engine.viewport.x !== this.origin[0]) || (_engine.viewport.y !== this.origin[1]))) {
+      _engine.viewport.setPosition(_engine.viewport.x, _engine.viewport.y);
     }
 
     this.origin = this.offset = this.mode = this.jointEnd = null;
@@ -129,8 +138,11 @@ var Selection = {
       return;
 
     if (this.mode === "camera") {
-      _engine.viewport.x = this.origin[0] + _engine.viewport.toScale(this.offset[0] - _engine.input.mouse.canvasX);
-      _engine.viewport.y = this.origin[1] + _engine.viewport.toScale(this.offset[1] - _engine.input.mouse.canvasY);
+      _engine.viewport.setPosition(
+        this.origin[0] + _engine.viewport.toScale(this.offset[0] - _engine.input.mouse.canvasX),
+        this.origin[1] + _engine.viewport.toScale(this.offset[1] - _engine.input.mouse.canvasY),
+        true
+      );
     }
 
     if (
@@ -168,6 +180,8 @@ var Selection = {
 
 
 var Rectangle = {
+  type: module.exports.RECTANGLE,
+
   origin: null,
   worldOrigin: null,
   w: 0,
@@ -230,6 +244,8 @@ var Rectangle = {
 
 
 var Circle = {
+  type: module.exports.CIRCLE,
+
   origin: null,
   worldOrigin: null,
   radius: 0,

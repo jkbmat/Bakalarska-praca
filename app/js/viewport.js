@@ -110,6 +110,14 @@ Viewport.prototype.setCameraStyle = function(val, silent) {
     UpdateEvent.fire(UpdateEvent.CAMERA_STYLE_CHANGE);
 };
 
+Viewport.prototype.setPosition = function (x, y, silent) {
+  this.x = x;
+  this.y = y;
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.CAMERA_MOVE);
+};
+
 Viewport.prototype.toScale = function (number) {
   return number * this.scale;
 };

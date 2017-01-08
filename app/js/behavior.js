@@ -13,6 +13,9 @@ Behavior.prototype.toString = function() {
 
 Behavior.prototype.result = function(entity) {
   for (var i = 0; i < this.results.length; i++) {
+    if (entity.dead)
+      break;
+
     this.results[i].execute(entity);
   }
 };

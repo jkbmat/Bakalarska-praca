@@ -10,6 +10,7 @@ console.log(type, data.noState == undefined ? true : null)
     return event;
   },
 
+  TOOL_CHANGE: "tool_change",
   RESIZE: "resize",
   ROTATE: "rotate",
   ROTATION_LOCKED: "rotation_locked",
@@ -23,6 +24,7 @@ console.log(type, data.noState == undefined ? true : null)
   COLOR_CHANGE: "color_change",
   BODY_TYPE_CHANGE: "body_type_change",
   BEHAVIOR_CHANGE: "behavior_change",
+  BULLET_CHANGE: "bullet_change",
   ENTITY_ADD: "entity_add",
   ENTITY_DELETE: "entity_delete",
   STATE_CHANGE: "state_change",

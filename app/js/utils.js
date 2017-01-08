@@ -1,6 +1,5 @@
 // Object containing useful methods
 
-var $ = require("jquery");
 
 var Utils = {
   getBrowserWidth: function () {

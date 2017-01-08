@@ -53,6 +53,7 @@ body {
     font-weight: normal;
     color: $textColor;
     outline: none;
+    box-shadow: none;
 
     &.important {
       border-color: $highlightColor;

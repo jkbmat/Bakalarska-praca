@@ -3,7 +3,9 @@
   "version": "0.5.0",
   "description": "Scene editor using box2d for my bachelor's thesis",
   "main": "./dist/js/app.js",
-  "dependencies": {},
+  "dependencies": {
+    "lodash": "^4.17.4"
+  },
   "devDependencies": {
     "browser-sync": "^2.18.2",
     "browserify": "^13.1.1",
@@ -16,6 +18,8 @@
     "gulp-uglify": "^2.0.0",
     "gulp-util": "^3.0.7",
     "jquery": "^3.1.1",
+    "jsdom": "^9.9.1",
+    "jsdom-global": "^2.1.1",
     "lodash": "^4.17.4",
     "mocha": "^3.2.0",
     "vinyl-buffer": "^1.0.0",
@@ -34,6 +38,6 @@
     "scene",
     "editor"
   ],
-  "author": "Jakub Matuska",
-  "license": "ISC"
+  "author": "Jakub Matuska <jkb.matuska@gmail.com>",
+  "license": "BSD-3-Clause"
 }

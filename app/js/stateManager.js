@@ -68,8 +68,7 @@ StateManager.prototype.buildState = function (state) {
 
   this.engine.setGravity(state.world.gravity[0], state.world.gravity[1], true);
   this.engine.entityManager.collisionGroups = state.world.collisionGroups;
-  this.engine.viewport.x = state.world.camera[0];
-  this.engine.viewport.y = state.world.camera[1];
+  this.engine.viewport.setPosition(state.world.camera[0], state.world.camera[1], true);
   this.engine.viewport.setCameraStyle(state.world.cameraStyle, true);
   this.engine.viewport.setCameraEntityId(state.world.cameraEntityId, true);
 

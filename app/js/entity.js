@@ -10,6 +10,7 @@ var Entity = function (shape, fixture, body, id, collisionGroup) {
   this.id = id;
   this.dead = false;
   this.layer = 0;
+  this.isBullet = false;
 
   this.helpers = [];
   this.showHelpers = true;
@@ -66,6 +67,7 @@ Entity.export = function () {
     angle: this.getAngle(),
     fixedRotation: this.fixedRotation,
     type: this.type,
+    isBullet: this.isBullet,
     color: this.getColor(),
     restitution: this.getRestitution(),
     friction: this.getFriction(),
@@ -93,6 +95,7 @@ Entity.import = function (obj) {
   this.setId(obj.id, true);
   this.setCollisionGroup(obj.collisionGroup, true);
   this.setColor(obj.color, true);
+  this.setBullet(obj.isBullet, true);
 
   _.each(obj.behaviors, function(behavior) {
     this.addBehavior(new Behavior(
@@ -124,6 +127,14 @@ Entity.prototype.setPosition = function (x, y, silent) {
 
   if(!silent)
     UpdateEvent.fire(UpdateEvent.REPOSITION, {entities: [this]});
+};
+
+Entity.prototype.setBullet = function (val, silent) {
+  this.isBullet = val;
+  this.body.SetBullet(this.isBullet);
+
+  if(!silent)
+    UpdateEvent.fire(UpdateEvent.BULLET_CHANGE, {entities: [this]});
 };
 
 Entity.prototype.getAngle = function (degrees) {
@@ -257,12 +268,6 @@ Entity.prototype.moveRotate = function () {
     ),
     false, true
   );
-};
-
-Entity.prototype.die = function () {
-  this.dead = true;
-
-  return this;
 };
 
 Entity.prototype.draw = function () {

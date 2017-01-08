@@ -1,4 +1,3 @@
-var FixType = require("./typing").FixType;
 var Type = require("./typing").Type;
 var Literal = require("./token.js").Literal;
 
@@ -6,7 +5,6 @@ var Parser = function (tokenManager) {
   this.tokenManager = tokenManager;
 
   this.parserInput = "";
-  this.parserInputWhole = "";
   this.parserStack = [];
 };
 
@@ -103,10 +101,10 @@ Parser.prototype.parseToken = function () {
   var name = this.readName();
 
   if (name === false)
-    return;
+    return null;
 
   var token = this.tokenManager.getTokenByName(name);
-  token = token === undefined ? new Literal(name) : new token.constructor();
+  token = token == undefined ? new Literal(name) : new token.constructor();
 
   this.readParentheses();
 
@@ -129,7 +127,6 @@ Parser.prototype.parseToken = function () {
 
 Parser.prototype.parse = function (input) {
   this.parserInput = input;
-  this.parserInputWhole = input;
   this.parserStack = [];
 
   return this.parseToken();

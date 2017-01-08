@@ -8,7 +8,6 @@ var UpdateEvent = require("./updateEvent.js");
 var Joints = require("./joints.js");
 var Saver = require("./saver.js");
 var Type = require("./typing.js").Type;
-var $ = require("jquery");
 
 // Object for building the UI
 var UI = {
@@ -78,6 +77,7 @@ var UI = {
         tooltip: "CLEAR_WORLD_TOOLTIP",
         text: el.img({src: "./img/trash.svg"}),
         onclick: function () {
+          _engine.setGravity(0, 10, true);
           _engine.stateManager.clearWorld();
         },
         onupdate: function (action, details) {
@@ -161,17 +161,34 @@ var UI = {
             checked: true,
             onclick: function () {
               _engine.selectTool(Tools.Selection);
+            },
+            onupdate: function (action, details) {
+              if (action === UpdateEvent.TOOL_CHANGE) {
+                $("#" + this.id).prop('checked', details.tool === Tools.SELECTION);
+              }
             }
           },
           {
             text: el.img({src: "./img/rectangle.svg"}), tooltip: "RECTANGLE_TOOL", onclick: function () {
+            _engine.select(null, null);
             _engine.selectTool(Tools.Rectangle);
-          }
+          },
+            onupdate: function (action, details) {
+              if (action === UpdateEvent.TOOL_CHANGE) {
+                $("#" + this.id).prop('checked', details.tool === Tools.RECTANGLE);
+              }
+            }
           },
           {
             text: el.img({src: "./img/circle.svg"}), tooltip: "CIRCLE_TOOL", onclick: function () {
+            _engine.select(null, null);
             _engine.selectTool(Tools.Circle);
-          }
+          },
+            onupdate: function (action, details) {
+              if (action === UpdateEvent.TOOL_CHANGE) {
+                $("#" + this.id).prop('checked', details.tool === Tools.CIRCLE);
+              }
+            }
           },
         ]
       },
@@ -438,6 +455,7 @@ var UI = {
       }),
       UIBuilder.button({
         text: Translations.getTranslatedWrapped("BEHAVIORS.DONE_BUTTON"),
+        classList: ["important"],
         onclick: function () {
           that.saveBehavior(entity);
           UpdateEvent.fire(UpdateEvent.BEHAVIOR_CHANGE, {entities: [this]});
@@ -705,7 +723,7 @@ var UI = {
       {
         type: "inputNumber", value: _engine.viewport.x, id: "camera_x", classList: ["fixedCamera"],
         onchange: function (val) {
-          _engine.viewport.x = val * 1;
+          _engine.viewport.setPosition(val * 1, _engine.viewport.y);
         },
         onupdate: function (action, detail) {
           if (action === UpdateEvent.CAMERA_MOVE) {
@@ -718,7 +736,7 @@ var UI = {
       {
         type: "inputNumber", value: _engine.viewport.y, id: "camera_y", classList: ["fixedCamera"],
         onchange: function (val) {
-          _engine.viewport.y = val * 1;
+          _engine.viewport.setPosition(_engine.viewport.x, val * 1); 
         },
         onupdate: function (action, detail) {
           if (action === UpdateEvent.CAMERA_MOVE) {
@@ -785,7 +803,7 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ENTITY_A")},
       {
         type: "inputEntity", value: joint.getIDA(), onchange: function (val) {
-        joint.setEntityA(_engine.entityManager.getEntityById(val));
+        joint.setEntityA(_engine.entityManager.getEntityById(val), true);
       }
       },
       {type: "html", content: el("p")},
@@ -794,14 +812,14 @@ var UI = {
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ENTITY_B")},
       {
         type: "inputEntity", value: joint.getIDB(), onchange: function (val) {
-        joint.setEntityB(_engine.entityManager.getEntityById(val));
+        joint.setEntityB(_engine.entityManager.getEntityById(val), true);
       }
       },
 
       {type: "html", content: el("p")},
 
       {
-        type: "button", classList: ["joint-addButton"], text: Translations.getTranslatedWrapped("SIDEBAR.ADD"),
+        type: "button", text: Translations.getTranslatedWrapped("SIDEBAR.ADD"),
         disabled: true,
         onupdate: function (action, details) {
           if (joint.isCorrect())
@@ -823,28 +841,56 @@ var UI = {
   buildSidebarJoint: function (joint) {
     var specific = el("span");
 
-    if (joint.type === Joints.ROPE) {
-      specific = UIBuilder.build([
-        {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.MAX_LENGTH")},
-        {
-          type: "inputNumber", value: joint.maxLength, onchange: function (val) {
-          joint.setMaxLength(val * 1);
-        }
-        },
-        {type: "html", content: el("p")},
-      ]);
+    switch (joint.type) {
+      case Joints.ROPE:
+        specific = UIBuilder.build([
+          {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.MAX_LENGTH")},
+          {
+            type: "inputNumber", value: joint.maxLength, onchange: function (val) {
+            joint.setMaxLength(val * 1);
+          }
+          },
+          {type: "html", content: el("p")},
+        ]);
+        break;
+
+      case Joints.WELD:
+        specific = UIBuilder.build([
+          {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.DAMPING")},
+          {
+            type: "inputNumber", min: 0, max: 1, step: 0.1, value: joint.damping, onchange: function (val) {
+            joint.setDamping(val * 1);
+          }
+          },
+          {type: "html", content: el("p")},
+          {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.DAMPING_FREQUENCY")},
+          {
+            type: "inputNumber", min: 0, step: 5, value: joint.dampingFrequency, onchange: function (val) {
+            joint.setDampingFrequency(val * 1);
+          }
+          },
+          {type: "html", content: el("p")},
+        ]);
+        break;
+
+      default:
+        break;
     }
+
 
     var properties = [
       {type: "html", content: el("h2", {}, [Translations.getTranslatedWrapped("JOINT." + joint.type)])},
 
       {
         type: "button", text: Translations.getTranslatedWrapped("JOINT.REMOVE"), onclick: function () {
+        if (!confirm(Translations.getTranslated("SIDEBAR.DELETE_CONFIRM_JOINT")))
+          return;
+
         _engine.jointManager.removeJoint(joint);
         _engine.select(null, null);
       }
       },
-      {type: "html", content: el("p")},
+      {type: "html", content: el("hr")},
 
       // ID
       {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.ID")},
@@ -1124,6 +1170,16 @@ var UI = {
         type: "inputNumber", value: entity.getDensity(), min: 0,
         onchange: function (val) {
           entity.setDensity(val * 1);
+        }
+      },
+      {type: "html", content: el("p")},
+
+      // Bullet
+      {type: "html", content: Translations.getTranslatedWrapped("SIDEBAR.BULLET")},
+      {
+        type: "checkbox", checked: entity.isBullet,
+        onchange: function (val) {
+          entity.setBullet(val);
         }
       },
       {type: "html", content: el("p")},

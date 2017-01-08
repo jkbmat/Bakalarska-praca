@@ -1,6 +1,5 @@
 var FixType = require("./typing.js").FixType;
 var Type = require("./typing.js").Type;
-var $ = require("jquery");
 
 var BehaviorBuilder = function (tokenManager) {
   this.tokenManager = tokenManager;

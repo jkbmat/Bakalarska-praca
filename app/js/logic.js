@@ -4,7 +4,6 @@ var Literal = require("./token.js").Literal;
 var Utils = require("./utils.js");
 var Type = require("./typing.js").Type;
 var FixType = require("./typing.js").FixType;
-var $ = require("jquery");
 
 module.exports = [];
 
@@ -173,7 +172,8 @@ var lRandom = function (min, max) {
 lRandom.prototype = new Logic();
 
 lRandom.prototype.evaluate = function () {
-  return Utils.randomRange(this.args[0].evaluate(), this.args[1].evaluate());
+  var random = Utils.randomRange(this.args[0].evaluate(), this.args[1].evaluate());
+  return random * 1;
 };
 
 lRandom.prototype.constructor = lRandom;
@@ -336,6 +336,10 @@ lTouching.prototype.evaluate = function () {
   return _engine.contactManager.anyContact(this.args[0].filter(), this.args[1].filter());
 };
 
+lTouching.prototype.constructor = lTouching;
+module.exports.push(lTouching);
+
+
 
 var lEqual = function (a, b) {
   Logic.call(this, "=", Type.BOOLEAN, arguments, [Type.NUMBER, Type.NUMBER]);
@@ -353,10 +357,6 @@ lEqual.prototype.evaluate = function () {
 
 lEqual.prototype.constructor = lEqual;
 module.exports.push(lEqual);
-
-
-lTouching.prototype.constructor = lTouching;
-module.exports.push(lTouching);
 
 
 var lGetX = function (entity) {
@@ -408,5 +408,35 @@ lCountEntities.prototype.evaluate = function () {
 
 lCountEntities.prototype.constructor = lCountEntities;
 module.exports.push(lCountEntities);
+
+
+var lGetGravityX = function () {
+  Logic.call(this, "getGravityX", Type.NUMBER, arguments, []);
+
+  this.fixType = FixType.PREFIX;
+};
+lGetGravityX.prototype = new Logic();
+
+lGetGravityX.prototype.evaluate = function () {
+  return _engine.getGravityX();
+};
+
+lGetGravityX.prototype.constructor = lGetGravityX;
+module.exports.push(lGetGravityX);
+
+
+var lGetGravityY = function () {
+  Logic.call(this, "getGravityY", Type.NUMBER, arguments, []);
+
+  this.fixType = FixType.PREFIX;
+};
+lGetGravityY.prototype = new Logic();
+
+lGetGravityY.prototype.evaluate = function () {
+  return _engine.getGravityY();
+};
+
+lGetGravityY.prototype.constructor = lGetGravityY;
+module.exports.push(lGetGravityY);
 
 

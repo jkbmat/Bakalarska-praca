@@ -53,6 +53,69 @@ Joint.import = function (obj) {
   _engine.jointManager.addJoint(this, true);
 };
 
+Joint.draw = function (ctx) {
+  ctx.save();
+
+  var A = this.getWorldPosA();
+  var B = this.getWorldPosB();
+
+  ctx.translate(
+    _engine.viewport.fromScale(-_engine.viewport.x) + _engine.viewport.width / 2,
+    _engine.viewport.fromScale(-_engine.viewport.y) + _engine.viewport.height / 2);
+
+  ctx.strokeStyle = this.color;
+  ctx.lineWidth = 2;
+
+  if (_engine.selected.ptr === this) {
+    ctx.shadowColor = "black";
+    ctx.shadowBlur = 5;
+    ctx.strokeStyle = "white";
+  }
+
+  ctx.globalAlpha = 0.3;
+
+  ctx.beginPath();
+  ctx.moveTo(_engine.viewport.fromScale(A.get_x()), _engine.viewport.fromScale(A.get_y()));
+  ctx.lineTo(_engine.viewport.fromScale(B.get_x()), _engine.viewport.fromScale(B.get_y()));
+  ctx.closePath();
+  ctx.stroke();
+
+  if(!_engine.world.paused) {
+    ctx.restore();
+    destroy(A);
+    destroy(B);
+
+    return;
+  }
+
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = this.entityA.getColor();
+
+  ctx.beginPath();
+  ctx.arc(_engine.viewport.fromScale(A.get_x()), _engine.viewport.fromScale(A.get_y()), Constants.JOINT_HEAD_RADIUS, 0, 2 * Math.PI, false);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = this.entityB.getColor();
+
+  ctx.beginPath();
+  ctx.arc(_engine.viewport.fromScale(B.get_x()), _engine.viewport.fromScale(B.get_y()), Constants.JOINT_HEAD_RADIUS, 0, 2 * Math.PI, false);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+
+  destroy(A);
+  destroy(B);
+};
+
+Joint.prototype.draw = function (ctx) {
+  Joint.draw.call(this, ctx);
+};
+
 Joint.prototype.setId = function (id) {
   this.id = id;
 };
@@ -250,7 +313,7 @@ Rope.prototype.getDefinition = function () {
   var def = new b2RopeJointDef();
 
   Joint.getDefinition.call(this, def);
-  def.set_maxLength(this.maxLength);
+  def.set_maxLength(this.maxLength, true);
 
   return def;
 };
@@ -262,7 +325,7 @@ Rope.prototype.setMaxLength = function (val, silent) {
 
   if (!silent)
     UpdateEvent.fire(UpdateEvent.JOINT_PROPERTY_CHANGE);
-}
+};
 
 module.exports.Rope = Rope;
 
@@ -271,6 +334,9 @@ module.exports.Rope = Rope;
 var Weld = function (entityA, entityB, localAnchorA, localAnchorB, collide, id) {
   Joint.call(this, module.exports.WELD, entityA, entityB, localAnchorA, localAnchorB, collide, id);
   this.color = "blue";
+
+  this.damping = 0;
+  this.dampingFrequency = 0;
 };
 Weld.prototype = new Joint();
 Weld.prototype.constructor = Weld;
@@ -279,13 +345,35 @@ Weld.import = function (obj) {
   var ret = new Weld();
 
   Joint.import.call(ret, obj);
+  ret.setDamping(obj.damping, true);
+  ret.setDampingFrequency(obj.dampingFrequency, true);
 
   return ret;
+};
+
+Weld.prototype.setDamping = function (val, silent) {
+  this.damping = (val <= 1 && val >= 0) ? val : this.damping;
+
+  this.updateObject();
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.JOINT_PROPERTY_CHANGE);
+};
+
+Weld.prototype.setDampingFrequency = function (val, silent) {
+  this.dampingFrequency = val >= 0 ? val : this.dampingFrequency;
+
+  this.updateObject();
+
+  if (!silent)
+    UpdateEvent.fire(UpdateEvent.JOINT_PROPERTY_CHANGE);
 };
 
 
 Weld.prototype.export = function () {
   var ret = Joint.export.call(this);
+  ret.damping = this.damping;
+  ret.dampingFrequency = this.dampingFrequency;
 
   return ret;
 };
@@ -299,6 +387,8 @@ Weld.prototype.getDefinition = function () {
 
   Joint.getDefinition.call(this, def);
   def.set_referenceAngle(this.entityB.getAngle() - this.entityA.getAngle());
+  def.set_dampingRatio(this.damping);
+  def.set_frequencyHz(this.dampingFrequency);
 
   return def;
 };

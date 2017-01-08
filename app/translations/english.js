@@ -28,7 +28,7 @@ module.exports = {
   CREATE_JOINT: "Joint:",
   JOINT: {
     NEW: "New ",
-    REMOVE: "Remove",
+    REMOVE: "Delete",
     REVOLUTE: "Revolute joint",
     ROPE: "Rope joint",
     WELD: "Weld joint"
@@ -94,8 +94,10 @@ module.exports = {
     DENSITY: "Density:",
     COLOR: "Color:",
     LAYER: "Layer:",
+    BULLET: "Precise collision checking at high velocities:",
     DELETE_BUTTON: "Delete entity",
     DELETE_CONFIRM: "Are you sure you want to delete this entity?",
+    DELETE_CONFIRM_JOINT: "Are you sure you want to delete this joint?",
     SET_BEHAVIORS: "Set behavior",
 
     BODY_TYPE: "Body type:",
@@ -120,6 +122,8 @@ module.exports = {
     ADD: "Create",
     COLLIDE_CONNECTED: "Connected entities should collide:",
     MAX_LENGTH: "Maximum rope length: ",
+    DAMPING: "Damping:",
+    DAMPING_FREQUENCY: "Damping frequency (Hz):",
     ENTITY_A: "ID of entity A:",
     ENTITY_B: "ID of entity B:",
     X_A: "X-axis position relative to entity A:",
