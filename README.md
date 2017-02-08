@@ -10,6 +10,7 @@ And here's some examples of Scenária in action:
 * [Voleyball](https://jkbmat.github.io/bakalarska-praca-dist/#27fcde37-d8e0-40e2-bfe6-90c88689603c)
 * [Pong](https://jkbmat.github.io/bakalarska-praca-dist/#ca279676-b8a2-48a4-b67c-30c1a59af6ed)
 * [Weird Pong](https://jkbmat.github.io/bakalarska-praca-dist/#f9935f21-9b56-47e5-9797-f74c6a3afe1e) with dampened weld joints
+Controls: WASD and arrow keys
 
 ## Quick glossary
 * **Entity** is a combination of Box2D's body, shape and fixture. Scenária doesn't support entities with multiple shapes. The workaround for this issue is to use weld joints.
@@ -77,4 +78,18 @@ Aside from layer and collision group number, an entity has the following attribu
   * Static: Immovable entity. Has infinite mass and cannot be moved by any interactions, impulses or forces.
   * Kinematic: Same as the static body type, but can be interacted with using impulses and forces. It also has infinite mass, so interaction with static entities is ignored (Interaction of two objects with infinite mass is not defined in Newtonian physics).
 
+##Joints
 
+Joints joint two entities together and change how they behave. To create a joint, first click on the joint's button in the toolbar. A dialog will appear in the contextual sidebar, where the connected entities need to be chosen.
+
+After creating the joint, the following attributes can be changed:
+* **ID**: Name of the joint. Unused as of yet.
+* **Connected entities should collide**
+* **Connected entities and the relative positions of the joint**
+
+Each type of joint can also have additional attributes:
+* **Weld joint**: Holds two entities together at fixed distance and angle
+ * **Damping frequency**: How often the entities' positions should be corrected. 0 is fixed positions, otherwise the lower, the bouncier.
+* **Revolute joint**: The two entities rotate about a common point (imagine a hinged door).
+* **Rope joint**: Constricts maximal distance between two entities
+ * **Maximum rope length**
