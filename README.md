@@ -15,12 +15,13 @@
 
 ## Examples and links
 
-First things first, here's a link to the newest depoloyed version of the editor: [https://jkbmat.github.io/bakalarska-praca-dist/](https://jkbmat.github.io/bakalarska-praca-dist/).
+First things first, here's a link to the newest deployed version of the editor: [https://jkbmat.github.io/bakalarska-praca-dist/](https://jkbmat.github.io/bakalarska-praca-dist/).
 
 And here's some examples of Scenária in action:
 * [Voleyball](https://jkbmat.github.io/bakalarska-praca-dist/#27fcde37-d8e0-40e2-bfe6-90c88689603c)
 * [Pong](https://jkbmat.github.io/bakalarska-praca-dist/#ca279676-b8a2-48a4-b67c-30c1a59af6ed)
 * [Weird Pong](https://jkbmat.github.io/bakalarska-praca-dist/#f9935f21-9b56-47e5-9797-f74c6a3afe1e) with dampened weld joints
+
 Controls: WASD and arrow keys
 
 ## Quick glossary
@@ -48,25 +49,25 @@ The main sections are:
   * **Save/Load buttons** allows the user to save or load scenes to the local machine or the internet
   * **Remove all button** removes all entities and joints from the scene
   * **Undo/Redo buttons** step through scene history one step backwards/forwards
-  * **Collision groups button** sets which collision groups should and should not interact. More on this in section **Entities**.
+  * **Collision groups button** sets which collision groups should and should not interact. More on this in section [Entities](#entities).
   * **Tool buttons**
     * Select tool is used for selecting and repositioning entities and joints
     * Rectangle and circle tools are used for creating new entities with their respective shapes
-  * **Joint buttons** are used for creating new joints. More on this in the section **Joints**
+  * **Joint buttons** are used for creating new joints. More on this in the section [Joints](#joints)
   * **Zoom slider** controls the zoom level of the enviroment
   * **Language chooser** allows changing the editor's language
     * Language files are located in the folder [/app/translations/](/app/translations/). Feel free to translate the editor to any language of your choice!
     
 ## World
-If no joits or entities are selected, the contextual sidebar shows informations about the simulation world.
+If no joints or entities are selected, the contextual sidebar shows information about the simulation world.
 Here you can set the gravity vector and camera style.
 
 Camera can be either:
-* **Locked on point** (static)
-* **Locked on entity** (always centered on an entity of your choice)
+* **Locked on point**: Static
+* **Locked on entity**: Always centered on an entity of your choice
 
 ## Entities
-To add a new entity to the simulation, simply choose a desired tool and create the entity in the work space using drag & drop. It will be assigned default attributes and a random color.
+To add a new entity to the simulation, simply choose the desired tool and create the entity in the work space using drag & drop. It will be assigned default attributes and a random color.
 Each entity is assigned a layer and a collision group. Layers determine the order in which entities are drawn. Collision groups determine which entities should interact with which other entities.
 The Collision groups window, accessible form the toolbar, is a place to define collision group interaction.
 
@@ -92,7 +93,7 @@ Aside from layer and collision group number, an entity has the following attribu
 
 ##Joints
 
-Joints joint two entities together and change how they behave. To create a joint, first click on the joint's button in the toolbar. A dialog will appear in the contextual sidebar, where the connected entities need to be chosen.
+Joints bind two entities together and change how they behave. To create a joint, first click on the joint's button in the toolbar. A dialog will appear in the contextual sidebar, where the connected entities need to be chosen.
 
 After creating the joint, the following attributes can be changed:
 * **ID**: Name of the joint. Unused as of yet.
