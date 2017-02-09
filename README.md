@@ -18,7 +18,7 @@ Controls: WASD and arrow keys
 
 ## The enviroment
 
-Here's how the editor looks once it's freshly started:
+*Here's how the editor looks once it's freshly started:*
 ![The enviroment](/readme-files/enviroment.png)
 
 The main sections are:
@@ -60,7 +60,8 @@ Each entity is assigned a layer and a collision group. Layers determine the orde
 The Collision groups window, accessible form the toolbar, is a place to define collision group interaction.
 
 ![Collision groups window](/readme-files/collision-groups.png)
-Collision groups 2 and 3 will now no longer interact
+
+*Collision groups 2 and 3 will now no longer interact*
 
 Aside from layer and collision group number, an entity has the following attributes:
 * **ID**: A name, so to speak
@@ -93,3 +94,86 @@ Each type of joint can also have additional attributes:
 * **Revolute joint**: The two entities rotate about a common point (imagine a hinged door).
 * **Rope joint**: Constricts maximal distance between two entities
  * **Maximum rope length**
+ 
+##Behavior
+
+The real strength of Scenária lies in editing Entities' behaviors. The behavior editor can be accessed by clicking on Set behavior button in the contextual sidebar when an entity is selected.
+
+The behavior system is strongly typed using the following types:
+* ***boolean***
+* ***number***
+* ***string***
+* ***action***
+* ***entityfilter***
+* ***literal***
+
+A behavior comprises of two parts:
+* **One condition**: *(type: boolean)* Is checked on every frame
+* **One or more actions**: *(type: action)* If the condition is fulfilled, all of the behavior's actions are carried out.
+
+An entity can have any number of behaviors.
+
+The full list of implemented commands is as follows:
+
+### Value holders
+
+Name|Type|Arguments|Description
+----|----|---------|-----------
+AND|*boolean*|<ul><li>Operand A *boolean*</li><li>Operand B *boolean*</li></ul>|Evaluates to true if both operands are true, false otherwise
+OR|*boolean*|<ul><li>Operand A *boolean*</li><li>Operand B *boolean*</li></ul>|Evaluates to true if at least one of the operands is true, false otherwise
+NOT|*boolean*|<ul><li>Operand *boolean*</li></ul>|Reverses the value of the operand
+true|*boolean*||Evaluates to true
+false|*boolean*||Evaluates to false
+text|*string*|<ul><li>Value *literal*</li></ul>|Evaluates to a string
+number|*number*|<ul><li>Value *literal*</li></ul>|Evaluates to a number
+randomNumber|*number*|<ul><li>Min *number*</li><li>Max *number*</li></ul>|Evaluates to a random integer in range \<min, max>
++|*number*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to the sum of its operands
+*|*number*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to the product of its operands
+/|*number*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to the quotient of its operands
+-|*number*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to the difference of its operands
+>|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is greater than Operand B
+<|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is lesser than Operand B
+=|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is equal to Operand B
+getX|*number*|<ul><li>Entity *entityfilter*</li></ul>|Evaluates to x-axis position of the first entity in argument
+getY|*number*|<ul><li>Entity *entityfilter*</li></ul>|Evaluates to y-axis position of the first entity in argument
+velocityX|*number*|<ul><li>Entity *entityfilter*</li></ul>|Evaluates to x-axis velocity of the first entity in argument
+velocityX|*number*|<ul><li>Entity *entityfilter*</li></ul>|Evaluates to y-axis velocity of the first entity in argument
+getGravityX|*number*||Evaluates to x-axis strength of the world's gravity
+getGravityY|*number*||Evaluates to y-axis strength of the world's gravity
+isTouching|*boolean*|<ul><li>Entity filter A *entityfilter*</li><li>Entity filter B *number*</li></ul>|Evaluates to true if any of the entities from Entity filter A are touching any of the entities from Entity filter B
+countEntities|*number*|<ul><li>Entity filter *entityfilter*</li></ul>|Evaluates to the number of entities in Entity filter
+isButtonDown|*boolean*|<ul><li>Keycode *number*</li></ul>|Evaluates to true if the specified button is currently pressed
+isButtonUp|*boolean*|<ul><li>Keycode *number*</li></ul>|Evaluates to true if the specified button has been released
+
+You can use [keycode.info](http://keycode.info/) to find keycodes of buttons.
+
+### Entity filters
+
+All entity filters are of type *entityfilter*. All entity filters except `thisEntity`, `allEntities` and `filterById` take an *entityfiler* as the first argument, which they then filter further.
+
+Name|Arguments|Description
+----|---------|-----------
+thisEntity||Contains the entity owning the behavior
+allEntities||Contains all entities in the scene
+filterById|<ul><li>ID *string*</li></ul>|Contains an entity with the specified ID
+filterByGroup|<ul><li>Filter *entityfilter*</li><li>Collision group *number*</li></ul>|Contains all entities from Filter that belong to the specified collision group
+filterByLayer|<ul><li>Filter *entityfilter*</li><li>Layer *number*</li></ul>|Contains all entities from Filter that belong to the specified layer
+filterByContactWith|<ul><li>Filter *entityfilter*</li><li>Entities *entityfilter*</li></ul>|Contains all entities from Filter that are touching any of the entities in Entities
+
+### Actions
+
+Actions are executed when their behavior's condition is fulfilled. All actions are of type *action*.
+
+Name|Arguments|Description
+----|---------|-----------
+setColor|<ul><li>Entities *entityfilter*</li><li>Color *string*</li></ul>|Sets the color to CSS color Color for all Entities
+remove|<ul><li>Entities *entityfilter*</li></ul>|Removes all Entities
+setGravity|<ul><li>X *number*</li><li>Y *number*</li></ul>|Sets the world's gravity
+setPosition|<ul><li>Entities *entityfilter*</li><li>X *number*</li><li>Y *number*</li></ul>|Sets the position for all Entities
+setAngularVelocity|<ul><li>Entities *entityfilter*</li><li>Strength *number*</li></ul>|Sets the angular velocity for all Entities
+setLinearVelocity|<ul><li>Entities *entityfilter*</li><li>X *number*</li><li>Y *number*</li></ul>|Sets the linear velocity for all Entities
+applyTorque|<ul><li>Entities *entityfilter*</li><li>Strength *number*</li></ul>|Applies angular force to all Entities
+applyLinearForce|<ul><li>Entities *entityfilter*</li><li>X strength *number*</li><li>Y strength *number*</li></ul>|Applies a linear force to all entities
+applyAngularImpulse|<ul><li>Entities *entityfilter*</li><li>Strength *number*</li></ul>|Applies an angular impulse to all entities
+applyLinearImpulse|<ul><li>Entities *entityfilter*</li><li>X strength *number*</li><li>Y strength *number*</li></ul>|Applies a linear impulse to all entities
+
