@@ -143,8 +143,8 @@ randomNumber|*number*|<ul><li>Min *number*</li><li>Max *number*</li></ul>|Evalua
 *|*number*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to the product of its operands
 /|*number*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to the quotient of its operands
 -|*number*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to the difference of its operands
->|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is greater than Operand B
-<|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is lesser than Operand B
+&gt;|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is greater than Operand B
+&lt;|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is lesser than Operand B
 =|*boolean*|<ul><li>Operand A *number*</li><li>Operand B *number*</li></ul>|Evaluates to true if Operand A is equal to Operand B
 getX|*number*|<ul><li>Entity *entityfilter*</li></ul>|Evaluates to x-axis position of the first entity in argument
 getY|*number*|<ul><li>Entity *entityfilter*</li></ul>|Evaluates to y-axis position of the first entity in argument
