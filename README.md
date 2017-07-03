@@ -91,7 +91,7 @@ Aside from layer and collision group number, an entity has the following attribu
   * Static: Immovable entity. Has infinite mass and cannot be moved by any interactions, impulses or forces.
   * Kinematic: Same as the static body type, but can be interacted with using impulses and forces. It also has infinite mass, so interaction with static entities is ignored (Interaction of two objects with infinite mass is not defined in Newtonian physics).
 
-##Joints
+## Joints
 
 Joints bind two entities together and change how they behave. To create a joint, first click on the joint's button in the toolbar. A dialog will appear in the contextual sidebar, where the connected entities need to be chosen.
 
@@ -107,7 +107,7 @@ Each type of joint can also have additional attributes:
 * **Rope joint**: Constricts maximal distance between two entities
  * **Maximum rope length**
  
-##Behavior
+## Behavior
 
 The real strength of Scenária lies in editing Entities' behaviors. The behavior editor can be accessed by clicking on Set behavior button in the contextual sidebar when an entity is selected.
 
