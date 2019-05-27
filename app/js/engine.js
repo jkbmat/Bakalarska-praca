@@ -193,7 +193,7 @@ Engine.prototype.step = function () {
   // Call next step
   setTimeout(window.requestAnimationFrame(function () {
     _engine.step();
-  }), Math.min(Constants.TIME_STEP - end - start, 0));
+  }), Math.max(Constants.TIME_STEP - (end - start), 0));
 };
 
 Engine.prototype.drawBoundary = function (ctx) {
